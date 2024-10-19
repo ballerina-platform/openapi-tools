@@ -34,80 +34,82 @@ public isolated client class Client {
         if config.auth is ApiKeysConfig {
             self.apiKeyConfig = (<ApiKeysConfig>config.auth).cloneReadOnly();
         } else {
-            config.auth = <OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|OAuth2RefreshTokenGrantConfig>config.auth;
+            httpClientConfig.auth = <OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|OAuth2RefreshTokenGrantConfig>config.auth;
             self.apiKeyConfig = ();
         }
         http:Client httpEp = check new (serviceUrl, httpClientConfig);
         self.clientEp = httpEp;
         return;
     }
-    # Info for a specific pet
-    #
-    # + petId - The id of the pet to retrieve
-    # + headerX - Header X
-    # + return - Expected response to a valid request
-    remote isolated function getPetInfo(string petId, string headerX) returns Pet|error {
-        string resourcePath = string `/pets/management`;
-        map<any> headerValues = {"headerX": headerX};
-        map<anydata> queryParam = {"petId": petId};
-        if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
-        }
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
-    }
-    # Vote for a pet
-    #
-    # + return - Expected response to a valid request
-    remote isolated function votePet() returns Pet|error {
-        string resourcePath = string `/pets/management`;
-        map<any> headerValues = {};
-        map<anydata> queryParam = {};
-        if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
-        }
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Request request = new;
-        Pet response = check self.clientEp->post(resourcePath, request, httpHeaders);
-        return response;
-    }
+
     # Delete a pet
     #
-    # + petId - The id of the pet to delete
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Expected response to a valid request
-    remote isolated function deletePetInfo(string petId) returns Pet|error {
+    remote isolated function deletePetInfo(map<string|string[]> headers = {}, *DeletePetInfoQueries queries) returns Pet|error {
         string resourcePath = string `/pets/management`;
-        map<any> headerValues = {};
-        map<anydata> queryParam = {"petId": petId};
+        map<anydata> headerValues = {...headers};
+        map<anydata> queryParam = {...queries};
         if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
+            headerValues["api-key"] = self.apiKeyConfig?.api\-key;
+            queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
-        return response;
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
+        return self.clientEp->delete(resourcePath, headers = httpHeaders);
     }
+
     # Delete a pet 2
     #
-    # + petId - The id of the pet to delete
+    # + headers - Headers to be sent with the request
     # + return - Expected response to a valid request
-    remote isolated function deletePetInfo2(string petId) returns Pet|error {
+    remote isolated function deletePetInfo2(DeletePetInfo2Headers headers) returns Pet|error {
         string resourcePath = string `/pets/management2`;
-        map<any> headerValues = {"petId": petId};
+        map<anydata> headerValues = {...headers};
         map<anydata> queryParam = {};
         if self.apiKeyConfig is ApiKeysConfig {
-            headerValues["api-key"] = self.apiKeyConfig?.apiKey;
-            queryParam["api-key-2"] = self.apiKeyConfig?.apiKey2;
+            headerValues["api-key"] = self.apiKeyConfig?.api\-key;
+            queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
         }
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        Pet response = check self.clientEp->delete(resourcePath, headers = httpHeaders);
-        return response;
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
+        return self.clientEp->delete(resourcePath, headers = httpHeaders);
+    }
+
+    # Info for a specific pet
+    #
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
+    # + return - Expected response to a valid request
+    remote isolated function getPetInfo(GetPetInfoHeaders headers, *GetPetInfoQueries queries) returns Pet|error {
+        string resourcePath = string `/pets/management`;
+        map<anydata> headerValues = {...headers};
+        map<anydata> queryParam = {...queries};
+        if self.apiKeyConfig is ApiKeysConfig {
+            headerValues["api-key"] = self.apiKeyConfig?.api\-key;
+            queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
+        }
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
+        return self.clientEp->get(resourcePath, httpHeaders);
+    }
+
+    # Vote for a pet
+    #
+    # + headers - Headers to be sent with the request
+    # + return - Expected response to a valid request
+    remote isolated function votePet(map<string|string[]> headers = {}) returns Pet|error {
+        string resourcePath = string `/pets/management`;
+        map<anydata> headerValues = {...headers};
+        map<anydata> queryParam = {};
+        if self.apiKeyConfig is ApiKeysConfig {
+            headerValues["api-key"] = self.apiKeyConfig?.api\-key;
+            queryParam["api-key-2"] = self.apiKeyConfig?.api\-key\-2;
+        }
+        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
+        http:Request request = new;
+        return self.clientEp->post(resourcePath, request, httpHeaders);
     }
 }

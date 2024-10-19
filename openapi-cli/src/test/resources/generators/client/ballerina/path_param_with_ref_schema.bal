@@ -1,5 +1,4 @@
-import  ballerina/http;
-
+import ballerina/http;
 
 public isolated client class Client {
     final http:Client clientEp;
@@ -35,12 +34,12 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    #
+
     # + id - id value
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId03(Id id) returns string|error {
+    remote isolated function operationId03(Id id, map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
-        string response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
 }

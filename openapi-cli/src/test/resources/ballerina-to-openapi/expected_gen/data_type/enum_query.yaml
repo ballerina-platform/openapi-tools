@@ -18,43 +18,46 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/MeetingGroup'
+            $ref: "#/components/schemas/MeetingGroup"
         - name: required-q-ref
           in: query
           required: true
           schema:
-            $ref: '#/components/schemas/RoomNo'
+            $ref: "#/components/schemas/RoomNo"
         - name: required-q-arr
           in: query
           required: true
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Status'
+              $ref: "#/components/schemas/Status"
         - name: optional-q-arr
           in: query
           schema:
             type: array
             nullable: true
             items:
-              $ref: '#/components/schemas/Status'
+              $ref: "#/components/schemas/Status"
         - name: format
           in: query
           schema:
-            $ref: '#/components/schemas/Format'
+            nullable: true
+            allOf:
+              - $ref: "#/components/schemas/Format"
         - name: type
           in: query
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
-                default: live
+          schema:
+            type: string
+            default: live
+            enum:
+              - scheduled
+              - live
+              - upcoming
         - name: q-default-ref
           in: query
           schema:
             allOf:
-              - $ref: '#/components/schemas/RoomNo'
+              - $ref: "#/components/schemas/RoomNo"
             default: R5
       responses:
         "200":
@@ -62,22 +65,40 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeetingList'
+                $ref: "#/components/schemas/MeetingList"
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
-    Status:
-      type: string
-      enum:
-        - PENDING
-        - AVAILABLE
-    RoomNo:
-      type: string
-      enum:
-        - R6
-        - R5
-        - R3
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
     Format:
       type: string
       enum:
@@ -91,6 +112,12 @@ components:
       properties:
         topic:
           type: string
+    MeetingGroup:
+      type: string
+      enum:
+        - ENGINEERING
+        - HR
+        - ADMIN
     MeetingList:
       required:
         - meetings
@@ -99,10 +126,15 @@ components:
         meetings:
           type: array
           items:
-            $ref: '#/components/schemas/Meeting'
-    MeetingGroup:
+            $ref: "#/components/schemas/Meeting"
+    RoomNo:
       type: string
       enum:
-        - ENGINEERING
-        - HR
-        - ADMIN
+        - R6
+        - R5
+        - R3
+    Status:
+      type: string
+      enum:
+        - PENDING
+        - AVAILABLE

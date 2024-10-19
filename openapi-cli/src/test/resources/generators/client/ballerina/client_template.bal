@@ -41,13 +41,11 @@ public isolated client class Client {
         string resourcePath = string `/pets`;
         map<anydata> queryParam = {'limit: 'limit};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     remote isolated function showPetById(string petId) returns Pets|error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
-        Pets response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }
 

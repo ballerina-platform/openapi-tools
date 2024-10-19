@@ -6,6 +6,6 @@ service /v1 on ep0 {
     # Creates a new pets.
     #
     # + return - A User object
-    resource function post pets() returns Inline_response_201 {
+    resource function post pets() returns inline_response_201 {
     }
 }

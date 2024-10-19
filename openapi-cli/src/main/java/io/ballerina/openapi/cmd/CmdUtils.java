@@ -17,10 +17,13 @@
  */
 package io.ballerina.openapi.cmd;
 
-import io.ballerina.openapi.converter.utils.ConverterCommonUtils;
-import io.ballerina.openapi.core.ErrorMessages;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.model.GenSrcFile;
+import io.ballerina.openapi.core.generators.common.ErrorMessages;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+import io.ballerina.toml.syntax.tree.AbstractNodeFactory;
+import io.ballerina.toml.syntax.tree.DocumentMemberDeclarationNode;
+import io.ballerina.toml.syntax.tree.NodeList;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
@@ -31,12 +34,18 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-import static io.ballerina.openapi.core.GeneratorConstants.LINE_SEPARATOR;
+import static io.ballerina.cli.cmd.CommandUtil.exitError;
+import static io.ballerina.openapi.cmd.CmdConstants.BALLERINA_TOML;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.LINE_SEPARATOR;
 
 /**
  * Contains all the util functions used for openapi commands.
@@ -53,7 +62,7 @@ public class CmdUtils {
 
         DiagnosticInfo diagnosticInfo = new DiagnosticInfo(code, message, severity);
         if (location == null) {
-            location = new ConverterCommonUtils.NullLocation();
+            location = new MapperCommonUtils.NullLocation();
         }
         return new OpenAPIDiagnostic(diagnosticInfo, location, Collections.emptyList(), args);
     }
@@ -105,5 +114,39 @@ public class CmdUtils {
         }
         gFile.setFileName(gFile.getFileName().split("\\.")[0] + "." + (duplicateCount) + "." +
                 gFile.getFileName().split("\\.")[1]);
+    }
+
+    public static Optional<Path> validateBallerinaProject(Path projectPath, PrintStream outStream, String diagnostic,
+                                                          boolean exitOnException) {
+        Optional<Path> ballerinaToml;
+        try (Stream<Path> stream = Files.list(projectPath)) {
+            ballerinaToml = stream.filter(file -> !Files.isDirectory(file))
+                    .map(Path::getFileName)
+                    .filter(Objects::nonNull)
+                    .filter(file -> BALLERINA_TOML.equals(file.toString()))
+                    .findFirst();
+        } catch (IOException e) {
+            outStream.printf(diagnostic, projectPath.toAbsolutePath());
+            exitError(exitOnException);
+            return Optional.empty();
+        }
+        return ballerinaToml;
+    }
+
+    public static NodeList<DocumentMemberDeclarationNode> addNewLine(NodeList moduleMembers, int n) {
+        for (int i = 0; i < n; i++) {
+            moduleMembers = moduleMembers.add(AbstractNodeFactory.createIdentifierToken(System.lineSeparator()));
+        }
+        return moduleMembers;
+    }
+
+    public static <T extends Enum<?>> T searchEnum(Class<T> enumeration,
+                                                   String search) {
+        for (T each : enumeration.getEnumConstants()) {
+            if (each.name().compareToIgnoreCase(search) == 0) {
+                return each;
+            }
+        }
+        return null;
     }
 }

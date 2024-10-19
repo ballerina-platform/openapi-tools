@@ -135,7 +135,7 @@ public class CmdConstants {
         httpCodeMap.put("202", "Accepted");
         httpCodeMap.put("203", "NonAuthoritativeInformation");
         httpCodeMap.put("204", "NoContent");
-        httpCodeMap.put("205", "RestContent");
+        httpCodeMap.put("205", "ResetContent");
         httpCodeMap.put("206", "PartialContent");
         httpCodeMap.put("300", "MultipleChoices");
         httpCodeMap.put("301", "MovedPermanently");
@@ -153,7 +153,7 @@ public class CmdConstants {
         httpCodeMap.put("405", "MethodNotAllowed");
         httpCodeMap.put("406", "NotAcceptable");
         httpCodeMap.put("407", "ProxyAuthenticationRequired");
-        httpCodeMap.put("408", "RequestTimeOut");
+        httpCodeMap.put("408", "RequestTimeout");
         httpCodeMap.put("409", "Conflict");
         httpCodeMap.put("410", "Gone");
         httpCodeMap.put("411", "LengthRequired");
@@ -204,4 +204,13 @@ public class CmdConstants {
     public static final String DOUBLE_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
     public static final List<String> SUPPORTED_OPENAPI_VERSIONS =
             List.of("2.0", "3.0.0", "3.0.1", "3.0.2", "3.0.3", "3.1.0");
+    public static final String DEFAULT_CLIENT_ID = "oas_%s_%s";
+    public static final String OPENAPI_ADD_CMD = "add";
+
+    public enum Mode {
+        SERVICE,
+        CLIENT,
+        BOTH_SERVICE_CLIENT
+    }
+
 }

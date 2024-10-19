@@ -36,6 +36,32 @@ paths:
       responses:
         '200':
           description: An paged array of pets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+    put:
+      summary: List all pets
+      description: Show a list of pets in the system
+      operationId: putPets
+      tags:
+        - pets
+        - list
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: An paged array of pets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stock'
 components:
   schemas:
     Pet:

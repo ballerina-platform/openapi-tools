@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  title: Formstack API
+  version: "2.0"
+servers:
+  - url: https://www.formstack.com/api/v2
+
+paths:
+  /v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo:
+    post:
+      operationId: post1
+      parameters:
+        - in: path
+          name: spreadsheetId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: sheetId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Successful response
+  /v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom:
+    post:
+      operationId: post2
+      parameters:
+        - in: path
+          name: spreadsheetId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: sheetId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Successful response
+  /v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo:
+    post:
+      operationId: post3
+      parameters:
+        - in: path
+          name: spreadsheetId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: sheetId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Successful response
+  /payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/{imageId}.{imageExtension}:
+    post:
+      operationId: post4
+      parameters:
+        - in: path
+          name: associateoid
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: payStatementId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: imageId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: imageExtension
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Successful response
+  /v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier='{userDefinedIdentifier}'):
+    post:
+      operationId: post5
+      parameters:
+        - in: path
+          name: userDefinedIdentifier
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Successful response
+  /companies({company_id})/items({item_id}):
+    post:
+      operationId: post6
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: item_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Successful response

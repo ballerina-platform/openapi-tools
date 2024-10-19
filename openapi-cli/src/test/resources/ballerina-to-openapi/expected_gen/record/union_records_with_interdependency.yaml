@@ -25,19 +25,18 @@ paths:
           content:
             application/fhir+json:
               schema:
-                $ref: '#/components/schemas/Patient'
+                $ref: "#/components/schemas/Patient"
             application/fhir+xml:
               schema:
-                $ref: '#/components/schemas/Patient'
+                type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
-    Extension:
-      oneOf:
-        - $ref: '#/components/schemas/ExtensionExtension'
-        - $ref: '#/components/schemas/StringExtension'
-        - $ref: '#/components/schemas/CodingExtension'
-        - $ref: '#/components/schemas/CodeExtension'
-        - $ref: '#/components/schemas/IntegerExtension'
     CodeExtension:
       required:
         - url
@@ -45,45 +44,29 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueCode:
           type: string
-    Identifier:
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            value:
-              type: string
-            assigner:
-              $ref: '#/components/schemas/Reference'
-            id:
-              type: string
-            element:
-              type: integer
-              format: int64
+      additionalProperties: false
     Coding:
+      type: object
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
-            id:
-              type: string
             extension:
               type: array
               items:
-                $ref: '#/components/schemas/Extension'
+                $ref: "#/components/schemas/Extension"
             system:
-              $ref: '#/components/schemas/uri'
+              $ref: "#/components/schemas/uri"
             version:
               type: string
             display:
               type: string
             userSelected:
               type: boolean
-            element:
-              type: integer
-              format: int64
+          additionalProperties: false
     CodingExtension:
       required:
         - url
@@ -91,27 +74,10 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueCoding:
-          $ref: '#/components/schemas/Coding'
-    Reference:
-      allOf:
-        - $ref: '#/components/schemas/Element'
-        - type: object
-          properties:
-            reference:
-              type: string
-            type:
-              type: string
-            identifier:
-              $ref: '#/components/schemas/Identifier'
-            display:
-              type: string
-            id:
-              type: string
-            element:
-              type: integer
-              format: int64
+          $ref: "#/components/schemas/Coding"
+      additionalProperties: false
     Element:
       type: object
       properties:
@@ -120,25 +86,59 @@ components:
         element:
           type: integer
           format: int64
-    StringExtension:
+      additionalProperties: false
+    ErrorPayload:
       required:
-        - url
-        - valueString
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        url:
-          $ref: '#/components/schemas/uri'
-        valueString:
+        timestamp:
           type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Extension:
+      oneOf:
+        - $ref: "#/components/schemas/ExtensionExtension"
+        - $ref: "#/components/schemas/StringExtension"
+        - $ref: "#/components/schemas/CodingExtension"
+        - $ref: "#/components/schemas/CodeExtension"
+        - $ref: "#/components/schemas/IntegerExtension"
     ExtensionExtension:
+      type: object
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             extension:
               type: array
               items:
-                $ref: '#/components/schemas/Extension'
+                $ref: "#/components/schemas/Extension"
+          additionalProperties: false
+    Identifier:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Element"
+        - type: object
+          properties:
+            value:
+              type: string
+            assigner:
+              $ref: "#/components/schemas/Reference"
+          additionalProperties: false
     IntegerExtension:
       required:
         - url
@@ -146,20 +146,48 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueInteger:
           type: integer
           format: int64
+      additionalProperties: false
     Patient:
       type: object
       properties:
         ext:
           type: array
           items:
-            $ref: '#/components/schemas/Extension'
+            $ref: "#/components/schemas/Extension"
         id:
           type: string
         ref:
-          $ref: '#/components/schemas/Reference'
+          $ref: "#/components/schemas/Reference"
+      additionalProperties: false
+    Reference:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Element"
+        - type: object
+          properties:
+            reference:
+              type: string
+            type:
+              type: string
+            identifier:
+              $ref: "#/components/schemas/Identifier"
+            display:
+              type: string
+          additionalProperties: false
+    StringExtension:
+      required:
+        - url
+        - valueString
+      type: object
+      properties:
+        url:
+          $ref: "#/components/schemas/uri"
+        valueString:
+          type: string
+      additionalProperties: false
     uri:
       type: string

@@ -34,6 +34,12 @@ public class Constants {
     public static final String ATTRIBUTE_EXCLUDE_OPERATIONS = "excludeOperations";
     public static final String ATTRIBUTE_FAIL_ON_ERRORS = "failOnErrors";
     public static final String BALLERINA = "ballerina";
+    public static final String OPENAPI = "openapi";
+    public static final String EMPTY = "";
+    public static final String EXAMPLE_VALUE = "ExampleValue";
+    public static final String EXAMPLE_VALUES = "ExampleValues";
+    public static final String HTTP_SERVICE_TYPE = "Service";
+    public static final String SERVICE_CONTRACT_TYPE = "ServiceContract";
     public static final String FALSE = "false";
     public static final String EMBED = "embed";
     public static final String JSON = ".json";
@@ -86,7 +92,7 @@ public class Constants {
         httpCodes.put("Accepted", "202");
         httpCodes.put("NonAuthoritativeInformation", "203");
         httpCodes.put("NoContent", "204");
-        httpCodes.put("RestContent", "205");
+        httpCodes.put("ResetContent", "205");
         httpCodes.put("PartialContent", "206");
         httpCodes.put("MultiStatus", "207");
         httpCodes.put("AlreadyReported", "208");
@@ -107,7 +113,7 @@ public class Constants {
         httpCodes.put("MethodNotAllowed", "405");
         httpCodes.put("NotAcceptable", "406");
         httpCodes.put("ProxyAuthenticationRequired", "407");
-        httpCodes.put("RequestTimeOut", "408");
+        httpCodes.put("RequestTimeout", "408");
         httpCodes.put("Conflict", "409");
         httpCodes.put("Gone", "410");
         httpCodes.put("LengthRequired", "411");

@@ -17,20 +17,37 @@
 import ballerina/http;
 import ballerina/constraint;
 
+annotation Annotation Annot on type;
+
+type Annotation record {
+    string name;
+};
+
+@Annot {
+    name: "test"
+}
+type AnnotatedString string;
+
 @constraint:String {
     length: 10,
     pattern: re `^[a-zA-Z0-9_]+$`
 }
 public type St_ID string;
 
+@constraint:String {
+    minLength: 5
+}
+public type St_Roll_No St_ID;
+
 public type StudentRecord record {
     St_ID id;
+    St_Roll_No rollNo;
     @constraint:String { pattern: re `^[a-zA-Z]+$`}
     string name?;
 };
 
 service /payloadV on new http:Listener(9090) {
-    resource function post pet(@http:Payload StudentRecord body) returns error? {
+    resource function post pet(@http:Payload StudentRecord body, AnnotatedString annotStr) returns error? {
         return;
     }
 }

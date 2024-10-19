@@ -9,17 +9,8 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-        public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
-        http:ClientConfiguration httpClientConfig = {
-            httpVersion: config.httpVersion,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            validation: config.validation
-        };
+    public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config =  {}, string serviceUrl = "http://petstore.openapi.io/v1") returns error? {
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
@@ -46,14 +37,16 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
+
     # Info for a specific pet
     #
+    # + headers - Headers to be sent with the request
     # + return - Expected response to a valid request
-    remote isolated function showPetById() returns http:Response|error {
+    remote isolated function showPetById(map<string|string[]> headers = {}) returns http:Response|error {
         string resourcePath = string `/pets`;
-        map<any> headerValues = {"X-API-KEY": self.apiKeyConfig.xApiKey};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        http:Response response = check self.clientEp-> get(resourcePath, httpHeaders);
-        return response;
+        map<anydata> headerValues = {...headers};
+        headerValues["X-API-KEY"] = self.apiKeyConfig.X\-API\-KEY;
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

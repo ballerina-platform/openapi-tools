@@ -26,37 +26,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
         "500":
-          description: Internal server error
+          description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
-    ErrorPayload:
-      type: object
-      properties:
-        reason:
-          type: string
-          description: Reason phrase
-        path:
-          type: string
-          description: Request path
-        method:
-          type: string
-          description: Method type of the request
-        message:
-          type: string
-          description: Error message
-        timestamp:
-          type: string
-          description: Timestamp of the error
-        status:
-          type: integer
-          description: Relevant HTTP status code
-          format: int32
     Category:
       type: object
       properties:
@@ -65,13 +49,28 @@ components:
           format: int64
         name:
           type: string
-    Tag:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
       type: object
       properties:
-        id:
+        timestamp:
+          type: string
+        status:
           type: integer
           format: int64
-        name:
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
           type: string
     Pet:
       required:
@@ -85,7 +84,7 @@ components:
         name:
           type: string
         category:
-          $ref: '#/components/schemas/Category'
+          $ref: "#/components/schemas/Category"
         photoUrls:
           type: array
           items:
@@ -93,6 +92,14 @@ components:
         tags:
           type: array
           items:
-            $ref: '#/components/schemas/Tag'
+            $ref: "#/components/schemas/Tag"
         status:
+          type: string
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
           type: string

@@ -72,7 +72,7 @@ service /payloadV on new http:Listener(9090) {
     // Read the current state of the resource represented by the given id.
     isolated resource function get fhir/r4/Patient/[string id]()
     returns @http:Payload {mediaType: ["application/fhir+json", "application/fhir+xml"]}
-    Patient {
+    Patient|xml {
         Patient patient = {
             id: id
         };

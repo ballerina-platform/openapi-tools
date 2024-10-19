@@ -17,8 +17,10 @@
  */
 package io.ballerina.openapi.cmd;
 
+import io.ballerina.cli.launcher.BLauncherException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import picocli.CommandLine;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,13 +29,16 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.ballerina.openapi.CodeGeneratorTest.USER_DIR;
+//import static io.ballerina.openapi.CodeGeneratorTest.USER_DIR;
 
 /**
  * This class contains tests necessary to test OpenApi Generate Service command.
  */
 public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
+    public static final String USER_DIR = "user.dir";
     Path resourcePath = Paths.get(System.getProperty(USER_DIR));
+    String replaceRegex  = System.getProperty("os.name").toLowerCase()
+            .contains("windows") ? "#.*[+*a\\r\\n]" : "#.*[+*a\\n]";
 
     @Test(description = "Test openapi gen-service for successful service generation with inline request body type",
             enabled = false)
@@ -109,6 +114,65 @@ public class OpenApiGenServiceCmdTest extends OpenAPICommandTest {
             }
         } else {
             Assert.fail("Service generation for OneOf Schema type failed.");
+        }
+    }
+
+    @Test(description = "Test successful service generation from OpenAPI which contains an array schema with " +
+            "multiple members")
+    public void testArrayOfOneOfSchemaGen() throws IOException {
+        Path yamlPath = resourceDir.resolve(Paths.get("array-of-oneof.yaml"));
+        String[] args = {"--input", yamlPath.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
+        new CommandLine(cmd).parseArgs(args);
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+            String errorMsg = String.format("Service generation with array of OneOf Schema type failed: %s",
+                    e.getDetailedMessages().get(0));
+            Assert.fail(errorMsg);
+        }
+
+        Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen",
+                "array-of-oneof-schema.bal"));
+        String expectedService = new String(Files.readAllBytes(expectedServiceFile));
+        if (Files.exists(this.tmpDir.resolve("array-of-oneof_service.bal"))) {
+            String generatedService = getStringFromFile(this.tmpDir.resolve("array-of-oneof_service.bal"));
+            Assert.assertEquals(replaceWhiteSpace(generatedService.replaceAll(replaceRegex, "")),
+                    replaceWhiteSpace(expectedService.replaceAll(replaceRegex, "")),
+                    "Expected content and actual generated content is mismatched for: " + yamlPath);
+            deleteGeneratedFiles("array-of-oneof_service.bal");
+        } else {
+            Assert.fail("Service generation with array of OneOf Schema type failed.");
+        }
+    }
+
+    @Test(description = "Test for --without-data-binding flag")
+    public void testWithoutDataBinding() throws IOException {
+        Path yamlPath = resourceDir.resolve(Paths.get("withoutDataBinding.yaml"));
+        String[] args = {"--input", yamlPath.toString(), "--without-data-binding", "-o",
+                this.tmpDir.toString(), "--mode", "service"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, this.tmpDir);
+        new CommandLine(cmd).parseArgs(args);
+        try {
+            cmd.execute();
+        } catch (BLauncherException e) {
+            String errorMsg = String.format("Service generation for low level service is failed: %s",
+                    e.getDetailedMessages().get(0));
+            Assert.fail(errorMsg);
+        }
+
+        Path expectedServiceFile = resourceDir.resolve(Paths.get("expected_gen",
+                "without-data-binding.bal"));
+        String expectedService = new String(Files.readAllBytes(expectedServiceFile));
+        Assert.assertFalse(Files.exists(this.tmpDir.resolve("types.bal")));
+        if (Files.exists(this.tmpDir.resolve("withoutdatabinding_service.bal"))) {
+            String generatedService = getStringFromFile(this.tmpDir.resolve("withoutdatabinding_service.bal"));
+            Assert.assertEquals(replaceWhiteSpace(generatedService.replaceAll(replaceRegex, "")),
+                    replaceWhiteSpace(expectedService.replaceAll(replaceRegex, "")),
+                    "Expected content and actual generated content is mismatched for: " + yamlPath);
+            deleteGeneratedFiles("without-data-binding-service.bal");
+        } else {
+            Assert.fail("Service generation for low level service is failed.");
         }
     }
 }

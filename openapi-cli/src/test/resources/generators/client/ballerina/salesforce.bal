@@ -21,8 +21,7 @@ public isolated client class Client {
             longitude: longitude
         };
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     remote isolated function price(decimal start_latitude, decimal start_longitude, decimal end_latitude,
                                    decimal end_longitude) returns PriceEstimateArr|error {
@@ -34,8 +33,7 @@ public isolated client class Client {
             end_longitude: end_longitude
         };
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        PriceEstimateArr response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     remote isolated function time(decimal start_latitude, decimal start_longitude, string? customer_uuid,
                                   string? product_id) returns ProductArr|error {
@@ -47,20 +45,17 @@ public isolated client class Client {
             product_id: product_id
         };
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     remote isolated function me() returns Profile|error {
         string resourcePath = string `/me`;
-        Profile response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
     remote isolated function history(int? offset, int? 'limit) returns Activities|error {
         string resourcePath = string `/history`;
         map<anydata> queryParam = {offset: offset, 'limit: 'limit};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Activities response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }
 

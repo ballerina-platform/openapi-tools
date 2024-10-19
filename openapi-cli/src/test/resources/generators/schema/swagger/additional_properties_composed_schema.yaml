@@ -25,13 +25,42 @@ servers:
         default: v2
 paths:
   /store/inventory:
-    get:
+    post:
       tags:
         - store
         - pet
       summary: Returns pet inventories by status
       description: Returns a map of status codes to quantities
-      operationId: "wws"
+      operationId: "storeget"
+      requestBody:
+        description: Update an existent pet in the store
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pet:
+                  $ref: '#/components/schemas/Pet'
+                pet2:
+                  $ref: '#/components/schemas/Pet02'
+                user1:
+                  $ref: '#/components/schemas/User01'
+                user2:
+                  $ref: '#/components/schemas/User02'
+                user3:
+                  $ref: '#/components/schemas/User03'
+                user4:
+                  $ref: '#/components/schemas/User04'
+                user5:
+                  $ref: '#/components/schemas/User05'
+                use6:
+                  $ref: '#/components/schemas/User06'
+                user7:
+                  $ref: '#/components/schemas/User07'
+                user8:
+                  $ref: '#/components/schemas/User08'
+                use9:
+                  $ref: '#/components/schemas/User09'
       responses:
         "200":
           description: successful operation

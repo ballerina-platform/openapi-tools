@@ -20,6 +20,10 @@ paths:
       responses:
         200:
           description: Status OK
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Person"
 
 components:
   schemas:

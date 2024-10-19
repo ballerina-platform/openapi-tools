@@ -14,4 +14,8 @@ service /payloadV on ep0 {
     resource function post student2(@http:Payload string p, string q) returns json {
         return {Name: p};
     }
+
+        resource function post student3(@http:Payload string? p, string q) returns json {
+            return {Name: p ?: q};
+        }
 }

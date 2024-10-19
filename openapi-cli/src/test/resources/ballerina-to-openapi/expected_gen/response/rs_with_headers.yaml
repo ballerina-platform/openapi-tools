@@ -1,3 +1,14 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
 paths:
   /status:
     get:
@@ -6,21 +17,25 @@ paths:
         "200":
           description: Ok
           headers:
-            x-rate-limit-id:
+            x-rate-limit-enable:
+              required: true
               schema:
-                type: string
+                type: boolean
             x-rate-limit-remaining:
+              required: true
               schema:
                 type: integer
                 format: int64
             x-rate-limit-types:
+              required: true
               schema:
                 type: array
                 items:
                   type: string
-            x-rate-limit-enable:
+            x-rate-limit-id:
+              required: true
               schema:
-                type: boolean
+                type: string
           content:
             text/plain:
               schema:

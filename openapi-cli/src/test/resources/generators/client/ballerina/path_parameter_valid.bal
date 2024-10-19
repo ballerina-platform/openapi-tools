@@ -1,5 +1,4 @@
-import  ballerina/http;
-
+import ballerina/http;
 
 public isolated client class Client {
     final http:Client clientEp;
@@ -37,48 +36,44 @@ public isolated client class Client {
     }
     # op1
     #
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId01() returns string|error {
+    remote isolated function operationId01(map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/`;
-        string response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
-    #
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId02() returns string|error {
+    remote isolated function operationId02(map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/`;
         http:Request request = new;
-        string response = check self.clientEp-> post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request, headers);
     }
     # op2
     #
     # + id - id value
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId03(int id) returns string|error {
+    remote isolated function operationId03(int id, map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(id)}`;
-        string response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
-    #
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId04(int version, string name) returns string|error {
+    remote isolated function operationId04(int version, string name, map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
-    #
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId05(int version, int 'limit) returns string|error {
+    remote isolated function operationId05(int version, int 'limit, map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri('limit)}`;
-        string response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
-    #
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId06(int age, string name) returns string|error {
+    remote isolated function operationId06(int age, string name, map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
 }

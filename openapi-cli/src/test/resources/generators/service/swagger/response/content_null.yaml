@@ -37,4 +37,3 @@ paths:
       responses:
         '202':
           description: A User object
-components: {}

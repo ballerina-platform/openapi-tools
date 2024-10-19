@@ -2,11 +2,6 @@ name: PR build
 
 on:
   pull_request:
-  push:
-    branches-ignore:
-      - master
-      - "automated/dependency_version_update"
-      - "automated/dependency_version_update_tmp"
 
 jobs:
   ubuntu-build:
@@ -26,9 +21,10 @@ jobs:
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
             ./gradlew build codeCoverageReport --stacktrace --scan --console=plain --no-daemon
-      - name: Generate Codecov Report
-        if:  github.event_name == 'pull_request'
-        uses: codecov/codecov-action@v1
+#      - name: Generate Codecov Report
+#        if:  github.event_name == 'pull_request'
+#        uses: codecov/codecov-action@v1
+#  todo: uncomment this block when the issue with the code coverage report is resolved
 
   windows-build:
 

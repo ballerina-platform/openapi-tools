@@ -73,7 +73,11 @@ paths:
         '404':
           description: Pet not found
         '405':
-          description: Validation exception
+          description: Validation
+          content:
+            text/plain:
+              schema:
+                type: string
       security:
         - petstore_auth:
             - write:pets

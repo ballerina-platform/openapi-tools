@@ -1,0 +1,99 @@
+openapi: "3.0.1"
+info:
+  title: "OpenWeather Map API for Query parameter"
+  description: "Get current weather, daily forecast for 16 days, and 3-hourly forecast 5 days for your city."
+  version: "2.5.2"
+  x-ballerina-display:
+    label: Open Weather Client
+
+servers:
+  - url: "http://api.openweathermap.org/data/2.5/"
+paths:
+  /onecall:
+    get:
+      tags:
+        - Weather Forecast
+      summary: "Provide weather forecast for any geographical coordinates"
+      description: "test"
+      operationId: getWeatherForecast
+      parameters:
+        - name: extraParams
+          in: query
+          description: Any additional parameters to pass to the callback URLs; these
+            will be passed as query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                nullable: true
+        - description: "Longtitude"
+          in: query
+          name: lon
+          required: false
+          schema:
+            type: integer
+            format: int32
+          x-ballerina-display:
+            label: Longtitude
+        - description: "test"
+          in: query
+          name: exclude
+          required: false
+          schema:
+            type: integer
+            format: invalid_format
+            default: 100
+          x-ballerina-display:
+            label: Exclude
+        - description: 'units'
+          in: query
+          name: units
+          required: true
+          schema:
+            type: integer
+            format: int64
+            default: 12
+          x-ballerina-display:
+            label: Units
+      x-ballerina-display:
+        label: "Weather Forecast"
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherForecast'
+        404:
+          description: Not found response
+          content:
+            text/plain:
+              schema:
+                title: Weather not found
+                type: string
+                example: Not found
+
+security:
+  - app_id: []
+
+tags:
+  - name: Current Weather Data
+    description: "Get current weather details"
+  - name: Weather Forecast
+    description: "Get data related to weather forecast"
+components:
+  schemas:
+    WeatherForecast:
+      type: object
+      properties:
+        lat:
+          type: number
+        lon:
+          type: number
+  securitySchemes:
+    app_id:
+      type: apiKey
+      description: API key.
+      name: appid
+      in: query

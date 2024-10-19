@@ -77,6 +77,12 @@ paths:
                 items: {
                   "$ref": "#/components/schemas/GrossDomesticProduct"
                 }
+        '201':
+          description: No data found for the given country
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
 
   /country/{country_name}/indicator/1.1_ACCESS.ELECTRICITY.TOT:
     get:

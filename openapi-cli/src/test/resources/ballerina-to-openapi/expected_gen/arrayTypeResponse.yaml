@@ -22,9 +22,16 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Product'
+                  $ref: "#/components/schemas/Product"
 components:
   schemas:
+    Currency:
+      type: string
+      enum:
+        - GBP
+        - SGD
+        - LKR
+        - USD
     Price:
       required:
         - amount
@@ -32,15 +39,11 @@ components:
       type: object
       properties:
         currency:
-          type: string
-          enum:
-            - GBP
-            - SGD
-            - LKR
-            - USD
+          $ref: "#/components/schemas/Currency"
         amount:
           type: number
           format: float
+      additionalProperties: false
     Product:
       required:
         - description
@@ -56,5 +59,6 @@ components:
         description:
           type: string
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
+      additionalProperties: false
       description: Represents a product

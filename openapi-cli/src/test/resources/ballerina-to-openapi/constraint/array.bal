@@ -22,6 +22,11 @@ public type Hobby HobbyItemsString[];
 @constraint:Array {length: 15}
 public type School SchoolName[];
 
+public type Modules string[];
+
+@constraint:Array {maxLength: 5}
+public type Subjects Modules;
+
 public type Person record {
     Hobby hobby?;
     School school?;
@@ -31,6 +36,7 @@ public type Person record {
     PersonFeeItemsNumber[] fee?;
     # The maximum number of items in the response (as set in the query or by default).
     PersonLimitItemsInteger[] 'limit?;
+    Subjects[] subjects?;
 };
 
 service /payloadV on new http:Listener(9090) {

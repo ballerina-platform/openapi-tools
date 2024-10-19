@@ -19,7 +19,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError'
+                $ref: "#/components/schemas/ResponseError"
         "202":
           description: Accepted
   /pet02:
@@ -31,7 +31,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError02'
+                $ref: "#/components/schemas/ResponseError02"
         "202":
           description: Accepted
   /pet03:
@@ -43,7 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError03'
+                $ref: "#/components/schemas/ResponseError03"
         "202":
           description: Accepted
   /pet04:
@@ -55,7 +55,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError04'
+                $ref: "#/components/schemas/ResponseError04"
         "202":
           description: Accepted
   /pet05:
@@ -67,7 +67,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError05'
+                $ref: "#/components/schemas/ResponseError05"
         "202":
           description: Accepted
   /pet06:
@@ -79,7 +79,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError06'
+                $ref: "#/components/schemas/ResponseError06"
         "202":
           description: Accepted
   /pet07:
@@ -91,7 +91,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError07'
+                $ref: "#/components/schemas/ResponseError07"
         "202":
           description: Accepted
   /items:
@@ -105,9 +105,31 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AidPackage'
+                  $ref: "#/components/schemas/AidPackage"
 components:
   schemas:
+    AidPackage:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+        aidPackageItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/AidPackageItem"
+      additionalProperties: false
+    AidPackageItem:
+      type: object
+      properties:
+        totalAmount:
+          type: number
+          format: double
+          default: 0
+        aidPackage:
+          $ref: "#/components/schemas/AidPackage"
+      additionalProperties: false
     ResponseError:
       required:
         - id
@@ -118,7 +140,8 @@ components:
           format: int64
           nullable: true
         resError:
-          $ref: '#/components/schemas/ResponseError'
+          $ref: "#/components/schemas/ResponseError"
+      additionalProperties: false
     ResponseError02:
       required:
         - id
@@ -130,8 +153,9 @@ components:
           nullable: true
         resError:
           oneOf:
-            - $ref: '#/components/schemas/ResponseError02'
+            - $ref: "#/components/schemas/ResponseError02"
             - type: string
+      additionalProperties: false
     ResponseError03:
       required:
         - id
@@ -144,7 +168,8 @@ components:
         resError:
           type: array
           items:
-            $ref: '#/components/schemas/ResponseError03'
+            $ref: "#/components/schemas/ResponseError03"
+      additionalProperties: false
     ResponseError04:
       required:
         - id
@@ -159,7 +184,8 @@ components:
           items:
             type: array
             items:
-              $ref: '#/components/schemas/ResponseError04'
+              $ref: "#/components/schemas/ResponseError04"
+      additionalProperties: false
     ResponseError05:
       required:
         - id
@@ -171,8 +197,9 @@ components:
           nullable: true
         resError:
           nullable: true
-          oneOf:
-            - $ref: '#/components/schemas/ResponseError05'
+          allOf:
+            - $ref: "#/components/schemas/ResponseError05"
+      additionalProperties: false
     ResponseError06:
       required:
         - id
@@ -186,7 +213,8 @@ components:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/ResponseError06'
+            $ref: "#/components/schemas/ResponseError06"
+      additionalProperties: false
     ResponseError07:
       required:
         - id
@@ -201,25 +229,5 @@ components:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/ResponseError07'
-    AidPackageItem:
-      required:
-        - totalAmount
-      type: object
-      properties:
-        totalAmount:
-          type: number
-          format: double
-        aidPackage:
-          $ref: '#/components/schemas/AidPackage'
-    AidPackage:
-      required:
-        - status
-      type: object
-      properties:
-        status:
-          type: string
-        aidPackageItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/AidPackageItem'
+            $ref: "#/components/schemas/ResponseError07"
+      additionalProperties: false

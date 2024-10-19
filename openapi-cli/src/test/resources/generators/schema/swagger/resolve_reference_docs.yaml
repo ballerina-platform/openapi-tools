@@ -31,7 +31,9 @@ paths:
       responses:
         200:
           content:
-            application/json: {}
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Dog"
           description: "Response"
       requestBody:
         content:
@@ -39,7 +41,7 @@ paths:
             schema:
               type: array
               items:
-                description: "Array description"
+                "$ref": "#/components/schemas/Pets"
 components:
   schemas:
     Pet:

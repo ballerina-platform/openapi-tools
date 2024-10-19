@@ -63,8 +63,23 @@ public type Person record {
     decimal net?;
 };
 
+type Record record {
+    record {
+        @constraint:String {length: 10}
+        string name;
+        @constraint:Int {minValue: 18}
+        int age;
+        record {
+            @constraint:String {pattern: re `^[a-zA-Z0-9]+$`}
+            string username;
+            @constraint:String {minLength: 8}
+            string password;
+        } auth;
+    } user;
+};
+
 service /payloadV on new http:Listener(9090) {
-    resource function post pet(@http:Payload Person body) returns error? {
+    resource function post pet(@http:Payload Person body, Record rec) returns error? {
         return;
     }
 }

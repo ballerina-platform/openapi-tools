@@ -3,6 +3,7 @@ public type MeetingObject record {
     string topic?;
     # Meeting Type: 1 - Instant meeting. 2 - Scheduled meeting. 3 - Recurring meeting with no fixed time. 8 - Recurring meeting with fixed time.
     int 'type?;
+    MeetingTypes othertype?;
 };
 
 public type MeetingTypes string?;

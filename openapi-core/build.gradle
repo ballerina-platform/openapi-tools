@@ -22,7 +22,7 @@ apply plugin: "java-library"
 
 description = "Ballerina - OpenAPI Tooling - OpenAPI to Ballerina"
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy.preferProjectModules()
 }
 
@@ -31,13 +31,14 @@ configurations {
 }
 
 dependencies {
-    implementation project(':openapi-bal-service')
+    implementation project(':ballerina-to-openapi')
     implementation ("io.swagger.parser.v3:swagger-parser:${swaggerParserVersion}") {
         exclude group: "io.swagger", module: "swagger-compat-spec-parser"
         exclude group: "org.slf4j", module: "slf4j-ext"
         exclude group: "javax.validation", module: "validation-api"
     }
     implementation "io.swagger.core.v3:swagger-models"
+    implementation "io.swagger.parser.v3:swagger-parser-safe-url-resolver:${swaggerParserVersion}"
     implementation "javax.ws.rs:javax.ws.rs-api"
     implementation "com.github.jknack:handlebars"
     implementation "info.picocli:picocli"
@@ -115,7 +116,8 @@ shadowJar {
     dependencies {
         include(dependency('com.github.jknack:handlebars'))
         include(dependency('org.antlr:antlr4:4.5'))
-        include(dependency('io.swagger.parser.v3:swagger-parser:2.1.15'))
+        include(dependency('io.swagger.parser.v3:swagger-parser'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-safe-url-resolver'))
         include(dependency('com.atlassian.commonmark:commonmark'))
         include(dependency('com.atlassian.commonmark:commonmark-ext-gfm-tables'))
         exclude('META-INF/*.SF')
@@ -132,3 +134,27 @@ compileJava {
         classpath = files()
     }
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId "io.ballerina.openapi"
+            artifactId "core"
+            version = project.version
+            artifact jar
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/ballerina-platform/openapi-tools")
+            credentials {
+                username = System.getenv("packageUser")
+                password = System.getenv("packagePAT")
+            }
+        }
+    }
+}
+
+publish.dependsOn build

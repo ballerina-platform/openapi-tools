@@ -30,6 +30,7 @@ public class SchemaGenerationTests extends OpenAPITest {
     public void setupDistributions() throws IOException {
         TestUtil.cleanDistribution();
     }
+
     @Test(description = "Tests with record field has constraint value with union type.")
     public void constraintWithUnionType() throws IOException, InterruptedException {
         String openapiFilePath = "union_type.yaml";

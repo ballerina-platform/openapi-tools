@@ -50,19 +50,16 @@ public isolated client class Client {
     }
     # Provide weather forecast for any geographical coordinates
     #
-    # + lat - Latitude
-    # + lon - Longtitude
-    # + exclude - test
-    # + units - tests
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Successful response
     @display {label: "Weather Forecast"}
-    remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string exclude = "current", @display {label: "Units"} int units = 12) returns WeatherForecast|error {
+    remote isolated function getWeatherForecast(GetWeatherForecastHeaders headers = {}, *GetWeatherForecastQueries queries) returns WeatherForecast|error {
         string resourcePath = string `/onecall`;
-        map<anydata> queryParam = {"lat": lat, "lon": lon, "appid": self.apiKeyConfig.appid};
+        map<anydata> queryParam = {...queries};
+        queryParam["appid"] = self.apiKeyConfig.appid;
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<any> headerValues = {"exclude": exclude, "units": units};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        WeatherForecast response = check self.clientEp-> get(resourcePath, httpHeaders);
-        return response;
+        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

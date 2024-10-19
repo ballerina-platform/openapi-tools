@@ -7,6 +7,6 @@ service /v1 on ep0 {
     #
     # + request - Request to add a pet
     # + return - Successful operation
-    resource function post pets/my(http:Request request) returns OkAnydata {
+    resource function post pets/my(http:Request request) returns AnydataOk {
     }
 }

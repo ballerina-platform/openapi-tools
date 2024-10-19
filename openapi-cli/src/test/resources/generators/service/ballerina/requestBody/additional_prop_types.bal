@@ -24,9 +24,21 @@ public type Mailing_AddContact_body_3 record {|
     MailingViewModel...;
 |};
 
+public type ApiHistoricoSimulacaoAddHistoricoRequest record {|
+    string...;
+|};
+
 public type HistoricoSimulacaoViewModel record {|
     string? email?;
     string? data?;
     string? step?;
     string? descricao?;
+|};
+
+public type ApiHistoricoSimulacaoAddHistoricoRequest_2 record {|
+    record {|string...;|}...;
+|};
+
+public type ApiHistoricoSimulacaoAddHistoricoRequest_1 record {|
+    HistoricoSimulacaoViewModel...;
 |};

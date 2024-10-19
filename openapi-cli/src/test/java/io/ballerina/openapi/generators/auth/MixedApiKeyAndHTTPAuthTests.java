@@ -19,10 +19,17 @@
 package io.ballerina.openapi.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
+import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
@@ -35,15 +42,17 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.openapi.generators.common.TestConstants.MIXED_AUTH_INIT_STATEMENTS;
+
 /**
  * All the tests related to the auth related code snippet generation for api key auth mechanism.
  */
 public class MixedApiKeyAndHTTPAuthTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/generators/client/").toAbsolutePath();
-    BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(true, true);
+    AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(true, true);
 
     @Test(description = "Generate ApiKeysConfig record", dataProvider = "apiKeyAuthIOProvider")
-    public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException {
+    public void testGetConfigRecord(String yamlFile) throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RES_DIR.resolve("swagger/" + yamlFile);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
@@ -52,6 +61,17 @@ public class MixedApiKeyAndHTTPAuthTests {
         Optional<TypeDefinitionNode> connectionConfig = authRelatedTypeDefinitionNodes.stream()
                 .filter(typeDefinitionNode -> typeDefinitionNode.typeName().text().equals("ConnectionConfig"))
                 .findFirst();
+        TypeHandler.createInstance(openAPI, false);
+        OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
+        OASClientConfig oasClientConfig = clientMetaDataBuilder
+                .withFilters(new Filter())
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
+        SyntaxTree syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        Assert.assertTrue(syntaxTree.toSourceCode().trim().replaceAll("\\s+", "")
+                .contains(MIXED_AUTH_INIT_STATEMENTS.trim().replaceAll("\\s+", "")));
+
         if (connectionConfig.isPresent()) {
             String expectedRecord = TestConstants.CONNECTION_CONFIG_MIXED_AUTH;
             String generatedRecord = connectionConfig.get().toString();
@@ -78,8 +98,7 @@ public class MixedApiKeyAndHTTPAuthTests {
     public void testGetConfigParamForClassInit() {
         String expectedParams = TestConstants.AUTH_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit(
-                "https:localhost/8080");
+        List<ParameterNode> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }

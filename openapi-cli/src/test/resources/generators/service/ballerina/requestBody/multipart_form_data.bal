@@ -7,6 +7,6 @@ service / on ep0 {
     #
     # + request - parameter description
     # + return - Successful
-    resource function post user(http:Request request) returns OkJson {
+    resource function post user(http:Request request) returns JsonOk {
     }
 }

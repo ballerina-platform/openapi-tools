@@ -7,13 +7,13 @@ public type User record {
     anydata remarks?;
 };
 
-public type Description anydata;
-
 public type Address record {
     string street?;
     string city?;
 };
 
-public type Id Name;
+public type description anydata;
+
+public type id Name;
 
 public type Name string;

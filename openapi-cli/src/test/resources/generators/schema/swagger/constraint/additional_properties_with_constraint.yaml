@@ -14,6 +14,34 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Additional_Primitive'
+  /users2:
+    get:
+      summary: Returns a list of users.
+      operationId: "test02"
+      description: Optional extended description in Markdown.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Additional_Array'
+  /users3:
+    get:
+      summary: Returns a list of users.
+      operationId: "test03"
+      description: Optional extended description in Markdown.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Additional_NestedArray'
 components:
   schemas:
     Additional_Primitive:

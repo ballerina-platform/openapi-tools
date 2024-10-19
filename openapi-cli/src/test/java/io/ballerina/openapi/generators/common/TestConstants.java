@@ -83,8 +83,8 @@ public class TestConstants {
             "   # Configurations related to client authentication\n" +
             "   http:BearerTokenConfig|http:CredentialsConfig auth;\n" + commonClientConfigurationFields;
     public static final String HTTP_CLIENT_CONFIG_PARAM =
-            "ConnectionConfig config, string serviceUrl = \"https:localhost/8080\"";
-    public static final String HTTP_CLIENT_CONFIG_PARAM_NO_URL = "ConnectionConfig config, string serviceUrl";
+            "ConnectionConfig config";
+    public static final String HTTP_CLIENT_CONFIG_PARAM_NO_URL = "ConnectionConfig config";
     public static final String HTTP_CLIENT_DECLARATION = "" +
             "http:Client httpEp = check new (serviceUrl, httpClientConfig);";
     public static final String OAUTH2_AUTHORIZATION_CODE_CONFIG_REC = "" +
@@ -131,13 +131,11 @@ public class TestConstants {
     public static final String API_KEY_CONFIG_VAR = "final readonly & ApiKeysConfig apiKeyConfig;";
     public static final String API_KEY_CONFIG_NILLABLE_VAR = "final readonly & ApiKeysConfig? apiKeyConfig;";
     public static final String API_KEY_CONFIG_PARAM = "" +
-            "ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, " +
-            "string serviceUrl = \"https:localhost/8080\"";
+            "ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}";
     public static final String AUTH_CONFIG_PARAM = "" +
-            "ConnectionConfig config, " +
-            "string serviceUrl = \"https:localhost/8080\"";
+            "ConnectionConfig config";
     public static final String API_KEY_CONFIG_PARAM_NO_URL = "" +
-            "ApiKeysConfig apiKeyConfig, string serviceUrl,ConnectionConfig config =  {}";
+            "ApiKeysConfig apiKeyConfig ConnectionConfig config =  {}";
     public static final String API_KEYS_CONFIG_RECORD = "# Provides API key configurations needed when communicating " +
             "with a remote HTTP endpoint.\n" +
             "public type ApiKeysConfig record {|\n" +
@@ -146,7 +144,7 @@ public class TestConstants {
             "    string appid;\n" +
             "    # API key to authorize requests.\n" +
             "    @display {label: \"\", kind: \"password\"}\n" +
-            "    string apiXKey;\n" +
+            "    string API\\-X\\-Key;\n" +
             "|};";
 
     public static final String API_KEY_ASSIGNMENT = "self.apiKeyConfig = apiKeyConfig.cloneReadOnly();";
@@ -158,7 +156,7 @@ public class TestConstants {
             "    string appid;\n" +
             "    # API key to authorize POST requests.\n" +
             "    @display {label: \"\", kind: \"password\"}\n" +
-            "    string xApiKey;\n" +
+            "    string X\\-API\\-Key;\n" +
             "|};";
     public static final String MULTI_LINE_API_KEY_DESC = "# Provides API key configurations needed when " +
             "communicating with a remote HTTP endpoint.\n" +
@@ -287,4 +285,14 @@ public class TestConstants {
             "    Enabled by default\n" +
             "    boolean validation = true;\n" +
             "|};";
+    public static final String OAUTH2_REFRESH_TOKEN_GRANT_CONFIG_RECORD = "#OAuth2ClientCredentialsGrantConfigs" +
+            "publictypeOAuth2ClientCredentialsGrantConfigrecord{|*http:OAuth2ClientCredentialsGrantConfig;" +
+            "#TokenURLstringtokenUrl=\"https://domain/services/data/oauth2/token\";|};";
+    public static final String MIXED_AUTH_INIT_STATEMENTS = "if config.auth is ApiKeysConfig {\n" +
+            "            self.apiKeyConfig = (<ApiKeysConfig>config.auth).cloneReadOnly();\n" +
+            "        } else {\n" +
+            "            httpClientConfig.auth = <OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig|" +
+            "OAuth2RefreshTokenGrantConfig>config.auth;\n" +
+            "            self.apiKeyConfig = ();\n" +
+            "        }";
 }

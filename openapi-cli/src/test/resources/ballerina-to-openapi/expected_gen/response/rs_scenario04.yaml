@@ -22,4 +22,3 @@ paths:
           description: Unauthorized
         "404":
           description: NotFound
-components: {}

@@ -65,7 +65,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-    post:
+    put:
       summary: Create a pet
       operationId: createPet
       tags:
@@ -73,6 +73,10 @@ paths:
       responses:
         '201':
           description: Null response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dog"
         default:
           description: unexpected error
           content:
@@ -104,7 +108,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pets"
+                $ref: "#/components/schemas/Error"
         default:
           description: unexpected error
           content:

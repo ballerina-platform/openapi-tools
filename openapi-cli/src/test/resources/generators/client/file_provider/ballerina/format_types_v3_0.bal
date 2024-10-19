@@ -34,26 +34,23 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    #
+    # + headers - Headers to be sent with the request
     # + return - Feature flag approval request response
-    remote isolated function op1() returns StringObject|error {
+    remote isolated function op1(map<string|string[]> headers = {}) returns StringObject|error {
         string resourcePath = string `/projects`;
-        StringObject response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
-    #
+    # + headers - Headers to be sent with the request
     # + return - Feature flag approval request response
-    remote isolated function op2() returns IntegerObject|error {
+    remote isolated function op2(map<string|string[]> headers = {}) returns IntegerObject|error {
         string resourcePath = string `/projects`;
         http:Request request = new;
-        IntegerObject response = check self.clientEp-> post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request, headers);
     }
-    #
+    # + headers - Headers to be sent with the request
     # + return - Feature flag approval request response
-    remote isolated function op3() returns NumberObject|error {
+    remote isolated function op3(map<string|string[]> headers = {}) returns NumberObject|error {
         string resourcePath = string `/projects`;
-        NumberObject response = check self.clientEp-> delete(resourcePath);
-        return response;
+        return self.clientEp->delete(resourcePath, headers = headers);
     }
 }

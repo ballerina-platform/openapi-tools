@@ -28,4 +28,3 @@ paths:
       responses:
         "200":
           description: Accepted
-components: {}

@@ -92,4 +92,6 @@ components:
         type:
           description: "Meeting Type: 1 - Instant meeting. 2 - Scheduled meeting. 3 - Recurring meeting with no fixed time. 8 - Recurring meeting with fixed time."
           type: integer
+        othertype:
+          $ref: "#/components/schemas/MeetingTypes"
       type: object

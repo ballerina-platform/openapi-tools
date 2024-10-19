@@ -17,7 +17,7 @@ paths:
         "202":
           description: Accepted
           content:
-            application/x-www-form-urlencoded:
+            application/json:
               schema:
                 type: object
                 additionalProperties:
@@ -59,4 +59,3 @@ paths:
                 additionalProperties:
                   type: integer
                   format: int64
-components: {}

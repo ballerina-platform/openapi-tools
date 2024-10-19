@@ -19,7 +19,7 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -28,7 +28,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.core.GeneratorUtils.getImportDeclarationNode;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getImportDeclarationNode;
 
 /**
  * This tests class for the tests imports in the generation.

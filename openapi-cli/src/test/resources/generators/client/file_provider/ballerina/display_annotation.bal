@@ -38,14 +38,14 @@ public isolated client class Client {
     }
     # Update an existing pet
     #
+    # + headers - Headers to be sent with the request
     # + payload - Pet object that needs to be added to the store
     # + return - Invalid ID supplied
-    remote isolated function updatePet(Pet payload) returns http:Response|error {
+    remote isolated function updatePet(Pet payload, map<string|string[]> headers = {}) returns http:Response|error {
         string resourcePath = string `/pet`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        http:Response response = check self.clientEp->put(resourcePath, request);
-        return response;
+        return self.clientEp->put(resourcePath, request, headers);
     }
 }

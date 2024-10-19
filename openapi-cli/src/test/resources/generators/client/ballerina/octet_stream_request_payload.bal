@@ -35,23 +35,25 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # Creates a new user.
-    #
-    # + return - OK
-    resource isolated function post user(byte[] payload) returns error? {
-        string resourcePath = string `/user`;
-        http:Request request = new;
-        request.setPayload(payload, "application/octet-stream");
-        return self.clientEp->post(resourcePath, request);
-    }
     # Creates a new payment.
     #
+    # + headers - Headers to be sent with the request
     # + payload - Details of the pet to be purchased
     # + return - OK
-    resource isolated function post payment(byte[] payload) returns error? {
+    remote isolated function addPayment(byte[] payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/payment`;
         http:Request request = new;
         request.setPayload(payload, "application/octet-stream");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
+    }
+    # Creates a new user.
+    #
+    # + headers - Headers to be sent with the request
+    # + return - OK
+    remote isolated function addUser(byte[] payload, map<string|string[]> headers = {}) returns error? {
+        string resourcePath = string `/user`;
+        http:Request request = new;
+        request.setPayload(payload, "application/octet-stream");
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

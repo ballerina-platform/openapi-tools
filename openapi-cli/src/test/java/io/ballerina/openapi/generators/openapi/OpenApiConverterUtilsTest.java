@@ -30,8 +30,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static io.ballerina.openapi.converter.utils.ConverterCommonUtils.unescapeIdentifier;
-import static io.ballerina.openapi.generators.common.TestUtils.getStringFromGivenBalFile;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getStringFromGivenBalFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.compareWithGeneratedFile;
 import static io.ballerina.openapi.generators.openapi.TestUtils.deleteDirectory;
 import static io.ballerina.openapi.generators.openapi.TestUtils.deleteGeneratedFiles;
@@ -65,8 +65,8 @@ public class OpenApiConverterUtilsTest {
         OASContractGenerator openApiConverter = new OASContractGenerator();
         openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, this.tempDir, "/abc",
                 false);
-        Assert.assertFalse(openApiConverter.getErrors().isEmpty());
-        Assert.assertEquals(openApiConverter.getErrors().get(0).getMessage(),
+        Assert.assertFalse(openApiConverter.getDiagnostics().isEmpty());
+        Assert.assertEquals(openApiConverter.getDiagnostics().get(0).getMessage(),
                 "No Ballerina HTTP services found with name '/abc' to generate an OpenAPI specification. " +
                         "These services are available in ballerina file. [/hello, /hello02]");
     }

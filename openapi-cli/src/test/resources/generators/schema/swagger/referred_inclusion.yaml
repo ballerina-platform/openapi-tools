@@ -64,27 +64,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pets"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-    post:
+                $ref: "#/components/schemas/ReferredSimpleType"
+    put:
       summary: Create a pet
       operationId: createPet
       tags:
         - pets
       responses:
-        '201':
-          description: Null response
-        default:
+        '200':
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/Pets"
+        '202':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestPet"
   /pets/{petId}:
     get:
       summary: Info for a specific pet
@@ -100,17 +98,24 @@ paths:
             type: string
       responses:
         '200':
-          description: Expected response to a valid request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pets"
-        default:
           description: unexpected error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /pets/others:
+    get:
+      summary: Info for other pets
+      operationId: showOtherPets
+      tags:
+        - pets
+      responses:
+        '200':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestDog"
   /action:
     x-MULTI:
       operationId: getAction

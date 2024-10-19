@@ -27,7 +27,7 @@ paths:
             type: string
           style: simple
         - in: query
-          name: payment method name
+          name: payment-method-name
           description: Payment Method
           required: true
           schema:
@@ -85,7 +85,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/customer"
+                "$ref": "#/components/schemas/Customer"
           description: Successful response.
 components:
   schemas:
@@ -111,7 +111,7 @@ components:
           type: string
       title: optional_fields_address
       type: object
-    customer:
+    Customer:
       properties:
         address:
           anyOf:

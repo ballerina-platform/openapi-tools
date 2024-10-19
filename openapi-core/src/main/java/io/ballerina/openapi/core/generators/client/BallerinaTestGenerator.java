@@ -50,9 +50,9 @@ import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
-import io.ballerina.openapi.core.GeneratorConstants;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import org.apache.commons.io.IOUtils;
@@ -99,14 +99,14 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.API_KEY;
-import static io.ballerina.openapi.core.GeneratorConstants.API_KEY_CONFIG_PARAM;
-import static io.ballerina.openapi.core.GeneratorConstants.BASIC;
-import static io.ballerina.openapi.core.GeneratorConstants.BEARER;
-import static io.ballerina.openapi.core.GeneratorConstants.CLIENT_CRED;
-import static io.ballerina.openapi.core.GeneratorConstants.CONNECTION_CONFIG;
-import static io.ballerina.openapi.core.GeneratorConstants.PASSWORD;
-import static io.ballerina.openapi.core.GeneratorConstants.REFRESH_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API_KEY;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.API_KEY_CONFIG_PARAM;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BASIC;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.BEARER;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CLIENT_CRED;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.CONNECTION_CONFIG;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PASSWORD;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.REFRESH_TOKEN;
 
 /**
  * This class use for generating boilerplate codes for test cases.
@@ -182,7 +182,7 @@ public class BallerinaTestGenerator {
                 StringBuilder configFileContent = new StringBuilder("[" + API_KEY_CONFIG_PARAM + "]\n");
 
                 for (String apiKey : ballerinaClientGenerator.getApiKeyNameList()) {
-                    configFileContent.append(GeneratorUtils.getValidName(apiKey, false)).
+                    configFileContent.append(GeneratorUtils.escapeIdentifier(apiKey)).
                             append(" = \"<Enter Value>\"\n");
                 }
                 return configFileContent.toString();
@@ -351,7 +351,7 @@ public class BallerinaTestGenerator {
         String serverURL = ballerinaClientGenerator.getServerUrl();
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
+                createIdentifierToken(GeneratorConstants.CLIENT));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                 createIdentifierToken("baseClient"));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(typeBindingPattern,
@@ -374,7 +374,7 @@ public class BallerinaTestGenerator {
         ParenthesizedArgList parenthesizedArgList = createParenthesizedArgList(openParenArg, arguments,
                 closeParenArg);
         TypeDescriptorNode clientClassType = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken
-                (GeneratorConstants.CLIENT_CLASS));
+                (GeneratorConstants.CLIENT));
 
         ExplicitNewExpressionNode explicitNewExpressionNode = createExplicitNewExpressionNode(newKeyWord,
                 clientClassType, parenthesizedArgList);
@@ -395,7 +395,7 @@ public class BallerinaTestGenerator {
         String serverURL = ballerinaClientGenerator.getServerUrl();
         MetadataNode metadataNode = createMetadataNode(null, createEmptyNodeList());
         BuiltinSimpleNameReferenceNode typeBindingPattern = createBuiltinSimpleNameReferenceNode(null,
-                createIdentifierToken(GeneratorConstants.CLIENT_CLASS));
+                createIdentifierToken(GeneratorConstants.CLIENT));
         CaptureBindingPatternNode bindingPattern = createCaptureBindingPatternNode(
                 createIdentifierToken("baseClient"));
         TypedBindingPatternNode typedBindingPatternNode = createTypedBindingPatternNode(typeBindingPattern,
@@ -413,7 +413,7 @@ public class BallerinaTestGenerator {
         ParenthesizedArgList parenthesizedArgList = createParenthesizedArgList(openParenArg, arguments,
                 closeParenArg);
         TypeDescriptorNode clientClassType = createBuiltinSimpleNameReferenceNode(null, createIdentifierToken
-                (GeneratorConstants.CLIENT_CLASS));
+                (GeneratorConstants.CLIENT));
 
         ExplicitNewExpressionNode explicitNewExpressionNode = createExplicitNewExpressionNode(newKeyWord,
                 clientClassType, parenthesizedArgList);

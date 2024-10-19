@@ -39,20 +39,16 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # Returns the comments posted on the track(track_id).
     #
     # + track_id - SoundCloud Track id
-    # + 'limit - Number of results to return in the collection.
-    # + offset - Offset of first result. Deprecated, use `linked_partitioning` instead.
-    # + linked_partitioning - Returns paginated collection of items (recommended, returning a list without pagination is deprecated and should not be used)
-    # # Deprecated parameters
-    # + offset -
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Success
-    remote isolated function getCommentsOnTrack(int track_id, int 'limit = 50, @deprecated int offset = 0, boolean? linked_partitioning = ()) returns Inline_response_200|error {
+    remote isolated function getCommentsOnTrack(int track_id, map<string|string[]> headers = {}, *GetCommentsOnTrackQueries queries) returns inline_response_200|error {
         string resourcePath = string `/tracks/${getEncodedUri(track_id)}/comments`;
-        map<anydata> queryParam = {"limit": 'limit, "offset": offset, "linked_partitioning": linked_partitioning};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Inline_response_200 response = check self.clientEp->get(resourcePath);
-        return response;
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        return self.clientEp->get(resourcePath, headers);
     }
 }

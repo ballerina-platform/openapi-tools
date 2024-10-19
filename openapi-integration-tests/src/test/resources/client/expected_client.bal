@@ -40,7 +40,6 @@ public isolated client class Client {
     # + return - OK
     resource isolated function get users() returns http:Response|error {
         string resourcePath = string `/users`;
-        http:Response response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath);
     }
 }

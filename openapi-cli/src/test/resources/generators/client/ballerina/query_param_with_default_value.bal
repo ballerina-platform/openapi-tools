@@ -11,17 +11,8 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the `connector`
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
-        public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config = {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
-        http:ClientConfiguration httpClientConfig = {
-            httpVersion: config.httpVersion,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            validation: config.validation
-        };
+    public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config =  {}, string serviceUrl = "http://api.openweathermap.org/data/2.5/") returns error? {
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
         do {
             if config.http1Settings is ClientHttp1Settings {
                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
@@ -50,17 +41,15 @@ public isolated client class Client {
     }
     # Provide weather forecast for any geographical coordinates
     #
-    # + lat - Latitude
-    # + lon - Longtitude
-    # + exclude - test
-    # + units - tests
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Successful response
     @display {label: "Weather Forecast"}
-    remote isolated function getWeatherForecast(@display {label: "Latitude"} string lat, @display {label: "Longtitude"} string lon, @display {label: "Exclude"} string exclude = "current", @display {label: "Units"} int units = 12) returns WeatherForecast|error {
+    remote isolated function getWeatherForecast(map<string|string[]> headers = {}, *GetWeatherForecastQueries queries) returns WeatherForecast|error {
         string resourcePath = string `/onecall`;
-        map<anydata> queryParam = {"lat": lat, "lon": lon, "exclude": exclude, "units": units, "appid": self.apiKeyConfig.appid};
+        map<anydata> queryParam = {...queries};
+        queryParam["appid"] = self.apiKeyConfig.appid;
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        WeatherForecast response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
 }

@@ -28,6 +28,8 @@ paths:
           description: NonAuthoritativeInformation
         "204":
           description: NoContent
+        "205":
+          description: ResetContent
         "206":
           description: PartialContent
         "300":
@@ -62,6 +64,8 @@ paths:
           description: NotAcceptable
         "407":
           description: ProxyAuthenticationRequired
+        "408":
+          description: RequestTimeout
         "409":
           description: Conflict
         "410":
@@ -98,4 +102,3 @@ paths:
           description: GatewayTimeout
         "505":
           description: HttpVersionNotSupported
-components: {}

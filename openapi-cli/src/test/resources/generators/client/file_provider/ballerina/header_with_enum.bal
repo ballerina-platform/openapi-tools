@@ -35,14 +35,14 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
+
     # Returns pet inventories by status
     #
+    # + headers - Headers to be sent with the request
     # + return - successful operation
-    remote isolated function getInventory(("X"|"Y"|"Z")[]? xClient = ()) returns json|error {
+    remote isolated function getInventory(GetInventoryHeaders headers = {}) returns record {|int:Signed32...;|}|error {
         string resourcePath = string `/store/inventory`;
-        map<any> headerValues = {"X-CLIENT": xClient};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        json response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+        map<string|string[]> httpHeaders = http:getHeaderMap(headers);
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

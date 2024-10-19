@@ -20,4 +20,3 @@ paths:
             application/swanlake+fake+json:
               schema:
                 type: string
-components: {}

@@ -1,6 +1,15 @@
 openapi: 3.0.1
 info:
   title: Mock File
+  description: API system description
+  termsOfService: http://mock-api-doc
+  contact:
+    name: sumudu
+    url: http://mock-api-contact
+    email: sumudu@abc.com
+  license:
+    name: ABC
+    url: http://abc.com
   version: 0.1.0
 servers:
   - url: "{server}:{port}/titleBase"
@@ -20,4 +29,3 @@ paths:
             text/plain:
               schema:
                 type: string
-components: {}

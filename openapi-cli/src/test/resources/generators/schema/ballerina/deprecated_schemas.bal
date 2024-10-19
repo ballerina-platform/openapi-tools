@@ -1,3 +1,5 @@
+import ballerina/http;
+
 @deprecated
 public type Pets Pet[];
 
@@ -6,6 +8,16 @@ public type Owner record {
     string Name?;
     "admin"|"contributor"|"member"|"owner" Address?;
 };
+
+public type DogCreated record {|
+    *http:Created;
+    Dog body;
+|};
+
+public type ErrorDefault record {|
+    *http:DefaultStatusCodeResponse;
+    Error body;
+|};
 
 public type Error record {
     int code;

@@ -119,6 +119,24 @@ public class RecordTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/union_records_with_interdependency.yaml");
     }
 
+    @Test(description = "Test for rest field in the record")
+    public void testRestFieldInRecord() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/record_rest_param.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_rest_param.yaml");
+    }
+
+    @Test(description = "Test for record with default values")
+    public void testRecordWithDefaultValues() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/record_with_default_values.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_with_default_values.yaml");
+    }
+
+    @Test(description = "Test for record fields with name field annotation")
+    public void testRecordWithNameFieldAnnotation() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/record_field_with_name_annotation.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_field_with_name_annotation.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

@@ -19,8 +19,6 @@
 package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.mime.CustomType;
 import io.ballerina.openapi.core.generators.client.mime.JsonType;
 import io.ballerina.openapi.core.generators.client.mime.MimeType;
@@ -28,17 +26,19 @@ import io.ballerina.openapi.core.generators.client.mime.MultipartFormData;
 import io.ballerina.openapi.core.generators.client.mime.OctetStreamType;
 import io.ballerina.openapi.core.generators.client.mime.UrlEncodedType;
 import io.ballerina.openapi.core.generators.client.mime.XmlType;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 import java.util.Map;
 
-import static io.ballerina.openapi.core.GeneratorConstants.IMAGE;
-import static io.ballerina.openapi.core.GeneratorConstants.PDF;
-import static io.ballerina.openapi.core.GeneratorConstants.TEXT_PREFIX;
-import static io.ballerina.openapi.core.GeneratorConstants.UNSUPPORTED_MEDIA_ERROR;
-import static io.ballerina.openapi.core.GeneratorConstants.VENDOR_SPECIFIC_TYPE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.IMAGE;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PDF;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.TEXT_PREFIX;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_MEDIA_ERROR;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.VENDOR_SPECIFIC_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;

@@ -25,8 +25,8 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.core.GeneratorUtils;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MediaType;
 
@@ -47,9 +47,9 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
-import static io.ballerina.openapi.core.GeneratorConstants.ENCODING;
-import static io.ballerina.openapi.core.GeneratorConstants.STRING;
-import static io.ballerina.openapi.core.GeneratorUtils.createEncodingMap;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENCODING;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.createEncodingMap;
 
 /**
  * Defines the payload structure of "application/x-www-form-urlencoded" mime type.

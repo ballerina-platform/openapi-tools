@@ -15,9 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package io.ballerina.openapi.core.generators.service.model;
 
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 
 /**
@@ -31,14 +32,24 @@ public class OASServiceMetadata {
     private final Filter filters;
     private final boolean nullable;
     private final boolean generateServiceType;
+    private final boolean generateServiceContract;
     private final boolean generateWithoutDataBinding;
+    private final String licenseHeader;
+    private final String srcPackage;
+    private final String srcFile;
+    private final boolean isUsingSanitizedOas;
 
     private OASServiceMetadata(Builder serviceMetadataBuilder) {
         this.openAPI = serviceMetadataBuilder.openAPI;
         this.filters = serviceMetadataBuilder.filters;
         this.nullable = serviceMetadataBuilder.nullable;
         this.generateServiceType = serviceMetadataBuilder.generateServiceType;
+        this.generateServiceContract = serviceMetadataBuilder.generateServiceContract;
         this.generateWithoutDataBinding = serviceMetadataBuilder.generateWithoutDataBinding;
+        this.licenseHeader = serviceMetadataBuilder.licenseHeader;
+        this.srcPackage = serviceMetadataBuilder.srcPackage;
+        this.srcFile = serviceMetadataBuilder.srcFile;
+        this.isUsingSanitizedOas = serviceMetadataBuilder.isUsingSanitizedOas;
     }
 
     public OpenAPI getOpenAPI() {
@@ -57,10 +68,29 @@ public class OASServiceMetadata {
         return generateServiceType;
     }
 
+    public boolean isServiceContractRequired() {
+        return generateServiceContract;
+    }
+
     public boolean generateWithoutDataBinding() {
         return generateWithoutDataBinding;
     }
 
+    public String getLicenseHeader() {
+        return licenseHeader;
+    }
+
+    public String getSrcPackage() {
+        return srcPackage;
+    }
+
+    public String getSrcFile() {
+        return srcFile;
+    }
+
+    public boolean isUsingSanitizedOas() {
+        return isUsingSanitizedOas;
+    }
     /**
      * Service generation meta data builder class.
      */
@@ -71,8 +101,13 @@ public class OASServiceMetadata {
         private boolean nullable = false;
 
         private boolean generateServiceType = false;
+        private boolean generateServiceContract = false;
 
         private boolean generateWithoutDataBinding = false;
+        private String licenseHeader = "";
+        private String srcPackage = "";
+        private String srcFile = "";
+        private boolean isUsingSanitizedOas = false;
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
@@ -94,8 +129,33 @@ public class OASServiceMetadata {
             return this;
         }
 
+        public Builder withGenerateServiceContract(boolean generateServiceContract) {
+            this.generateServiceContract = generateServiceContract;
+            return this;
+        }
+
         public Builder withGenerateWithoutDataBinding(boolean generateWithoutDataBinding) {
             this.generateWithoutDataBinding = generateWithoutDataBinding;
+            return this;
+        }
+
+        public Builder withLicenseHeader(String licenseHeader) {
+            this.licenseHeader = licenseHeader;
+            return this;
+        }
+
+        public Builder withSrcPackage(String srcPackage) {
+            this.srcPackage = srcPackage;
+            return this;
+        }
+
+        public Builder withSrcFile(String srcFile) {
+            this.srcFile = srcFile;
+            return this;
+        }
+
+        public Builder withIsUsingSanitizedOas(boolean isUsingSanitizedOas) {
+            this.isUsingSanitizedOas = isUsingSanitizedOas;
             return this;
         }
 

@@ -35,4 +35,3 @@ paths:
               schema:
                 type: string
                 format: html
-components: {}

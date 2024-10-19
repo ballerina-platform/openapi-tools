@@ -19,7 +19,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Location'
+                $ref: "#/components/schemas/Location"
 components:
   schemas:
     Link:
@@ -50,7 +50,7 @@ components:
         _links:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/Link'
+            $ref: "#/components/schemas/Link"
         name:
           type: object
           additionalProperties:
@@ -67,7 +67,6 @@ components:
             format: float
         item:
           type: object
-          additionalProperties: true
         mapArray:
           type: object
           additionalProperties:
@@ -78,10 +77,10 @@ components:
           type: object
           additionalProperties:
             type: object
-            additionalProperties: true
         arrayItemMap:
           type: array
           items:
             type: object
             additionalProperties:
               type: string
+      additionalProperties: false

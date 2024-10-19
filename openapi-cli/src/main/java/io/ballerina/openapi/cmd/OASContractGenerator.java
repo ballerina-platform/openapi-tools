@@ -20,12 +20,12 @@ package io.ballerina.openapi.cmd;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.converter.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.converter.diagnostic.ExceptionDiagnostic;
-import io.ballerina.openapi.converter.diagnostic.OpenAPIConverterDiagnostic;
-import io.ballerina.openapi.converter.model.OASResult;
-import io.ballerina.openapi.converter.utils.CodegenUtils;
-import io.ballerina.openapi.converter.utils.ServiceToOpenAPIConverterUtils;
+import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
+import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.utils.CodegenUtils;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
@@ -43,9 +43,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
-import static io.ballerina.openapi.converter.utils.CodegenUtils.resolveContractFileName;
+import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveContractFileName;
 
 /**
  * OpenApi related utility classes.
@@ -57,8 +58,9 @@ public class OASContractGenerator {
     private SyntaxTree syntaxTree;
     private SemanticModel semanticModel;
     private Project project;
-    private List<OpenAPIConverterDiagnostic> errors = new ArrayList<>();
+    private List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private PrintStream outStream = System.out;
+    private Boolean ballerinaExtension = false;
 
     /**
      * Initialize constructor.
@@ -67,8 +69,14 @@ public class OASContractGenerator {
 
     }
 
-    public List<OpenAPIConverterDiagnostic> getErrors() {
-        return errors;
+    public void setBallerinaExtension(Boolean ballerinaExtension) {
+        if (Objects.nonNull(ballerinaExtension)) {
+            this.ballerinaExtension = ballerinaExtension;
+        }
+    }
+
+    public List<OpenAPIMapperDiagnostic> getDiagnostics() {
+        return diagnostics;
     }
 
     /**
@@ -108,18 +116,31 @@ public class OASContractGenerator {
                 .diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
         if (hasCompilationErrors || hasErrorsFromCodeGenAndModify) {
-            // if there are any compilation errors, do not proceed
+            // if there are any compilation errors, do not proceed and those diagnostic will display to user
+            outStream.println("openapi contract generation is skipped because of the Ballerina file/package has the" +
+                    " following compilation error(s):");
+            compilation.diagnosticResult().diagnostics().forEach(diagnostic -> {
+                outStream.println(diagnostic.toString());
+            });
             return;
         }
         semanticModel = compilation.getSemanticModel(docId.moduleId());
-        List<OASResult> openAPIDefinitions = ServiceToOpenAPIConverterUtils.generateOAS3Definition(project, syntaxTree,
-                semanticModel, serviceName, needJson, inputPath);
+        List<OASResult> openAPIDefinitions = ServiceToOpenAPIMapper.generateOAS3Definition(project, syntaxTree,
+                semanticModel, serviceName, needJson, inputPath, ballerinaExtension);
 
         if (!openAPIDefinitions.isEmpty()) {
             List<String> fileNames = new ArrayList<>();
             for (OASResult definition : openAPIDefinitions) {
                 try {
-                    this.errors.addAll(definition.getDiagnostics());
+                    List<OpenAPIMapperDiagnostic> definitionDiagnostics = definition.getDiagnostics();
+                    boolean hasErrors = definitionDiagnostics.stream()
+                            .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.getDiagnosticSeverity()));
+                    this.diagnostics.addAll(definition.getDiagnostics());
+                    if (hasErrors) {
+                        outStream.println("openapi contract generation skipped due to the following code generation " +
+                                "error(s):");
+                        return;
+                    }
                     if (definition.getOpenAPI().isPresent()) {
                         Optional<String> content;
                         if (needJson) {
@@ -132,11 +153,9 @@ public class OASContractGenerator {
                         fileNames.add(fileName);
                     }
                 } catch (IOException e) {
-                    DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_108;
-                    ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                            message.getDescription() + e.getLocalizedMessage(),
-                            null);
-                    this.errors.add(error);
+                    ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_108,
+                            e.getLocalizedMessage());
+                    this.diagnostics.add(error);
                 }
             }
             if (fileNames.isEmpty()) {
@@ -148,10 +167,8 @@ public class OASContractGenerator {
                 outStream.println("-- " + iterator.next());
             }
         } else {
-            DiagnosticMessages message = DiagnosticMessages.OAS_CONVERTOR_115;
-            ExceptionDiagnostic error = new ExceptionDiagnostic(message.getCode(),
-                    message.getDescription(), null);
-            this.errors.add(error);
+            ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_115);
+            this.diagnostics.add(error);
         }
     }
 }

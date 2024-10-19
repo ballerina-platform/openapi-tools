@@ -31,6 +31,8 @@ apply plugin: 'jacoco'
 apply plugin: "org.javamodularity.moduleplugin"
 apply from: "$rootDir/gradle/javaProject.gradle"
 
+ext.clientNativeVersion = project.clientNativeVersion
+ext.clientNativePublish = project.clientNativePublish
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
 ext.commonsLang3Version = project.commonsLang3Version
@@ -39,6 +41,7 @@ ext.netLingalaZip4jVersion = project.netLingalaZip4jVersion
 ext.slf4jVersion = project.slf4jVersion
 ext.commonsLang3Version = project.commonsLang3Version
 ext.commonsIoVersion = project.commonsIoVersion
+ext.commonsCodecVersion = project.commonsCodecVersion
 ext.netLingalaZip4jVersion = project.netLingalaZip4jVersion
 ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibLogVersion = project.stdlibLogVersion
@@ -125,7 +128,7 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:oauth2-ballerina:${stdlibOAuth2Version}"
         ballerinaStdLibs "io.ballerina.stdlib:uuid-ballerina:${stdlibUuidVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:url-ballerina:${stdlibUrlVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:xmldata-ballerina:${stdlibXmldataVersion}"
+        ballerinaStdLibs "io.ballerina.lib:data.xmldata-ballerina:${stdlibXmldataVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${observeVersion}"
         ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:graphql-ballerina:${stdlibGraphqlVersion}"
@@ -135,6 +138,17 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:constraint-ballerina:${stdlibConstraintVersion}"
 
     }
+}
+
+task createProperties(dependsOn: processResources) {
+    doLast {
+        def file = new File("$project.rootDir/openapi-cli/src/main/resources/openapi-client-native-version.properties")
+        file.text = "version=${clientNativeVersion}"
+    }
+}
+
+classes {
+    dependsOn createProperties
 }
 
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
@@ -153,6 +167,7 @@ release {
 }
 
 task buildProject {
+    dependsOn(createProperties)
     dependsOn('module-ballerina-openapi:build')
 }
 

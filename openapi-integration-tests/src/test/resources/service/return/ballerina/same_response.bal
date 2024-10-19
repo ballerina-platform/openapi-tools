@@ -1,6 +1,6 @@
- import ballerina/http;
+import ballerina/http;
 
-    public type AcceptedString record {|
-        *http:Accepted;
-        string body;
-    |};
+public type StringAccepted record {|
+    *http:Accepted;
+    string body;
+|};

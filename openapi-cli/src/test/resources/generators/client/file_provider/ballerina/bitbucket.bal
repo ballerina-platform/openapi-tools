@@ -31,8 +31,7 @@ public isolated client class Client {
         string resourcePath = string `/products`;
         map<anydata> queryParam = {"latitude": latitude, "longitude": longitude, server_token: self.apiKeys["server_token"]};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
     # Price Estimates
     #
@@ -45,8 +44,7 @@ public isolated client class Client {
         string resourcePath = string `/estimates/price`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "end_latitude": endLatitude, "end_longitude": endLongitude, server_token: self.apiKeys["server_token"]};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        PriceEstimateArr response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
     # Time Estimates
     #
@@ -59,8 +57,7 @@ public isolated client class Client {
         string resourcePath = string `/estimates/time`;
         map<anydata> queryParam = {"start_latitude": startLatitude, "start_longitude": startLongitude, "customer_uuid": customerUuid, "product_id": productId, server_token: self.apiKeys["server_token"]};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        ProductArr response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
     # User Profile
     #
@@ -69,8 +66,7 @@ public isolated client class Client {
         string resourcePath = string `/me`;
         map<anydata> queryParam = {server_token: self.apiKeys["server_token"]};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Profile response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
     # User Activity
     #
@@ -81,8 +77,7 @@ public isolated client class Client {
         string resourcePath = string `/history`;
         map<anydata> queryParam = {"offset": offset, "limit": 'limit, server_token: self.apiKeys["server_token"]};
         resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Activities response = check self.clientEp-> get(resourcePath);
-        return response;
+        return self.clientEp-> get(resourcePath);
     }
 }
 

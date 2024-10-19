@@ -1,11 +1,12 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -17,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.ballerina.openapi.core.GeneratorUtils.getValidName;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 /**
  * check whether the remote function names generated are matching with ballerina standard.
@@ -32,11 +33,11 @@ public class RemoteFunctionNameValidationTests {
 
     @Test(description = "When path parameter has given unmatch data type in ballerina",
             expectedExceptions = BallerinaOpenApiException.class,
-            expectedExceptionsMessageRegExp = "OpenAPI definition has errors: " +
-                    "\\ROperationId is missing in the resource path: .*")
-    public void testMissionOperationId() throws IOException, BallerinaOpenApiException {
+            expectedExceptionsMessageRegExp = "the configured generation mode requires operation ids for all " +
+                    "operations: \\ROperationId is missing in the resource path: .*", enabled = false)
+    public void testMissingOperationId() throws IOException, BallerinaOpenApiException, ClientException {
         Path definitionPath = RESDIR.resolve("petstore_without_operation_id.yaml");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
@@ -57,7 +58,7 @@ public class RemoteFunctionNameValidationTests {
     public Object[][] dataProvider() {
         return new Object[][]{
                 {"get-pet-name", "getPetName"},
-                {"GET_Add_permission", "gET_Add_permission"},
+                {"GET_Add_Permission", "gETAddPermission"},
                 {"ListBankAccount", "listBankAccount"},
                 {"chat.media.download", "chatMediaDownload"}
         };

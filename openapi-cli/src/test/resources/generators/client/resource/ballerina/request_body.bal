@@ -1,5 +1,5 @@
 import ballerina/http;
-import ballerina/xmldata;
+import ballerina/data.xmldata;
 
 # refComponent
 public isolated client class Client {
@@ -36,78 +36,92 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    # 02 Example for rb has inline requestbody.
-    #
-    # + return - OK
-    resource isolated function put path01(Path01_body payload) returns error? {
-        string resourcePath = string `/path01`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/json");
-        return self.clientEp->put(resourcePath, request);
-    }
+
     # 01 Request body with reference.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    resource isolated function post path01(User payload) returns error? {
+    resource isolated function post path01(User payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/path01`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
-    # 04 Example for rb has inline requestbody.
-    #
-    # + payload - A JSON object containing pet information
-    # + return - OK
-    resource isolated function put path02(User payload) returns error? {
-        string resourcePath = string `/path02`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        request.setPayload(jsonBody, "application/json");
-        return self.clientEp->put(resourcePath, request);
-    }
+
     # 03 Request body with record reference.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    resource isolated function post path02(User[] payload) returns error? {
+    resource isolated function post path02(User[] payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/path02`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         request.setPayload(jsonBody, "application/json");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
-    # 06 Example for rb has array inline requestbody.
-    #
-    # + return - OK
-    resource isolated function put path03(Path03_body payload) returns error? {
-        string resourcePath = string `/path03`;
-        http:Request request = new;
-        json jsonBody = payload.toJson();
-        xml? xmlBody = check xmldata:fromJson(jsonBody);
-        request.setPayload(xmlBody, "application/xml");
-        return self.clientEp->put(resourcePath, request);
-    }
+
     # 05 Example for rb has array inline requestbody.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    resource isolated function post path03(Path03_body_1 payload) returns error? {
+    resource isolated function post path03(path03_body_1 payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/path03`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
+
     # 07 Example for rb has array inline requestbody.
     #
+    # + headers - Headers to be sent with the request
     # + return - OK
-    resource isolated function post path04(Path04_body[] payload) returns error? {
+    resource isolated function post path04(path04_body[] payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/path04`;
         http:Request request = new;
         json jsonBody = payload.toJson();
         xml? xmlBody = check xmldata:fromJson(jsonBody);
         request.setPayload(xmlBody, "application/xml");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
+    }
+
+    # 02 Example for rb has inline requestbody.
+    #
+    # + headers - Headers to be sent with the request
+    # + return - OK
+    resource isolated function put path01(path01_body payload, map<string|string[]> headers = {}) returns error? {
+        string resourcePath = string `/path01`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/json");
+        return self.clientEp->put(resourcePath, request, headers);
+    }
+
+    # 04 Example for rb has inline requestbody.
+    #
+    # + headers - Headers to be sent with the request
+    # + payload - A JSON object containing pet information
+    # + return - OK
+    resource isolated function put path02(User payload, map<string|string[]> headers = {}) returns error? {
+        string resourcePath = string `/path02`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        request.setPayload(jsonBody, "application/json");
+        return self.clientEp->put(resourcePath, request, headers);
+    }
+
+    # 06 Example for rb has array inline requestbody.
+    #
+    # + headers - Headers to be sent with the request
+    # + return - OK
+    resource isolated function put path03(path03_body payload, map<string|string[]> headers = {}) returns error? {
+        string resourcePath = string `/path03`;
+        http:Request request = new;
+        json jsonBody = payload.toJson();
+        xml? xmlBody = check xmldata:fromJson(jsonBody);
+        request.setPayload(xmlBody, "application/xml");
+        return self.clientEp->put(resourcePath, request, headers);
     }
 }

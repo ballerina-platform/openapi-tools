@@ -35,13 +35,12 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    #
     # + version - test
     # + name - test
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function pathParameter(int version, string name) returns string|error {
+    remote isolated function pathParameter(int version, string name, map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
 }

@@ -1,3 +1,4 @@
+name: Add Reason Labels
 on:
   issues:
     types: [closed]

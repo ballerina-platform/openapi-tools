@@ -10,23 +10,23 @@ service /v1 on ep0 {
     #
     # + 'limit - How many items to return at one time (max 100)
     # + return - returns can be any of following types
-    # Pets (An paged array of pets)
-    # http:Response (unexpected error)
-    resource function get pets(int? 'limit) returns Pets|http:Response {
-    }
-    # Create a pet
-    #
-    # + return - returns can be any of following types
-    # http:Created (Null response)
-    # http:Response (unexpected error)
-    resource function post pets() returns http:Created|http:Response {
+    # http:Ok (An paged array of pets)
+    # http:StatusCodeResponse (unexpected error)
+    resource function get pets(int? 'limit) returns Pets|ErrorDefault {
     }
     # Info for a specific pet
     #
     # + petId - The id of the pet to retrieve
     # + return - returns can be any of following types
-    # Pets (Expected response to a valid request)
-    # http:Response (unexpected error)
-    resource function get pets/[string petId]() returns Pets|http:Response {
+    # http:Ok (Expected response to a valid request)
+    # http:StatusCodeResponse (unexpected error)
+    resource function get pets/[string petId]() returns Dog|ErrorDefault {
+    }
+    # Create a pet
+    #
+    # + return - returns can be any of following types
+    # http:Created (Null response)
+    # http:StatusCodeResponse (unexpected error)
+    resource function post pets() returns http:Created|ErrorDefault {
     }
 }

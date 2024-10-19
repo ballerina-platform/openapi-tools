@@ -6,4 +6,3 @@ servers:
   - url: http://petstore.openapi.io
 paths:
   /user: {}
-components: {}

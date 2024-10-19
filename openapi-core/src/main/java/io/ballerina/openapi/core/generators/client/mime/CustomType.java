@@ -19,7 +19,7 @@
 package io.ballerina.openapi.core.generators.client.mime;
 
 import io.ballerina.compiler.syntax.tree.StatementNode;
-import io.ballerina.openapi.core.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.swagger.v3.oas.models.media.MediaType;
 
 import java.util.List;

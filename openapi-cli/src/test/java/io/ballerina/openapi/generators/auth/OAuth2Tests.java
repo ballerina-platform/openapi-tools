@@ -19,10 +19,13 @@
 package io.ballerina.openapi.generators.auth;
 
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
-import io.ballerina.openapi.core.GeneratorUtils;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.core.generators.client.BallerinaAuthConfigGenerator;
+import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.generators.common.TestConstants;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -36,6 +39,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * All the tests related to the auth related code snippet generation for http or oauth 2.0 mechanisms.
@@ -46,13 +50,13 @@ public class OAuth2Tests {
     @Test(description = "Generate config record for OAuth 2.0 authorization code flow",
             dataProvider = "oAuth2IOProvider")
     public void testGetConfigRecord(String yamlFile, String configRecord) throws IOException,
-            BallerinaOpenApiException {
-        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
+            BallerinaOpenApiException, ClientException {
+        AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(false,
                 true);
         Path definitionPath = RES_DIR.resolve("scenarios/oauth2/" + yamlFile);
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         Map<String, SecurityScheme> securitySchemeMap = openAPI.getComponents().getSecuritySchemes();
-        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap);
+        ballerinaAuthConfigGenerator.setAuthTypes(securitySchemeMap, openAPI);
         String expectedConfigRecord = configRecord;
         String generatedConfigRecord = Objects.requireNonNull(
                 ballerinaAuthConfigGenerator.generateConnectionConfigRecord()).toString();
@@ -65,12 +69,11 @@ public class OAuth2Tests {
     @Test(description = "Test the generation of Config params in class init function signature",
             dependsOnMethods = {"testGetConfigRecord"})
     public void testGetConfigParamForClassInit() {
-        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
+        AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(false,
                 true);
         String expectedParams = TestConstants.HTTP_CLIENT_CONFIG_PARAM;
         StringBuilder generatedParams = new StringBuilder();
-        List<Node> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit(
-                "https:localhost/8080");
+        List<ParameterNode> generatedInitParamNodes = ballerinaAuthConfigGenerator.getConfigParamForClassInit();
         for (Node param: generatedInitParamNodes) {
             generatedParams.append(param.toString());
         }
@@ -82,13 +85,38 @@ public class OAuth2Tests {
     @Test(description = "Test the generation of http:Client init node",
             dependsOnMethods = {"testGetConfigRecord"})
     public void testGetClientInitializationNode() {
-        BallerinaAuthConfigGenerator ballerinaAuthConfigGenerator = new BallerinaAuthConfigGenerator(false,
+        AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(false,
                 true);
         String expectedParam = TestConstants.HTTP_CLIENT_DECLARATION;
         VariableDeclarationNode generatedInitParamNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
         String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedParam, generatedParamsStr);
+    }
+
+    @Test(description = "Generate OAuth2Record record for openweathermap api")
+    public void testOAuth2ConfigRecordWithRelativeUrl() throws IOException,
+            BallerinaOpenApiException, ClientException {
+        Path definitionPath = RES_DIR.resolve(
+                "scenarios/oauth2/oauth2_client_credential_with_relative_token_url.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(true, false);
+        ballerinaAuthConfigGenerator.addAuthRelatedRecords(openAPI);
+        List<TypeDefinitionNode> authRelatedTypeDefinitionNodes =
+                ballerinaAuthConfigGenerator.getAuthRelatedTypeDefinitionNodes();
+        Optional<TypeDefinitionNode> connectionConfig = authRelatedTypeDefinitionNodes.stream()
+                .filter(typeDefinitionNode -> typeDefinitionNode.typeName()
+                        .text().equals("OAuth2ClientCredentialsGrantConfig"))
+                .findFirst();
+        if (connectionConfig.isPresent()) {
+            String expectedRecord = TestConstants.OAUTH2_REFRESH_TOKEN_GRANT_CONFIG_RECORD;
+            String generatedRecord = connectionConfig.get().toString();
+            generatedRecord = (generatedRecord.trim()).replaceAll("\\s+", "");
+            expectedRecord = (expectedRecord.trim()).replaceAll("\\s+", "");
+            Assert.assertEquals(generatedRecord, expectedRecord);
+        } else {
+            Assert.fail();
+        }
     }
 
     @DataProvider(name = "oAuth2IOProvider")

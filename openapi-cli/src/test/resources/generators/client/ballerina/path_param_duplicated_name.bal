@@ -34,13 +34,13 @@ public isolated client class Client {
         self.clientEp = httpEp;
         return;
     }
-    #
+
     # + version - Version Id
-    # + versionName - Version Name
+    # + version\-name - Version Name
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    remote isolated function operationId04(int version, string versionName) returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(version)}/version-name/${getEncodedUri(versionName)}`;
-        string response = check self.clientEp-> get(resourcePath);
-        return response;
+    remote isolated function operationId04(int version, string version\-name, map<string|string[]> headers = {}) returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/version-name/${getEncodedUri(version\-name)}`;
+        return self.clientEp->get(resourcePath, headers);
     }
 }

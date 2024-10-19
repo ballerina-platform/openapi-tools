@@ -18,42 +18,45 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/MeetingGroup'
+            $ref: "#/components/schemas/MeetingGroup"
         - name: x-date-required
           in: header
           required: true
           schema:
-            $ref: '#/components/schemas/DateFormat'
+            $ref: "#/components/schemas/DateFormat"
         - name: x-date-optional
           in: header
           schema:
-            $ref: '#/components/schemas/DateFormat'
+            nullable: true
+            allOf:
+              - $ref: "#/components/schemas/DateFormat"
         - name: x-required-arr
           in: header
           required: true
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/TimeZone'
+              $ref: "#/components/schemas/TimeZone"
         - name: x-optional-arr
           in: header
           schema:
             type: array
+            nullable: true
             items:
-              $ref: '#/components/schemas/TimeZone'
+              $ref: "#/components/schemas/TimeZone"
         - name: x-def-arr
           in: header
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/DateFormat'
+              $ref: "#/components/schemas/DateFormat"
             default:
               - UTC
         - name: x-def-header
           in: header
           schema:
             allOf:
-              - $ref: '#/components/schemas/DateFormat'
+              - $ref: "#/components/schemas/DateFormat"
             default: UTC
       responses:
         "200":
@@ -61,24 +64,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeetingList'
+                $ref: "#/components/schemas/MeetingList"
         "404":
           description: NotFound
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
-    TimeZone:
-      type: string
-      enum:
-        - UTC
-        - GMT
-        - IST
-    Meeting:
-      required:
-        - topic
-      type: object
-      properties:
-        topic:
-          type: string
     DateFormat:
       type: string
       enum:
@@ -86,6 +82,42 @@ components:
         - OFFSET
         - LOCAL
         - UTC
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Meeting:
+      required:
+        - topic
+      type: object
+      properties:
+        topic:
+          type: string
+    MeetingGroup:
+      type: string
+      enum:
+        - ENGINEERING
+        - HR
+        - ADMIN
     MeetingList:
       required:
         - meetings
@@ -94,10 +126,10 @@ components:
         meetings:
           type: array
           items:
-            $ref: '#/components/schemas/Meeting'
-    MeetingGroup:
+            $ref: "#/components/schemas/Meeting"
+    TimeZone:
       type: string
       enum:
-        - ENGINEERING
-        - HR
-        - ADMIN
+        - UTC
+        - GMT
+        - IST

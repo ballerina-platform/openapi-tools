@@ -36,16 +36,15 @@ public isolated client class Client {
     }
     # List all pets
     #
-    # + 'limit - How many items to return at one time (max 100)
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + payload - Pet
-    # + return -  Return json
-    remote isolated function listPets(json payload, int? 'limit = ()) returns json|error {
+    # + return - Return json
+    remote isolated function listPets(json payload, map<string|string[]> headers = {}, *ListPetsQueries queries) returns json|error {
         string resourcePath = string `/pets`;
-        map<anydata> queryParam = {"limit": 'limit};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
         http:Request request = new;
         request.setPayload(payload, "application/json");
-        json response = check self.clientEp->post(resourcePath, request);
-        return response;
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

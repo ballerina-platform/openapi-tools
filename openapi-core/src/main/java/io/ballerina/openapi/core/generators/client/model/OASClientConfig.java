@@ -17,8 +17,10 @@
  */
 package io.ballerina.openapi.core.generators.client.model;
 
-import io.ballerina.openapi.core.model.Filter;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
+
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DO_NOT_MODIFY_FILE_HEADER;
 
 /**
  * This class stores metadata that related to client code generations.
@@ -27,26 +29,36 @@ import io.swagger.v3.oas.models.OpenAPI;
  */
 public class OASClientConfig {
     private final OpenAPI openAPI;
-    private final Filter filters;
+    private final Filter filter;
     private final boolean nullable;
     private final boolean resourceMode;
     private final boolean isPlugin;
+    private final String license;
+    private final boolean statusCodeBinding;
+    private final boolean isMock;
+    private final boolean singleFile;
+    private final boolean isUsingSanitizedOas;
 
 
     private OASClientConfig(Builder clientConfigBuilder) {
         this.openAPI = clientConfigBuilder.openAPI;
-        this.filters = clientConfigBuilder.filters;
+        this.filter = clientConfigBuilder.filter;
         this.nullable = clientConfigBuilder.nullable;
         this.isPlugin = clientConfigBuilder.isPlugin;
         this.resourceMode = clientConfigBuilder.resourceMode;
+        this.license = clientConfigBuilder.license;
+        this.statusCodeBinding = clientConfigBuilder.statusCodeBinding;
+        this.isMock = clientConfigBuilder.isMock;
+        this.singleFile = clientConfigBuilder.singleFile;
+        this.isUsingSanitizedOas = clientConfigBuilder.isUsingSanitizedOas;
     }
 
     public OpenAPI getOpenAPI() {
         return openAPI;
     }
 
-    public Filter getFilters() {
-        return filters;
+    public Filter getFilter() {
+        return filter;
     }
 
     public boolean isNullable() {
@@ -60,24 +72,47 @@ public class OASClientConfig {
     public boolean isPlugin() {
         return isPlugin;
     }
+    public String getLicense() {
+        return license;
+    }
+    public boolean isStatusCodeBinding() {
+        return statusCodeBinding;
+    }
+
+    public boolean isMock() {
+        return isMock;
+    }
+
+    public boolean singleFile() {
+        return singleFile;
+    }
+
+    public boolean isUsingSanitizedOas() {
+        return isUsingSanitizedOas;
+    }
 
     /**
      * Client IDL plugin meta data builder class.
      */
     public static class Builder {
         private OpenAPI openAPI;
-        private Filter filters;
+        private Filter filter = new Filter();
         private boolean nullable = false;
         private boolean resourceMode = true;
         private boolean isPlugin = false;
+        private String license = DO_NOT_MODIFY_FILE_HEADER;
+        private boolean statusCodeBinding = false;
+        private boolean isMock = false;
+        private boolean singleFile = false;
+        private boolean isUsingSanitizedOas = false;
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
             return this;
         }
 
-        public Builder withFilters(Filter filters) {
-            this.filters = filters;
+        public Builder withFilters(Filter filter) {
+            this.filter = filter;
             return this;
         }
 
@@ -93,6 +128,31 @@ public class OASClientConfig {
 
         public Builder withPlugin(boolean isPlugin) {
             this.isPlugin = isPlugin;
+            return this;
+        }
+
+        public Builder withLicense(String license) {
+            this.license = license;
+            return this;
+        }
+
+        public Builder withStatusCodeBinding(boolean statusCodeBinding) {
+            this.statusCodeBinding = statusCodeBinding;
+            return this;
+        }
+
+        public Builder withMock(boolean isMock) {
+            this.isMock = isMock;
+            return this;
+        }
+
+        public Builder withSingleFile(boolean singleFile) {
+            this.singleFile = singleFile;
+            return this;
+        }
+
+        public Builder withIsUsingSanitizedOas(boolean isUsingSanitizedOas) {
+            this.isUsingSanitizedOas = isUsingSanitizedOas;
             return this;
         }
 

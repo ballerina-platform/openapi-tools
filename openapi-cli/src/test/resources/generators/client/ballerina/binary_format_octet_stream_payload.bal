@@ -36,12 +36,12 @@ public isolated client class Client {
     }
     # Create a pet
     #
+    # + headers - Headers to be sent with the request
     # + return - Null response
-    remote isolated function createPet(byte[] payload) returns error? {
+    remote isolated function createPet(byte[] payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/pets`;
         http:Request request = new;
         request.setPayload(payload, "application/octet-stream");
-        return self.clientEp->post(resourcePath, request);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }
-

@@ -38,23 +38,20 @@ public isolated client class Client {
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
         return;
     }
+
     # Gets the events for the fine-tune job specified by the given fine-tune-id.
     # Events are created when the job status changes, e.g. running or complete, and when results are uploaded.
     #
-    # + fineTuneId - The identifier of the fine-tune job.
-    # + 'stream - A flag indicating whether to stream events for the fine-tune job. If set to true,
-    # events will be sent as data-only server-sent events as they become available. The stream will terminate with
-    # a data: [DONE] message when the job is finished (succeeded, cancelled, or failed).
-    # If set to false, only events generated so far will be returned..
-    # + apiVersion - The requested API version.
+    # + fine\-tune\-id - The identifier of the fine-tune job.
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Success
-    remote isolated function fineTunes_GetEvents(string fineTuneId, string apiVersion, boolean? 'stream = ()) returns EventList|error {
-        string resourcePath = string `/fine-tunes/${getEncodedUri(fineTuneId)}/events`;
-        map<anydata> queryParam = {"stream": 'stream, "api-version": apiVersion};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        map<any> headerValues = {"api-key": self.apiKeyConfig.apiKey};
-        map<string|string[]> httpHeaders = getMapForHeaders(headerValues);
-        EventList response = check self.clientEp->get(resourcePath, httpHeaders);
-        return response;
+    remote isolated function fineTunesGetEvents(string fine\-tune\-id, map<string|string[]> headers = {}, *FineTunesGetEventsQueries queries) returns EventList|error {
+        string resourcePath = string `/fine-tunes/${getEncodedUri(fine\-tune\-id)}/events`;
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        map<anydata> headerValues = {...headers};
+        headerValues["api-key"] = self.apiKeyConfig.api\-key;
+        map<string|string[]> httpHeaders = http:getHeaderMap(headerValues);
+        return self.clientEp->get(resourcePath, httpHeaders);
     }
 }

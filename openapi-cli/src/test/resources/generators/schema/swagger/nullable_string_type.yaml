@@ -61,14 +61,6 @@ paths:
           content:
             application/json:
               schema: {}
-        404:
-          description: Not found response
-          content:
-            text/plain:
-              schema:
-                title: Weather not found
-                type: string
-                example: Not found
 
 security:
   - app_id: []

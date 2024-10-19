@@ -36,63 +36,55 @@ public isolated client class Client {
     }
     # op1
     #
+    # + headers - Headers to be sent with the request
     # + return - Ok
-    resource isolated function get .() returns string|error {
+    resource isolated function get .(map<string|string[]> headers = {}) returns string|error {
         string resourcePath = string `/`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    #
-    # + return - Ok
-    resource isolated function post .() returns string|error {
-        string resourcePath = string `/`;
-        http:Request request = new;
-        string response = check self.clientEp-> post(resourcePath, request);
-        return response;
-    }
-    # op2
-    #
-    # + id - id value
-    # + return - Ok
-    resource isolated function get v1/[int id]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(id)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    #
-    # + return - Ok
-    resource isolated function get v1/[int version]/v2/[string name]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    #
-    # + return - Ok
-    resource isolated function get v1/[int version]/v2/[int 'limit]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri('limit)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    #
-    # + return - Ok
-    resource isolated function get v1/[int age]/v2/[string name]() returns string|error {
-        string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
-        string response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
     }
     # Retrieves a single customer.
     #
     # + customer_id - Customer ID
-    # + fields - Show only certain fields, specified by a comma-separated list of field names.
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - Requested customer
-    resource isolated function get admin/api/'2021\-10/customers/[string customer_idJson](string? fields = ()) returns error? {
-        if !customer_idJson.endsWith(".json") {
-            return error("bad URL");
-        }
-        string customer_id = customer_idJson.substring(0, customer_idJson.length() - 4);
-        string resourcePath = string `/admin/api/2021-10/customers/${getEncodedUri(customer_id)}.json`;
-        map<anydata> queryParam = {"fields": fields};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        return self.clientEp->get(resourcePath);
+    resource isolated function get admin/api/'2021\-10/customers/[string customer_id](map<string|string[]> headers = {}, *GetCustomerQueries queries) returns error? {
+        string resourcePath = string `/admin/api/2021-10/customers/${getEncodedUri(customer_id)}`;
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        return self.clientEp->get(resourcePath, headers);
+    }
+    # + headers - Headers to be sent with the request
+    # + return - Ok
+    resource isolated function get v1/[int age]/v2/[string name](map<string|string[]> headers = {}) returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(age)}/v2/${getEncodedUri(name)}`;
+        return self.clientEp->get(resourcePath, headers);
+    }
+    # op2
+    #
+    # + id - id value
+    # + headers - Headers to be sent with the request
+    # + return - Ok
+    resource isolated function get v1/[int id](map<string|string[]> headers = {}) returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(id)}`;
+        return self.clientEp->get(resourcePath, headers);
+    }
+    # + headers - Headers to be sent with the request
+    # + return - Ok
+    resource isolated function get v1/[int version]/v2/[int 'limit](map<string|string[]> headers = {}) returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri('limit)}`;
+        return self.clientEp->get(resourcePath, headers);
+    }
+    # + headers - Headers to be sent with the request
+    # + return - Ok
+    resource isolated function get v1/[int version]/v2/[string name](map<string|string[]> headers = {}) returns string|error {
+        string resourcePath = string `/v1/${getEncodedUri(version)}/v2/${getEncodedUri(name)}`;
+        return self.clientEp->get(resourcePath, headers);
+    }
+    # + headers - Headers to be sent with the request
+    # + return - Ok
+    resource isolated function post .(map<string|string[]> headers = {}) returns string|error {
+        string resourcePath = string `/`;
+        http:Request request = new;
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

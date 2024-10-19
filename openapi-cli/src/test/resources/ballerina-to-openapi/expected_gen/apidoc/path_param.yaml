@@ -26,4 +26,3 @@ paths:
           description: Accepted
         "400":
           description: BadRequest
-components: {}

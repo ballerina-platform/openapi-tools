@@ -6,6 +6,6 @@ service /v1 on ep0 {
     # Creates a new pets.
     #
     # + return - A User object
-    resource function post pets() returns BadRequestInline_response_400 {
+    resource function post pets() returns InlineResponse400BadRequest {
     }
 }

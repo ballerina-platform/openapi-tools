@@ -20,10 +20,22 @@ paths:
         "200":
           description: An array of products
           content:
-            application/xml:
+            application/json:
               schema:
-                type: array
-                items: {}
+                $ref: "#/components/schemas/Subject"
+    put:
+      summary: Product Types
+      operationId: putProducts
+      description: The Products endpoint
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Activities"
 components:
   schemas:
     Profile:

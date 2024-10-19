@@ -10,7 +10,8 @@ public isolated client class Client {
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
     public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "https://petstore.swagger.io:443/v2") returns error? {
-          http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};        do {
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
+        do {
             if config.http1Settings is ClientHttp1Settings {
                 ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
                 httpClientConfig.http1Settings = {...settings};
@@ -37,31 +38,30 @@ public isolated client class Client {
     }
     # List all pets
     #
-    # + 'limit - How many items to return at one time (max 100)
+    # + headers - Headers to be sent with the request
+    # + queries - Queries to be sent with the request
     # + return - An paged array of pets
-    resource isolated function get pets(int? 'limit = ()) returns Pets|error {
+    resource isolated function get pets(map<string|string[]> headers = {}, *ListPetsQueries queries) returns Pets|error {
         string resourcePath = string `/pets`;
-        map<anydata> queryParam = {"limit": 'limit};
-        resourcePath = resourcePath + check getPathForQueryParam(queryParam);
-        Pets response = check self.clientEp->get(resourcePath);
-        return response;
-    }
-    # Create a pet
-    #
-    # + return - Null response
-    resource isolated function post pets() returns http:Response|error {
-        string resourcePath = string `/pets`;
-        http:Request request = new;
-        http:Response response = check self.clientEp-> post(resourcePath, request);
-        return response;
+        resourcePath = resourcePath + check getPathForQueryParam(queries);
+        return self.clientEp->get(resourcePath, headers);
     }
     # Info for a specific pet
     #
     # + petId - The id of the pet to retrieve
+    # + headers - Headers to be sent with the request
     # + return - Expected response to a valid request
-    resource isolated function get pets/[string petId]() returns Pets|error {
+    resource isolated function get pets/[string petId](map<string|string[]> headers = {}) returns Dog|error {
         string resourcePath = string `/pets/${getEncodedUri(petId)}`;
-        Pets response = check self.clientEp->get(resourcePath);
-        return response;
+        return self.clientEp->get(resourcePath, headers);
+    }
+    # Create a pet
+    #
+    # + headers - Headers to be sent with the request
+    # + return - Null response
+    resource isolated function post pets(map<string|string[]> headers = {}) returns http:Response|error {
+        string resourcePath = string `/pets`;
+        http:Request request = new;
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

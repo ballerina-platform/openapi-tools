@@ -1,13 +1,7 @@
 import ballerina/constraint;
+import ballerina/http;
 
-public type Customers_customer_body record {
-    # The customer's address.
-    Customer_address|string? address?;
-    # An integer amount in %s that represents the customer's current balance, which affect the customer's future invoices. A negative amount represents a credit that decreases the amount due on an invoice; a positive amount increases the amount due on an invoice.
-    int balance?;
-};
-
-public type Customer_address record {
+public type customer_address record {
     @constraint:String {maxLength: 5000}
     string city?;
     @constraint:String {maxLength: 5000}
@@ -22,8 +16,20 @@ public type Customer_address record {
     string state?;
 };
 
-public type Customer record {
+public type CustomerOk record {|
+    *http:Ok;
+    customer body;
+|};
+
+public type customers_customer_body record {
     # The customer's address.
-    Customer_address? address?;
+    customer_address|string? address?;
+    # An integer amount in %s that represents the customer's current balance, which affect the customer's future invoices. A negative amount represents a credit that decreases the amount due on an invoice; a positive amount increases the amount due on an invoice.
+    int balance?;
+};
+
+public type customer record {
+    # The customer's address.
+    customer_address? address?;
     string name?;
 };

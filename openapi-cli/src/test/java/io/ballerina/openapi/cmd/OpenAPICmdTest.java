@@ -17,10 +17,9 @@
  */
 package io.ballerina.openapi.cmd;
 
-import io.ballerina.cli.launcher.BLauncherException;
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.openapi.core.exception.BallerinaOpenApiException;
-import io.ballerina.openapi.generators.common.TestUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
@@ -29,8 +28,10 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import picocli.CommandLine;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,10 +44,14 @@ import java.util.stream.Stream;
 public class OpenAPICmdTest extends OpenAPICommandTest {
 
     private static final String LINE_SEPARATOR = System.lineSeparator();
+    private final PrintStream standardOut = System.out;
+    private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
 
     @BeforeTest(description = "This will create a new ballerina project for testing below scenarios.")
     public void setupBallerinaProject() throws IOException {
         super.setup();
+        System.setOut(new PrintStream(outputStream));
     }
 
     @Test(description = "Test openapi command with help flag")
@@ -81,14 +86,15 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "       ballerina-openapi - Generate a Ballerina service"));
     }
 
-    @Test(description = "Test openapi gen-service without openapi contract file")
+    @Test(description = "Test openapi gen-service without openapi contract file",
+    expectedExceptions = {CommandLine.MissingParameterException.class})
     public void testWithoutOpenApiContract() throws IOException {
         String[] args = {"--input"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("An OpenAPI definition path is required to generate the service."));
+        Assert.assertTrue(output.contains("Missing required parameter for option '--input' (<inputPath>)"));
     }
 
     @Test(description = "Test openapi gen-service for successful service generation")
@@ -457,11 +463,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         String[] args = {"--input", petstoreYaml.toString(), "-o", this.tmpDir.toString()};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
-        try {
-            cmd.execute();
-        } catch (BLauncherException e) {
-        }
-        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema.bal"));
+        cmd.execute();
+        Path expectedSchemaFile = resourceDir.resolve(Paths.get("expected_gen", "petstore_schema_2.bal"));
         String expectedSchemaContent = "";
         try (Stream<String> expectedSchemaLines = Files.lines(expectedSchemaFile)) {
             expectedSchemaContent = expectedSchemaLines.collect(Collectors.joining(LINE_SEPARATOR));
@@ -487,6 +490,139 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 Assert.fail("Expected content and actual generated content is mismatched for: "
                         + petstoreYaml.toString());
                 deleteGeneratedFiles(false);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi service generation for single file option")
+    public void testSingleFileServiceGeneration() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode",
+                "service", "--single-file"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_service.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles("jira_openapi_service.bal", false);
+            if (!expectedFileContent.equals(generatedFile)) {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi service generation for single file option with service type")
+    public void testSingleFileServiceGenerationWithServiceType() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "service",
+                "--single-file", "--with-service-type"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_service_with_type.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles("jira_openapi_service.bal", false);
+            if (!expectedFileContent.equals(generatedFile)) {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi service generation for single file option with service type without data binding")
+    public void testSingleFileServiceGenerationWithoutDatabinding() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "service",
+                "--single-file", "--with-service-type", "--without-data-binding"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen",
+                "jira_openapi_service_with_type_without_data_binding.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("jira_openapi_service.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles("jira_openapi_service.bal", false);
+            if (!expectedFileContent.equals(generatedFile)) {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
+            }
+        } else {
+            Assert.fail("Service generation failed. : " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi client generation for single file option")
+    public void testSingleFileClientGeneration() throws IOException {
+        Path jiraYaml = resourceDir.resolve(Paths.get("jira_openapi.yaml"));
+        String[] args = {"--input", jiraYaml.toString(), "-o", this.tmpDir.toString(), "--mode", "client",
+                "--single-file"};
+        OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Path expectedFile = resourceDir.resolve(Paths.get("expected_gen", "jira_openapi_client.bal"));
+        String expectedFileContent = "";
+        try (Stream<String> expectedLines = Files.lines(expectedFile)) {
+            expectedFileContent = expectedLines.collect(Collectors.joining(LINE_SEPARATOR));
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+        if (Files.exists(this.tmpDir.resolve("client.bal"))) {
+            String generatedFile = "";
+            try (Stream<String> generatedLines = Files.lines(this.tmpDir.resolve("client.bal"))) {
+                generatedFile = generatedLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+            generatedFile = (generatedFile.trim()).replaceAll("\\s+", "");
+            expectedFileContent = (expectedFileContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles("", false);
+            if (!expectedFileContent.equals(generatedFile)) {
+                Assert.fail("Expected content and actual generated content is mismatched for: " + jiraYaml);
             }
         } else {
             Assert.fail("Service generation failed. : " + readOutput(true));
@@ -556,7 +692,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             generatedService = (generatedService.trim()).replaceAll("\\s+", "");
             expectedServiceContent = (expectedServiceContent.trim()).replaceAll("\\s+", "");
             if (expectedServiceContent.equals(generatedService)) {
-                SemanticModel semanticModel = TestUtils.getSemanticModel(
+                SemanticModel semanticModel = GeneratorTestUtils.getSemanticModel(
                         projectDir.resolve("petstore_service.bal"));
                 boolean hasErrors = semanticModel.diagnostics().stream()
                         .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
@@ -576,7 +712,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
     @Test(description = "Test for service generation with yaml contract without operationID")
     public void testForYamlContractWithoutOperationID() throws IOException {
         Path yamlContract = resourceDir.resolve(Paths.get("without_operationID.yaml"));
-        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode",
+                "service"};
         OpenApiCmd cmd = new OpenApiCmd(printStream, tmpDir, false);
         new CommandLine(cmd).parseArgs(args);
         cmd.execute();
@@ -602,6 +739,27 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         clientFile.delete();
         schemaFile.delete();
         testFile.delete();
+        if (isConfigGenerated) {
+            File configFile = new File(this.tmpDir.resolve("tests/Config.toml").toString());
+            configFile.delete();
+        }
+        FileUtils.deleteDirectory(testDir);
+    }
+
+    private void deleteGeneratedFiles(String filename, boolean isConfigGenerated) throws IOException {
+        File serviceFile = new File(this.tmpDir.resolve(filename).toString());
+        File clientFile = new File(this.tmpDir.resolve("client.bal").toString());
+        File testFile = new File(this.tmpDir.resolve("tests/test.bal").toString());
+        File testDir = new File(this.tmpDir.resolve("tests").toString());
+        if (serviceFile.exists()) {
+            serviceFile.delete();
+        }
+        if (clientFile.exists()) {
+            clientFile.delete();
+        }
+        if (testFile.exists()) {
+            testFile.delete();
+        }
         if (isConfigGenerated) {
             File configFile = new File(this.tmpDir.resolve("tests/Config.toml").toString());
             configFile.delete();
@@ -650,9 +808,329 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 equals("..\\..\\dir2\\dir3\\dir4\\test.txt"));
     }
 
+    @Test(description = "service generation for the parameterized path in OAS")
+    public void testForComplexPathInService() {
+        Path yamlContract = resourceDir.resolve(Paths.get("complexPath.yaml"));
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "service"};
+        OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        String expectedOutput = "service generation can not be done as the" +
+                " openapi definition contain following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
+                "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
+                "'{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})";
+
+        Assert.assertTrue(outputStream.toString().contains(expectedOutput));
+    }
+
+    @Test(description = "service type generation for the parameterized path in OAS")
+    public void testForComplexPathInServiceType() {
+        Path yamlContract = resourceDir.resolve(Paths.get("complexPath.yaml"));
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "service",
+                "--with-service-type"};
+        OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Assert.assertTrue(outputStream.toString().contains("service generation can not be done as the " +
+                "openapi definition contain following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
+                "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier='" +
+                "{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})"));
+    }
+
+    @Test(description = "client generation for the parameterized path in OAS")
+    public void testForComplexPathInClient() {
+        Path yamlContract = resourceDir.resolve(Paths.get("complexPath.yaml"));
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString(), "--mode", "client"};
+        OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client " +
+                "as the given openapi definition contains following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/{imageId}." +
+                "{imageExtension}" + System.lineSeparator() +
+                "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
+                "'{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})" + System.lineSeparator() +
+                "Client generated successfully."));
+    }
+
+    @Test(description = "both client and service generation for the parameterized path in OAS")
+    public void testForComplexPathInBothClientAndService() {
+        Path yamlContract = resourceDir.resolve(Paths.get("complexPath.yaml"));
+        String[] args = {"--input", yamlContract.toString(), "-o", this.tmpDir.toString()};
+        OpenApiCmd cmd = new OpenApiCmd(standardOut, tmpDir, false);
+        new CommandLine(cmd).parseArgs(args);
+        cmd.execute();
+        Assert.assertTrue(outputStream.toString().contains("WARNING: remote function(s) will be generated for client" +
+                " and the service generation can not proceed due to the openapi definition contain" +
+                " following complex path(s):" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}/sheets/{sheetId}:copyFrom" + System.lineSeparator() +
+                "/v4/spreadsheets/{spreadsheetId}.{sheetId}/sheets/{sheetId}:copyTo" + System.lineSeparator() +
+                "/payroll/v1/workers/{associateoid}/organizational-pay-statements/{payStatementId}/images/" +
+                "{imageId}.{imageExtension}" + System.lineSeparator() +
+                "/v3/ClientGroups/GetClientGroupByUserDefinedIdentifier(UserDefinedIdentifier=" +
+                "'{userDefinedIdentifier}')" + System.lineSeparator() +
+                "/companies({company_id})/items({item_id})" + System.lineSeparator() +
+                "Following files were created."));
+    }
+
+    @Test(description = "Test openapi add sub command")
+    public void testAddCmd() throws IOException {
+        Path resourceDir = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test");
+        Path packagePath = resourceDir.resolve(Paths.get("cmd/bal-task-client"));
+        String[] addArgs = {"--input", "petstore.yaml", "-p", packagePath.toString(),
+                "--module", "delivery", "--nullable", "--license", "license.txt", "--mode", "client",
+                "--client-methods", "resource", "--status-code-binding", "--single-file"};
+        Add add = new Add(printStream,  false);
+        new CommandLine(add).parseArgs(addArgs);
+        add.execute();
+        String newLine = System.lineSeparator();
+        String tomlContent = Files.readString(packagePath.resolve("Ballerina.toml"));
+        String generatedTool = "[[tool.openapi]]" + newLine +
+                "id = \"oas_client_petstore\"" + newLine +
+                "filePath = \"petstore.yaml\"" + newLine +
+                "targetModule = \"delivery\"" + newLine +
+                "options.mode = \"client\"" + newLine +
+                "options.nullable = true" + newLine +
+                "options.clientMethods = \"resource\"" + newLine +
+                "options.licensePath = \"license.txt\"" + newLine +
+                "options.statusCodeBinding = true" + newLine +
+                "options.singleFile = true";
+        Assert.assertTrue(tomlContent.contains(generatedTool));
+    }
+
+    @Test(description = "Test openapi flatten sub command with default options with the json file")
+    public void testFlattenCmdDefaultJson() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
+    }
+
+    private void compareFiles(Path expectedFilePath, Path generatedFilePath) throws IOException {
+        if (Files.exists(generatedFilePath)) {
+            String expectedOpenAPIContent = "";
+            try (Stream<String> expectedOpenAPIContentLines = Files.lines(expectedFilePath)) {
+                expectedOpenAPIContent = expectedOpenAPIContentLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Files.deleteIfExists(generatedFilePath);
+                Assert.fail(e.getMessage());
+            }
+
+            String generatedOpenAPIContent = "";
+            try (Stream<String> generatedOpenAPIContentLines =
+                         Files.lines(generatedFilePath)) {
+                generatedOpenAPIContent = generatedOpenAPIContentLines.collect(Collectors.joining(LINE_SEPARATOR));
+            } catch (IOException e) {
+                Files.deleteIfExists(generatedFilePath);
+                Assert.fail(e.getMessage());
+            }
+
+            generatedOpenAPIContent = (generatedOpenAPIContent.trim()).replaceAll("\\s+", "");
+            expectedOpenAPIContent = (expectedOpenAPIContent.trim()).replaceAll("\\s+", "");
+            Assert.assertEquals(expectedOpenAPIContent, generatedOpenAPIContent);
+
+            Files.deleteIfExists(generatedFilePath);
+        } else {
+            Assert.fail("Generation failed: " + readOutput(true));
+        }
+    }
+
+    @Test(description = "Test openapi flatten sub command with default options with the yaml file")
+    public void testFlattenCmdDefaultYaml() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.yaml", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the name option")
+    public void testFlattenCmdName() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString(), "-n", "flattened"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened.json"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the json format option")
+    public void testFlattenCmdJsonFormat() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.yaml", "-o", tmpDir.toString(), "-f", "json"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the yaml format option")
+    public void testFlattenCmdYamlFormat() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString(), "-f", "yaml"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the tags option")
+    public void testFlattenCmdTags() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected_pets.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString(), "-t", "pets"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with the operations option")
+    public void testFlattenCmdOperations() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_expected_list_pets.json"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi.json", "-o", tmpDir.toString(), "--operations",
+                "listPets"};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with composed schema")
+    public void testFlattenCmdWithComposedSchema() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_openapi_composed_schema.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/openapi_composed_schema.yaml", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with default options with the json file")
+    public void testSanitizeCmdDefaultJson() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with default options with the yaml file")
+    public void testSanitizeCmdDefaultYaml() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.yaml", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with Swagger 2.0")
+    public void testSanitizeCmdWithSwaggerV2() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_2.0_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_2.0.yaml", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with OpenAPI 3.0.0")
+    public void testSanitizeCmdWithOpenAPIV3_0_0() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_3.0.0_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_3.0.0.yaml", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the name option")
+    public void testSanitizeCmdName() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString(), "-n", "sanitized"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the json format option")
+    public void testSanitizeCmdJsonFormat() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected_1.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.yaml", "-o", tmpDir.toString(), "-f", "json"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the yaml format option")
+    public void testSanitizeCmdYamlFormat() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_expected_1.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString(), "-f", "yaml"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the tags option")
+    public void testSanitizeCmdTags() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(
+                Paths.get("cmd/sanitize/sanitized_openapi_expected_albums.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString(), "-t", "albums"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with the operations option")
+    public void testSanitizeCmdOperations() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(
+                Paths.get("cmd/sanitize/sanitized_openapi_expected_operations.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-o", tmpDir.toString(), "--operations",
+                "getAlbumById,getAlbums"};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
+    @Test(description = "Test openapi sanitize sub command with composed schema")
+    public void testSanitizeCmdWithComposedSchema() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_composed_schema.json"));
+        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_composed_schema.json", "-o", tmpDir.toString()};
+        Sanitize sanitize = new Sanitize();
+        new CommandLine(sanitize).parseArgs(args);
+        sanitize.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("sanitized_openapi.json"));
+    }
+
     @AfterTest
     public void clean() {
         System.setErr(null);
-        System.setOut(null);
+        System.setOut(standardOut);
     }
 }

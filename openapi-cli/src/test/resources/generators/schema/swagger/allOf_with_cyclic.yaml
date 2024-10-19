@@ -21,7 +21,21 @@ paths:
           description: An array of products
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: "#/components/schemas/Subject"
+    put:
+      summary: Product Types
+      operationId: putProducts
+      description: The Products endpoint
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Activity"
 components:
   schemas:
     Activity:
