@@ -99,6 +99,27 @@ public class BallerinaToOpenAPICLINegativeTests extends OpenAPITest {
         assertOnErrorStream(process, out);
     }
 
+    @Test(description = "Generate with openapi serviceConfig annotation to service contract type " +
+            "and service declaration")
+    public void openapiServiceConfigForServiceContractTypeWithServiceDeclaration() throws IOException,
+            InterruptedException {
+        String balFilePath = "project_openapi_info_with_service_contract_type_and_declaration/service_file.bal";
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add(0, "openapi");
+        buildArgs.add("-i");
+        buildArgs.add(balFilePath);
+        buildArgs.add("-o");
+        buildArgs.add(tmpDir.toString());
+
+        Process process = getProcess(buildArgs, TEST_RESOURCE);
+        //Thread for wait out put generate
+        Thread.sleep(5000);
+        // compare generated file has not included constraint annotation for scenario record field.
+        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("service_contract_openapi.yaml")));
+        Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve("v1_openapi.yaml")));
+        process.waitFor();
+    }
+
     @AfterClass
     public void cleanUp() throws IOException {
         TestUtil.cleanDistribution();

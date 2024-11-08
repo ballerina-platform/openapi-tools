@@ -178,6 +178,13 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
                 "project_openapi_bal_ext/result_1.yaml", true);
     }
 
+    @Test(description = "Generate with openapi serviceConfig annotation to service contract type")
+    public void openapiServiceConfigForServiceContractType() throws IOException, InterruptedException {
+        executeCommand("project_openapi_info_with_service_contract_type/service_file.bal",
+                "v1_openapi.yaml",
+                "project_openapi_info_with_service_contract_type/result.yaml", true);
+    }
+
     @AfterClass
     public void cleanUp() throws IOException {
         TestUtil.cleanDistribution();

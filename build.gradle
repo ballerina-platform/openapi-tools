@@ -60,6 +60,7 @@ ext.stdlibGrpcVersion = project.stdlibGrpcVersion
 ext.stdlibWebsubVersion = project.stdlibWebsubVersion
 ext.stdlibConstraintVersion = project.stdlibConstraintVersion
 ext.stdlibWebsocketVersion = project.stdlibWebsocketVersion
+ext.stdlibDataJsonDataVersion = project.stdlibDataJsonDataVersion
 ext.jacocoVersion = project.jacocoVersion
 ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 
@@ -136,6 +137,7 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:websub-ballerina:${stdlibWebsubVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:websocket-ballerina:${stdlibWebsocketVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:constraint-ballerina:${stdlibConstraintVersion}"
+        ballerinaStdLibs "io.ballerina.lib:data.jsondata-ballerina:${stdlibDataJsonDataVersion}"
 
     }
 }

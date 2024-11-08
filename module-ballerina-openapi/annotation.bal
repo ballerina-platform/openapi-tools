@@ -103,7 +103,8 @@ public type Examples readonly & record {|
 public const annotation ResourceInformation ResourceInfo on object function;
 
 # Annotation for additional OpenAPI information of a Ballerina service.
-public annotation ServiceInformation ServiceInfo on service;
+public annotation ServiceInformation ServiceInfo on service, type;
+
 // # Annotation for additional OpenAPI configurations of a Ballerina client.
 // public const annotation ClientConfiguration ClientConfig on source client;
 
