@@ -25,11 +25,14 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.ConstantDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
@@ -200,13 +203,14 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         Optional<TypeDefinitionNode> recordDefNodeOpt = moduleMemberVisitor.getTypeDefinitionNode(recordName);
         if (recordDefNodeOpt.isPresent() &&
                 recordDefNodeOpt.get().typeDescriptor() instanceof RecordTypeDescriptorNode recordDefNode) {
-            return getRecordFieldDefaultValue(fieldName, recordDefNode);
+            return getRecordFieldDefaultValue(fieldName, recordDefNode, moduleMemberVisitor);
         }
         return Optional.empty();
     }
 
     private static Optional<Object> getRecordFieldDefaultValue(String fieldName,
-                                                               RecordTypeDescriptorNode recordDefNode) {
+                                                               RecordTypeDescriptorNode recordDefNode,
+                                                               ModuleMemberVisitor moduleMemberVisitor) {
         NodeList<Node> recordFields = recordDefNode.fields();
         RecordFieldWithDefaultValueNode defaultValueNode = recordFields.stream()
                 .filter(field -> field instanceof RecordFieldWithDefaultValueNode)
@@ -217,10 +221,25 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             return Optional.empty();
         }
         ExpressionNode defaultValueExpression = defaultValueNode.expression();
+        // ConstantDeclaration
+        if (defaultValueExpression instanceof SimpleNameReferenceNode reference) {
+            defaultValueExpression = getExpressionNodeForConstantDeclaration(moduleMemberVisitor,
+                    defaultValueExpression, reference);
+        }
         if (MapperCommonUtils.isNotSimpleValueLiteralKind(defaultValueExpression.kind())) {
             return Optional.empty();
         }
         return Optional.of(MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim()));
+    }
+
+    private static ExpressionNode getExpressionNodeForConstantDeclaration(ModuleMemberVisitor moduleMemberVisitor, ExpressionNode defaultValueExpression, SimpleNameReferenceNode reference) {
+        Optional<ConstantDeclarationNode> constantDeclarationNode = moduleMemberVisitor
+                .getConstantDeclarationNode(reference.name().text());
+        if (constantDeclarationNode.isPresent()) {
+            ConstantDeclarationNode constantNode = constantDeclarationNode.get();
+            defaultValueExpression = (ExpressionNode) constantNode.initializer();
+        }
+        return defaultValueExpression;
     }
 
     public static RecordTypeInfo getDirectRecordType(TypeSymbol typeSymbol, String recordName) {
