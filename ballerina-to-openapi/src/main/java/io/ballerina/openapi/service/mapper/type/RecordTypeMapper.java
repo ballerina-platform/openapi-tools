@@ -120,7 +120,18 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                         .typeDescriptor();
                 Map<String, RecordFieldSymbol> includedRecordFieldMap = includedRecordTypeSymbol.fieldDescriptors();
                 for (Map.Entry<String, RecordFieldSymbol> includedRecordField : includedRecordFieldMap.entrySet()) {
-                    recordFieldMap.remove(includedRecordField.getKey());
+                    //logic comes here i guess
+                    RecordFieldSymbol recordFieldSymbol = recordFieldMap.get(includedRecordField.getKey());
+                    RecordFieldSymbol includedRecordFieldValue = includedRecordField.getValue();
+                    if (recordFieldSymbol != null) {
+                        //check for the types
+                        if (includedRecordFieldValue.typeDescriptor().equals(recordFieldSymbol.typeDescriptor())) {
+                            // check for the default values availability
+                            if (!recordFieldSymbol.hasDefaultValue()) {
+                                recordFieldMap.remove(includedRecordField.getKey());
+                            }
+                        }
+                    }
                 }
             }
         }
