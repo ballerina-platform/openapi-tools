@@ -50,12 +50,46 @@ public type Pod record {
     Status status?;
 };
 
+type RecA record {|
+    string a = "a";
+    string aa;
+|};
+
+type RecB record {|
+    *RecA;
+    int b;
+|};
+
+type RecC record {|
+    *RecA;
+    string aa = "aa";
+    int c;
+|};
+
+type RecD record {|
+    *RecA;
+    string a = "aad";
+    int d;
+|};
+
 service /payloadV on new http:Listener(7080) {
-    resource function get Pods() returns Pod[] {
+    resource function get pods() returns Pod[] {
         return [];
     }
 
-    resource function get Services() returns Service[] {
+    resource function get services() returns Service[] {
+        return [];
+    }
+
+    resource function get recB() returns RecB[] {
+        return [];
+    }
+
+    resource function get recC() returns RecC[] {
+        return [];
+    }
+
+    resource function post recD() returns RecD[] {
         return [];
     }
 }
