@@ -22,7 +22,7 @@ type Header2 record {|
 |};
 
 type Header3 record {|
-    string header31;
+    string header31 = RESOURCE_KIND_POD;
     int[] header32;
 |};
 
@@ -36,7 +36,7 @@ service /payloadV on helloEp {
             @http:Header Record h6 = {name: "John", city: "London"},
             @http:Header Header2 h7= {header21: "header1", header22: [1,2,3], header24: false, header23: []},
             @http:Header string h8 = RESOURCE_KIND_POD,
-            @http:Header Header3 h7= {header31: RESOURCE_KIND_POD, header32: [1,2,3]},) returns string {
+            @http:Header Header3 h9= {header32: [1,2,3]}) returns string {
         return "new";
     }
 }

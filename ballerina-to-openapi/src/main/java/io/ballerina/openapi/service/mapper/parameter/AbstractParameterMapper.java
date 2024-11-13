@@ -18,19 +18,19 @@
 package io.ballerina.openapi.service.mapper.parameter;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ConstantSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
 import java.util.Objects;
-
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getExpressionNodeForConstantDeclaration;
+import java.util.Optional;
 
 /**
  * This {@link AbstractParameterMapper} class represents the abstract parameter mapper.
@@ -59,12 +59,14 @@ public abstract class AbstractParameterMapper {
         parameterList.forEach(operationInventory::setParameter);
     }
 
-    static Object getDefaultValue(DefaultableParameterNode parameterNode, ModuleMemberVisitor moduleMemberVisitor) {
+    static Object getDefaultValue(DefaultableParameterNode parameterNode, SemanticModel semanticModel) {
         ExpressionNode defaultValueExpression = (ExpressionNode) parameterNode.expression();
-        if (defaultValueExpression instanceof SimpleNameReferenceNode reference) {
-            defaultValueExpression = getExpressionNodeForConstantDeclaration(
-                    moduleMemberVisitor,
-                    defaultValueExpression, reference);
+        Optional<Symbol> symbol = semanticModel.symbol(defaultValueExpression);
+        if (symbol.isPresent() && symbol.get() instanceof ConstantSymbol constantSymbol) {
+            Object constValue = constantSymbol.constValue();
+            if (constValue instanceof ConstantValue value) {
+                return value.value();
+            }
         }
         if (MapperCommonUtils.isNotSimpleValueLiteralKind(defaultValueExpression.kind())) {
             return null;

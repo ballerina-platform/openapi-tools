@@ -81,7 +81,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
             this.treatNilableAsOptional = treatNilableAsOptional;
             if (parameterNode instanceof DefaultableParameterNode defaultableHeaderParam) {
                 this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableHeaderParam,
-                        additionalData.moduleMemberVisitor());
+                        additionalData.semanticModel());
             }
             this.typeMapper = typeMapper;
         }
