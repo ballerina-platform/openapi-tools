@@ -10,7 +10,7 @@ servers:
       port:
         default: "7080"
 paths:
-  /Pods:
+  /pods:
     get:
       operationId: getPods
       responses:
@@ -22,7 +22,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Pod"
-  /Services:
+  /services:
     get:
       operationId: getServices
       responses:
@@ -34,6 +34,42 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Service"
+  /recB:
+    get:
+      operationId: getRecb
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecB"
+  /recC:
+    get:
+      operationId: getRecc
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecC"
+  /recD:
+    post:
+      operationId: postRecd
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecD"
 components:
   schemas:
     Metadata:
@@ -68,6 +104,59 @@ components:
       properties:
         nodeName:
           type: string
+    RecA:
+      required:
+        - aa
+      type: object
+      properties:
+        a:
+          type: string
+          default: a
+        aa:
+          type: string
+      additionalProperties: false
+    RecB:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/RecA"
+        - required:
+            - b
+          type: object
+          properties:
+            b:
+              type: integer
+              format: int64
+          additionalProperties: false
+    RecC:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/RecA"
+        - required:
+            - c
+          type: object
+          properties:
+            aa:
+              type: string
+              default: aa
+            c:
+              type: integer
+              format: int64
+          additionalProperties: false
+    RecD:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/RecA"
+        - required:
+            - d
+          type: object
+          properties:
+            a:
+              type: string
+              default: aad
+            d:
+              type: integer
+              format: int64
+          additionalProperties: false
     Resource:
       type: object
       allOf:
