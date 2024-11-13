@@ -178,6 +178,30 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
                 "project_openapi_bal_ext/result_1.yaml", true);
     }
 
+    @Test(description = "Map included record type which has same fields")
+    public void includedRecordTest() throws IOException, InterruptedException {
+        // 1. generate OAS
+        executeCommand("project_openapi_with_included_test/service_file.bal",
+                "payloadV_openapi.yaml",
+                "project_openapi_with_included_test/result.yaml", false);
+        // 2. generate type using the OAS which generated point 1
+        generateTypes();
+    }
+
+    private void generateTypes() throws IOException, InterruptedException {
+        List<String> buildArgs = new LinkedList<>();
+        buildArgs.add("-i");
+        buildArgs.add(String.valueOf(TEST_RESOURCE.resolve("payloadV_openapi.yaml")));
+        buildArgs.add("-o");
+        buildArgs.add(tmpDir.toString());
+        boolean successful = TestUtil.executeOpenAPI(DISTRIBUTION_FILE_NAME, TEST_RESOURCE, buildArgs);
+        Assert.assertTrue(Files.exists(Paths.get(tmpDir.toString()).resolve("types.bal")));
+        String generatedOpenAPI = getStringFromGivenBalFile(Paths.get(tmpDir.toString()).resolve("types.bal"));
+        String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve(
+                "resources/expected_types.bal"));
+        Assert.assertEquals(expectedYaml, generatedOpenAPI);
+    }
+
     @AfterClass
     public void cleanUp() throws IOException {
         TestUtil.cleanDistribution();

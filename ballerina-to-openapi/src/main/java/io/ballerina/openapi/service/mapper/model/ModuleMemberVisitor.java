@@ -19,7 +19,6 @@ package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
-import io.ballerina.compiler.syntax.tree.ConstantDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
@@ -45,7 +44,6 @@ public class ModuleMemberVisitor extends NodeVisitor {
     Set<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedHashSet<>();
     Set<ClassDefinitionNode> interceptorServiceClassNodes = new LinkedHashSet<>();
     Set<ServiceContractType> serviceContractTypeNodes = new LinkedHashSet<>();
-    Set<ConstantDeclarationNode> constantDeclarationNodes = new LinkedHashSet<>();
     SemanticModel semanticModel;
 
     public ModuleMemberVisitor(SemanticModel semanticModel) {
@@ -72,11 +70,6 @@ public class ModuleMemberVisitor extends NodeVisitor {
         interceptorServiceClassNodes.add(classDefinitionNode);
     }
 
-    @Override
-    public void visit(ConstantDeclarationNode constantDeclarationNode) {
-        constantDeclarationNodes.add(constantDeclarationNode);
-    }
-
     public Set<ListenerDeclarationNode> getListenerDeclarationNodes() {
         return listenerDeclarationNodes;
     }
@@ -94,16 +87,6 @@ public class ModuleMemberVisitor extends NodeVisitor {
         for (ClassDefinitionNode classDefinitionNode : interceptorServiceClassNodes) {
             if (MapperCommonUtils.unescapeIdentifier(classDefinitionNode.className().text()).equals(typeName)) {
                 return Optional.of(classDefinitionNode);
-            }
-        }
-        return Optional.empty();
-    }
-
-    public Optional<ConstantDeclarationNode> getConstantDeclarationNode(String constantName) {
-        for (ConstantDeclarationNode constantDeclarationNode : constantDeclarationNodes) {
-            if (MapperCommonUtils.unescapeIdentifier(constantDeclarationNode.variableName()
-                    .text()).equals(constantName)) {
-                return Optional.of(constantDeclarationNode);
             }
         }
         return Optional.empty();
