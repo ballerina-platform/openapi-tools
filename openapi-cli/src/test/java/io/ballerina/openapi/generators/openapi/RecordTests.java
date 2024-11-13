@@ -125,6 +125,12 @@ public class RecordTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_rest_param.yaml");
     }
 
+    @Test(description = "Test for record has included record with same fields")
+    public void testIncludedRecordWithSameFields() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/included_record.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/included_record.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

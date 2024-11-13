@@ -17,19 +17,22 @@
  */
 package io.ballerina.openapi.service.mapper.type;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
@@ -49,7 +52,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getExpressionNodeForConstantDeclaration;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getRecordFieldTypeDescription;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
@@ -122,17 +124,12 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                         .typeDescriptor();
                 Map<String, RecordFieldSymbol> includedRecordFieldMap = includedRecordTypeSymbol.fieldDescriptors();
                 for (Map.Entry<String, RecordFieldSymbol> includedRecordField : includedRecordFieldMap.entrySet()) {
-                    //logic comes here i guess
                     RecordFieldSymbol recordFieldSymbol = recordFieldMap.get(includedRecordField.getKey());
                     RecordFieldSymbol includedRecordFieldValue = includedRecordField.getValue();
-                    if (recordFieldSymbol != null) {
-                        //check for the types
-                        if (includedRecordFieldValue.typeDescriptor().equals(recordFieldSymbol.typeDescriptor())) {
-                            // check for the default values availability
-                            if (!recordFieldSymbol.hasDefaultValue()) {
-                                recordFieldMap.remove(includedRecordField.getKey());
-                            }
-                        }
+                    boolean isRemovableField = recordFieldSymbol != null && includedRecordFieldValue.typeDescriptor()
+                            .equals(recordFieldSymbol.typeDescriptor()) && !recordFieldSymbol.hasDefaultValue();
+                    if (isRemovableField) {
+                        recordFieldMap.remove(includedRecordField.getKey());
                     }
                 }
             }
@@ -160,7 +157,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             }
             if (recordFieldSymbol.hasDefaultValue()) {
                 Optional<Object> recordFieldDefaultValueOpt = getRecordFieldDefaultValue(recordName, recordFieldName,
-                        additionalData.moduleMemberVisitor());
+                        additionalData.moduleMemberVisitor(), additionalData.semanticModel());
                 if (recordFieldDefaultValueOpt.isPresent()) {
                     TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValueOpt.get());
                 } else {
@@ -175,18 +172,19 @@ public class RecordTypeMapper extends AbstractTypeMapper {
     }
 
     public static Optional<Object> getRecordFieldDefaultValue(String recordName, String fieldName,
-                                                    ModuleMemberVisitor moduleMemberVisitor) {
+                                                    ModuleMemberVisitor moduleMemberVisitor,
+                                                              SemanticModel semanticModel) {
         Optional<TypeDefinitionNode> recordDefNodeOpt = moduleMemberVisitor.getTypeDefinitionNode(recordName);
         if (recordDefNodeOpt.isPresent() &&
                 recordDefNodeOpt.get().typeDescriptor() instanceof RecordTypeDescriptorNode recordDefNode) {
-            return getRecordFieldDefaultValue(fieldName, recordDefNode, moduleMemberVisitor);
+            return getRecordFieldDefaultValue(fieldName, recordDefNode, semanticModel);
         }
         return Optional.empty();
     }
 
     private static Optional<Object> getRecordFieldDefaultValue(String fieldName,
                                                                RecordTypeDescriptorNode recordDefNode,
-                                                               ModuleMemberVisitor moduleMemberVisitor) {
+                                                               SemanticModel semanticModel) {
         NodeList<Node> recordFields = recordDefNode.fields();
         RecordFieldWithDefaultValueNode defaultValueNode = recordFields.stream()
                 .filter(field -> field instanceof RecordFieldWithDefaultValueNode)
@@ -197,10 +195,12 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             return Optional.empty();
         }
         ExpressionNode defaultValueExpression = defaultValueNode.expression();
-        // ConstantDeclaration
-        if (defaultValueExpression instanceof SimpleNameReferenceNode reference) {
-            defaultValueExpression = getExpressionNodeForConstantDeclaration(moduleMemberVisitor,
-                    defaultValueExpression, reference);
+        Optional<Symbol> symbol = semanticModel.symbol(defaultValueExpression);
+        if (symbol.isPresent() && symbol.get() instanceof ConstantSymbol constantSymbol) {
+            Object constValue = constantSymbol.constValue();
+            if (constValue instanceof ConstantValue value) {
+                return Optional.of(value.value());
+            }
         }
         if (MapperCommonUtils.isNotSimpleValueLiteralKind(defaultValueExpression.kind())) {
             return Optional.empty();
