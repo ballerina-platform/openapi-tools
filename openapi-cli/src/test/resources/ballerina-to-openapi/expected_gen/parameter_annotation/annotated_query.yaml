@@ -104,6 +104,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
+  /student12:
+    post:
+      operationId: postStudent12
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            default: Service
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:
