@@ -33,7 +33,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorPayload"
+                $ref: '#/components/schemas/ErrorPayload'
   /student9:
     post:
       operationId: postStudent9
@@ -52,13 +52,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Student"
+                $ref: '#/components/schemas/Student'
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorPayload"
+                $ref: '#/components/schemas/ErrorPayload'
   /student10:
     post:
       operationId: postStudent10
@@ -67,20 +67,20 @@ paths:
           in: query
           required: true
           schema:
-            $ref: "#/components/schemas/Status"
+            $ref: '#/components/schemas/Status'
       responses:
         "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Student"
+                $ref: '#/components/schemas/Student'
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorPayload"
+                $ref: '#/components/schemas/ErrorPayload'
   /student11:
     post:
       operationId: postStudent11
@@ -89,7 +89,7 @@ paths:
           in: query
           schema:
             allOf:
-              - $ref: "#/components/schemas/Status"
+              - $ref: '#/components/schemas/Status'
             default: ACTIVE
       responses:
         "201":
@@ -103,7 +103,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorPayload"
+                $ref: '#/components/schemas/ErrorPayload'
+  /student12:
+    post:
+      operationId: postStudent12
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            default: Service
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:

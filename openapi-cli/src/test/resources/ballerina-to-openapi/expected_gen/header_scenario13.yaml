@@ -134,6 +134,24 @@ paths:
               - 1
               - 2
               - 3
+        - name: h8
+          in: header
+          schema:
+            type: string
+            default: Pod
+        - name: header31
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: header32
+          in: header
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
       responses:
         "200":
           description: Ok
@@ -146,7 +164,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorPayload"
+                $ref: '#/components/schemas/ErrorPayload'
 components:
   schemas:
     ErrorPayload:
