@@ -36,6 +36,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.ConstantDeclarationNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.DistinctTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -54,6 +55,7 @@ import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ResourcePathParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
@@ -61,6 +63,7 @@ import io.ballerina.openapi.service.mapper.Constants;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
@@ -561,5 +564,17 @@ public class MapperCommonUtils {
             return distinctTypeDescriptorNode.typeDescriptor();
         }
         return node;
+    }
+
+    public static ExpressionNode getExpressionNodeForConstantDeclaration(ModuleMemberVisitor moduleMemberVisitor,
+                                                                         ExpressionNode defaultValueExpression,
+                                                                         SimpleNameReferenceNode reference) {
+        Optional<ConstantDeclarationNode> constantDeclarationNode = moduleMemberVisitor
+                .getConstantDeclarationNode(reference.name().text());
+        if (constantDeclarationNode.isPresent()) {
+            ConstantDeclarationNode constantNode = constantDeclarationNode.get();
+            defaultValueExpression = (ExpressionNode) constantNode.initializer();
+        }
+        return defaultValueExpression;
     }
 }
