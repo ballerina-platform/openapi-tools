@@ -72,6 +72,57 @@ type RecD record {|
     int d;
 |};
 
+// defaultable `a`` makes requried
+type RecE record {|
+    *RecA;
+    string a;
+    string e;
+|};
+
+//optional test cases
+type RecF record {|
+    int f?;
+|};
+
+type RecG record {|
+    *RecF;
+    int g?;
+|};
+
+type RecH record {|
+    *RecG;
+    int f;
+    int g;
+    string h;
+|};
+
+// optional with default value
+type RecI record {|
+    *RecG;
+    int f = 10;
+    string i;
+    int g;
+|};
+
+type RecJ record {|
+    *http:Accepted;
+    RecK body;
+|};
+
+type RecK record {|
+    *RecA;
+    *RecF;
+    *RecL;
+    int k;
+    string a;
+    string first\-name;
+|};
+
+type RecL record {|
+    string first\-name?;
+    int id;
+|};
+
 service /payloadV on new http:Listener(7080) {
     resource function get pods() returns Pod[] {
         return [];
@@ -91,5 +142,30 @@ service /payloadV on new http:Listener(7080) {
 
     resource function post recD() returns RecD[] {
         return [];
+    }
+
+    resource function post recE() returns RecE[] {
+        return [];
+    }
+
+    resource function post recH() returns RecH[] {
+        return [];
+    }
+
+    resource function post recI() returns RecI[] {
+        return [];
+    }
+
+    resource function post recJ() returns RecJ {
+        return {
+            body:
+            {
+                k: 10,
+                aa: "abc",
+                a: "abcd",
+                id: 11,
+                first\-name: "lnash"
+            }
+        };
     }
 }
