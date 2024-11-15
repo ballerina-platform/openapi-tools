@@ -80,15 +80,16 @@ public class RecordTypeMapper extends AbstractTypeMapper {
 
     public static Schema getSchema(RecordTypeSymbol typeSymbol, Components components, String recordName,
                                    AdditionalData additionalData) {
+        Set<String> fieldsOnlyForRequiredList = new HashSet<>();
         ObjectSchema schema = new ObjectSchema();
         Set<String> requiredFields = new HashSet<>();
 
         Map<String, RecordFieldSymbol> recordFieldMap = new LinkedHashMap<>(typeSymbol.fieldDescriptors());
         List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, additionalData,
-                recordName);
+                recordName, fieldsOnlyForRequiredList);
 
         Map<String, Schema> properties = mapRecordFields(recordFieldMap, components, requiredFields,
-                recordName, false, additionalData);
+                recordName, false, additionalData, fieldsOnlyForRequiredList);
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
@@ -100,8 +101,8 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             schema.additionalProperties(false);
         }
 
-        schema.setProperties(properties);
         schema.setRequired(requiredFields.stream().toList());
+        schema.setProperties(properties);
         if (!allOfSchemaList.isEmpty()) {
             ObjectSchema schemaWithAllOf = new ObjectSchema();
             allOfSchemaList.add(schema);
@@ -113,7 +114,8 @@ public class RecordTypeMapper extends AbstractTypeMapper {
 
     static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, Components components,
                                            Map<String, RecordFieldSymbol> recordFieldMap,
-                                           AdditionalData additionalData, String recordName) {
+                                           AdditionalData additionalData, String recordName,
+                                           Set<String> fieldsOnlyForRequiredList) {
         List<Schema> allOfSchemaList = new ArrayList<>();
         List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
         for (TypeSymbol typeInclusion : typeInclusions) {
@@ -130,15 +132,18 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                         .typeDescriptor();
                 Map<String, RecordFieldSymbol> includedRecordFieldMap = includedRecordTypeSymbol.fieldDescriptors();
                 for (Map.Entry<String, RecordFieldSymbol> includedRecordField : includedRecordFieldMap.entrySet()) {
+                    if (!recordFieldMap.containsKey(includedRecordField.getKey())) {
+                        continue;
+                    }
                     RecordFieldSymbol recordFieldSymbol = recordFieldMap.get(includedRecordField.getKey());
                     RecordFieldSymbol includedRecordFieldValue = includedRecordField.getValue();
 
-                    if (recordFieldSymbol == null
-                            || !includedRecordFieldValue.typeDescriptor().equals(recordFieldSymbol.typeDescriptor())) {
+                    if (!includedRecordFieldValue.typeDescriptor().equals(recordFieldSymbol.typeDescriptor())) {
                         continue;
                     }
                     eliminateRedundantFields(recordFieldMap, additionalData, recordName, typeInclusion,
-                            includedRecordField, recordFieldSymbol, includedRecordFieldValue);
+                            includedRecordField, recordFieldSymbol, includedRecordFieldValue,
+                            fieldsOnlyForRequiredList);
                 }
             }
         }
@@ -150,11 +155,15 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                                                  TypeSymbol typeInclusion,
                                                  Map.Entry<String, RecordFieldSymbol> includedRecordField,
                                                  RecordFieldSymbol recordFieldSymbol,
-                                                 RecordFieldSymbol includedRecordFieldValue) {
+                                                 RecordFieldSymbol includedRecordFieldValue,
+                                                 Set<String> fieldsOnlyForRequiredList) {
 
         boolean recordHasDefault = recordFieldSymbol.hasDefaultValue();
         boolean includedHasDefault = includedRecordFieldValue.hasDefaultValue();
         boolean hasTypeInclusionName = typeInclusion.getName().isPresent();
+        boolean isIncludedOptional = includedRecordFieldValue.isOptional();
+        boolean isRecordFieldOptional = recordFieldSymbol.isOptional();
+        boolean recordFieldName = recordFieldSymbol.getName().isPresent();
 
         if (recordHasDefault && includedHasDefault && hasTypeInclusionName) {
             Optional<Object> recordFieldDefaultValueOpt = getRecordFieldDefaultValue(recordName,
@@ -205,13 +214,18 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         } else if (!recordHasDefault && !includedHasDefault) {
             recordFieldMap.remove(includedRecordField.getKey());
         }
+        if (!isRecordFieldOptional && isIncludedOptional && !recordHasDefault && recordFieldName) {
+            fieldsOnlyForRequiredList.add(MapperCommonUtils.unescapeIdentifier(recordFieldSymbol.getName().get()));
+            recordFieldMap.remove(includedRecordField.getKey());
+        }
     }
 
     public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
                                                       Components components, Set<String> requiredFields,
                                                       String recordName, boolean treatNilableAsOptional,
                                                       boolean inferNameFromJsonData,
-                                                      AdditionalData additionalData) {
+                                                      AdditionalData additionalData,
+                                                      Set<String> fieldsOnlyForRequiredList) {
         Map<String, Schema> properties = new LinkedHashMap<>();
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
             RecordFieldSymbol recordFieldSymbol = recordField.getValue();
@@ -220,6 +234,9 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             if (!recordFieldSymbol.isOptional() && !recordFieldSymbol.hasDefaultValue() &&
                     (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(recordFieldSymbol.typeDescriptor()))) {
                 requiredFields.add(recordFieldName);
+            }
+            if (!fieldsOnlyForRequiredList.isEmpty()) {
+                requiredFields.addAll(fieldsOnlyForRequiredList);
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
             Schema recordFieldSchema = TypeMapperImpl.getTypeSchema(recordFieldSymbol.typeDescriptor(),
