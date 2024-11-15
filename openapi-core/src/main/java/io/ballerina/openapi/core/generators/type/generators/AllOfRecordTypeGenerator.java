@@ -31,6 +31,7 @@ import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
 import io.ballerina.openapi.core.generators.type.diagnostic.TypeGeneratorDiagnostic;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
@@ -155,7 +156,8 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         }
     }
 
-    private ImmutablePair<List<Node>, List<Schema<?>>> generateAllOfRecordFields(List<Schema<?>> allOfSchemas)
+    private ImmutablePair<List<Node>, List<Schema<?>>> generateAllOfRecordFields(List<Schema<?>> allOfSchemas,
+                                                                                 List<String> requiredFields)
             throws OASTypeGenException {
 
         List<Node> recordFieldList = new ArrayList<>();
@@ -175,7 +177,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                         typeRef, createToken(SEMICOLON_TOKEN));
                 // check whether given reference schema has additional fields.
                 OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
-                Schema refSchema = openAPI.getComponents().getSchemas().get(extractedSchemaName);
+                Schema<?> refSchema = openAPI.getComponents().getSchemas().get(extractedSchemaName);
                 addAdditionalSchemas(refSchema);
 
                 if (!pregeneratedTypeMap.containsKey(modifiedSchemaName)) {

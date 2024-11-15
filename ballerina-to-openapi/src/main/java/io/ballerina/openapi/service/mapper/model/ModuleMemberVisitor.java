@@ -17,7 +17,6 @@
  */
 package io.ballerina.openapi.service.mapper.model;
 
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
@@ -38,12 +37,6 @@ public class ModuleMemberVisitor extends NodeVisitor {
     Set<TypeDefinitionNode> typeDefinitionNodes = new LinkedHashSet<>();
     Set<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedHashSet<>();
     Set<ClassDefinitionNode> interceptorServiceClassNodes = new LinkedHashSet<>();
-    Set<ConstantDeclarationNode> constantDeclarationNodes = new LinkedHashSet<>();
-    SemanticModel semanticModel;
-
-    public ModuleMemberVisitor(SemanticModel semanticModel) {
-        this.semanticModel = semanticModel;
-    }
 
     @Override
     public void visit(TypeDefinitionNode typeDefinitionNode) {

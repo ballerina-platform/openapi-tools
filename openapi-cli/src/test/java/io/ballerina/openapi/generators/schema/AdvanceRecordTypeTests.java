@@ -113,7 +113,7 @@ public class AdvanceRecordTypeTests {
     public void generateTypeForTypeInclusions() throws IOException, BallerinaOpenApiException,
             FormatterException {
         Path definitionPath = RES_DIR.resolve("swagger/inclusion_types.yaml");
-        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
         TypeHandler.createInstance(openAPI, false);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()

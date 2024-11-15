@@ -36,8 +36,6 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
-import io.ballerina.compiler.syntax.tree.DistinctTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
@@ -467,17 +465,6 @@ public class MapperCommonUtils {
                 .map(en -> en.toString().trim());
     }
 
-    public static ExpressionNode getExpressionNodeForConstantDeclaration(ModuleMemberVisitor moduleMemberVisitor,
-                                                                         ExpressionNode defaultValueExpression,
-                                                                         SimpleNameReferenceNode reference) {
-        Optional<ConstantDeclarationNode> constantDeclarationNode = moduleMemberVisitor
-                .getConstantDeclarationNode(reference.name().text());
-        if (constantDeclarationNode.isPresent()) {
-            ConstantDeclarationNode constantNode = constantDeclarationNode.get();
-            defaultValueExpression = (ExpressionNode) constantNode.initializer();
-        }
-        return defaultValueExpression;
-    }
 
     public static Optional<Object> getConstantValues(Optional<Symbol> symbol) {
         if (symbol.isPresent() && symbol.get() instanceof ConstantSymbol constantSymbol) {
@@ -487,13 +474,5 @@ public class MapperCommonUtils {
             }
         }
         return Optional.empty();
-    }
-
-    public static Node getTypeDescriptor(TypeDefinitionNode typeDefinitionNode) {
-        Node node = typeDefinitionNode.typeDescriptor();
-        if (node instanceof DistinctTypeDescriptorNode distinctTypeDescriptorNode) {
-            return distinctTypeDescriptorNode.typeDescriptor();
-        }
-        return node;
     }
 }
