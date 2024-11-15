@@ -588,18 +588,6 @@ public class MapperCommonUtils {
         return node;
     }
 
-    public static ExpressionNode getExpressionNodeForConstantDeclaration(ModuleMemberVisitor moduleMemberVisitor,
-                                                                         ExpressionNode defaultValueExpression,
-                                                                         SimpleNameReferenceNode reference) {
-        Optional<ConstantDeclarationNode> constantDeclarationNode = moduleMemberVisitor
-                .getConstantDeclarationNode(reference.name().text());
-        if (constantDeclarationNode.isPresent()) {
-            ConstantDeclarationNode constantNode = constantDeclarationNode.get();
-            defaultValueExpression = (ExpressionNode) constantNode.initializer();
-        }
-        return defaultValueExpression;
-    }
-
     public static String getNameFromAnnotation(String packageName, String annotationName, String annotationFieldName,
                                                SemanticModel semanticModel, String defaultName,
                                                RecordFieldSymbol recordField) {

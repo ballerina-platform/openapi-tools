@@ -139,11 +139,6 @@ paths:
           schema:
             type: string
             default: Pod
-        - name: header31
-          in: header
-          schema:
-            type: string
-            default: Pod
         - name: header32
           in: header
           required: true
@@ -156,6 +151,11 @@ paths:
               - 1
               - 2
               - 3
+        - name: header31
+          in: header
+          schema:
+            type: string
+            default: Pod
       responses:
         "200":
           description: Ok

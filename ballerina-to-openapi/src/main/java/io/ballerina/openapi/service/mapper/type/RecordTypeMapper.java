@@ -18,7 +18,6 @@
 package io.ballerina.openapi.service.mapper.type;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
@@ -56,7 +55,6 @@ import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
 import static io.ballerina.openapi.service.mapper.Constants.NAME_CONFIG;
 import static io.ballerina.openapi.service.mapper.Constants.VALUE;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getNameFromAnnotation;
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getExpressionNodeForConstantDeclaration;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getRecordFieldTypeDescription;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
@@ -263,9 +261,10 @@ public class RecordTypeMapper extends AbstractTypeMapper {
     public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
                                                       Components components, Set<String> requiredFields,
                                                       String recordName, boolean treatNilableAsOptional,
-                                                      AdditionalData additionalData) {
+                                                      AdditionalData additionalData,
+                                                      Set<String> fieldsOnlyForRequiredList) {
         return mapRecordFields(recordFieldMap, components, requiredFields, recordName, treatNilableAsOptional,
-                true, additionalData);
+                true, additionalData, fieldsOnlyForRequiredList);
     }
 
     private static String getRecordFieldName(boolean inferNameFromJsonData,
