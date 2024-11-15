@@ -81,8 +81,11 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, additionalData,
                 recordName, fieldsOnlyForRequiredList);
 
-        Map<String, Schema> properties = mapRecordFields(recordFieldMap, components, requiredFields,
-                recordName, false, additionalData, fieldsOnlyForRequiredList);
+        RecordFieldMappingContext mappingContext = new RecordFieldMappingContext(
+                recordFieldMap, components, requiredFields, recordName, false, additionalData,
+                fieldsOnlyForRequiredList);
+
+        Map<String, Schema> properties = mapRecordFields(mappingContext);
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
@@ -134,22 +137,24 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                     if (!includedRecordFieldValue.typeDescriptor().equals(recordFieldSymbol.typeDescriptor())) {
                         continue;
                     }
-                    eliminateRedundantFields(recordFieldMap, additionalData, recordName, typeInclusion,
-                            includedRecordField, recordFieldSymbol, includedRecordFieldValue,
-                            fieldsOnlyForRequiredList);
+                    IncludedFieldContext context = new IncludedFieldContext(recordFieldMap, recordName,
+                            typeInclusion, includedRecordField, recordFieldSymbol, includedRecordFieldValue
+                    );
+                    eliminateRedundantFields(context, additionalData, fieldsOnlyForRequiredList);
                 }
             }
         }
         return allOfSchemaList;
     }
 
-    private static void eliminateRedundantFields(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                 AdditionalData additionalData, String recordName,
-                                                 TypeSymbol typeInclusion,
-                                                 Map.Entry<String, RecordFieldSymbol> includedRecordField,
-                                                 RecordFieldSymbol recordFieldSymbol,
-                                                 RecordFieldSymbol includedRecordFieldValue,
+    private static void eliminateRedundantFields(IncludedFieldContext context, AdditionalData additionalData,
                                                  Set<String> fieldsOnlyForRequiredList) {
+        Map<String, RecordFieldSymbol> recordFieldMap = context.recordFieldMap();
+        String recordName = context.recordName();
+        TypeSymbol typeInclusion = context.typeInclusion();
+        Map.Entry<String, RecordFieldSymbol> includedRecordField = context.includedRecordField();
+        RecordFieldSymbol recordFieldSymbol = context.recordFieldSymbol();
+        RecordFieldSymbol includedRecordFieldValue = context.includedRecordFieldValue();
 
         boolean recordHasDefault = recordFieldSymbol.hasDefaultValue();
         boolean includedHasDefault = includedRecordFieldValue.hasDefaultValue();
@@ -213,12 +218,56 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         }
     }
 
-    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                      Components components, Set<String> requiredFields,
-                                                      String recordName, boolean treatNilableAsOptional,
-                                                      AdditionalData additionalData,
-                                                      Set<String> fieldsOnlyForRequiredList) {
+    /**
+     * Encapsulates the context of included fields in a record for processing.
+     *
+     * @param recordFieldMap         A map containing record field symbols.
+     * @param recordName             The name of the record being processed.
+     * @param typeInclusion          The type symbol representing type inclusions in the record.
+     * @param includedRecordField    An entry representing the included record field and its symbol.
+     * @param recordFieldSymbol      The symbol of the current record field being processed.
+     * @param includedRecordFieldValue The symbol of the field in the included record.
+     */
+    public record IncludedFieldContext(
+            Map<String, RecordFieldSymbol> recordFieldMap,
+            String recordName,
+            TypeSymbol typeInclusion,
+            Map.Entry<String, RecordFieldSymbol> includedRecordField,
+            RecordFieldSymbol recordFieldSymbol,
+            RecordFieldSymbol includedRecordFieldValue) {
+    }
+
+    /**
+     * Encapsulates the context needed for mapping record fields to schemas.
+     *
+     * @param recordFieldMap        A map containing record field symbols.
+     * @param components            Components used for managing and storing schemas during mapping.
+     * @param requiredFields        A set of field names that are required in the mapped schema.
+     * @param recordName            The name of the record being processed.
+     * @param treatNilableAsOptional Flag indicating whether nilable fields should be treated as optional.
+     * @param additionalData        Additional data required for schema generation and field processing.
+     * @param fieldsOnlyForRequiredList A set of fields that should be exclusively marked as required.
+     */
+    public record RecordFieldMappingContext(
+            Map<String, RecordFieldSymbol> recordFieldMap,
+            Components components,
+            Set<String> requiredFields,
+            String recordName,
+            boolean treatNilableAsOptional,
+            AdditionalData additionalData,
+            Set<String> fieldsOnlyForRequiredList) {
+    }
+
+    public static Map<String, Schema> mapRecordFields(RecordFieldMappingContext context) {
+        Map<String, RecordFieldSymbol> recordFieldMap = context.recordFieldMap();
+        Components components = context.components();
+        Set<String> requiredFields = context.requiredFields();
+        String recordName = context.recordName();
+        boolean treatNilableAsOptional = context.treatNilableAsOptional();
+        AdditionalData additionalData = context.additionalData();
+        Set<String> fieldsOnlyForRequiredList = context.fieldsOnlyForRequiredList();
         Map<String, Schema> properties = new LinkedHashMap<>();
+
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
             RecordFieldSymbol recordFieldSymbol = recordField.getValue();
             String recordFieldName = MapperCommonUtils.unescapeIdentifier(recordField.getKey().trim());
