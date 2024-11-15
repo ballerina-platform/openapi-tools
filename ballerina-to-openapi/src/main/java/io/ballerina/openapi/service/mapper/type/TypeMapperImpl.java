@@ -114,8 +114,11 @@ public class TypeMapperImpl implements TypeMapper {
     public Map<String, Schema> getSchemaForRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
                                                         Set<String> requiredFields, String recordName,
                                                         boolean treatNilableAsOptional) {
-        return RecordTypeMapper.mapRecordFields(recordFieldMap, components, requiredFields, recordName,
-                treatNilableAsOptional, false, componentMapperData, new HashSet<>());
+
+        RecordTypeMapper.RecordFieldMappingContext context = new RecordTypeMapper.RecordFieldMappingContext(
+                recordFieldMap, components, requiredFields, recordName, treatNilableAsOptional,
+                false, componentMapperData, new HashSet<>());
+        return RecordTypeMapper.mapRecordFields(context);
     }
 
     public TypeSymbol getReferredType(TypeSymbol typeSymbol) {
