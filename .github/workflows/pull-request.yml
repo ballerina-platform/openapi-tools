@@ -10,11 +10,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v2
         with:
-          distribution: 'adopt'
-          java-version: 17.0.7
+          distribution: 'temurin'
+          java-version: 21.0.3
       - name: Build with Gradle
         env:
           packageUser: ${{ github.actor }}
@@ -32,11 +32,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v2
         with:
-          distribution: 'adopt'
-          java-version: 17.0.7
+          distribution: 'temurin'
+          java-version: 21.0.3
       - name: Build with Gradle
         env:
           packageUser: ${{ github.actor }}

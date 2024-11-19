@@ -81,7 +81,7 @@ public class TypeHandler {
     private static TypeHandler typeHandlerInstance;
 
     private static BallerinaTypesGenerator ballerinaTypesGenerator;
-    public HashMap<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
+    private HashMap<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
     private final Set<String> imports = new LinkedHashSet<>();
     private static List<Diagnostic> constraintDiagnostics;
 
