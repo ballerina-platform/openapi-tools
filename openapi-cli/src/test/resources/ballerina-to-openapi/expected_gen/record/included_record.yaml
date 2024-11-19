@@ -21,7 +21,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Pod"
+                  $ref: '#/components/schemas/Pod'
   /services:
     get:
       operationId: getServices
@@ -33,7 +33,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Service"
+                  $ref: '#/components/schemas/Service'
   /recB:
     get:
       operationId: getRecb
@@ -45,7 +45,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/RecB"
+                  $ref: '#/components/schemas/RecB'
   /recC:
     get:
       operationId: getRecc
@@ -57,7 +57,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/RecC"
+                  $ref: '#/components/schemas/RecC'
   /recD:
     post:
       operationId: postRecd
@@ -69,7 +69,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/RecD"
+                  $ref: '#/components/schemas/RecD'
   /recE:
     post:
       operationId: postRece
@@ -81,7 +81,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/RecE"
+                  $ref: '#/components/schemas/RecE'
   /recH:
     post:
       operationId: postRech
@@ -93,7 +93,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/RecH"
+                  $ref: '#/components/schemas/RecH'
   /recI:
     post:
       operationId: postReci
@@ -105,7 +105,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/RecI"
+                  $ref: '#/components/schemas/RecI'
   /recJ:
     post:
       operationId: postRecj
@@ -115,7 +115,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecK"
+                $ref: '#/components/schemas/RecK'
 components:
   schemas:
     Metadata:
@@ -132,17 +132,17 @@ components:
     Pod:
       type: object
       allOf:
-        - $ref: "#/components/schemas/Resource"
+        - $ref: '#/components/schemas/Resource'
         - required:
             - spec
           type: object
           properties:
             kind:
               allOf:
-                - $ref: "#/components/schemas/ResourceKind"
+                - $ref: '#/components/schemas/ResourceKind'
               default: Pod
             spec:
-              $ref: "#/components/schemas/PodSpec"
+              $ref: '#/components/schemas/PodSpec'
     PodSpec:
       required:
         - nodeName
@@ -164,7 +164,7 @@ components:
     RecB:
       type: object
       allOf:
-        - $ref: "#/components/schemas/RecA"
+        - $ref: '#/components/schemas/RecA'
         - required:
             - b
           type: object
@@ -176,7 +176,7 @@ components:
     RecC:
       type: object
       allOf:
-        - $ref: "#/components/schemas/RecA"
+        - $ref: '#/components/schemas/RecA'
         - required:
             - c
           type: object
@@ -191,7 +191,7 @@ components:
     RecD:
       type: object
       allOf:
-        - $ref: "#/components/schemas/RecA"
+        - $ref: '#/components/schemas/RecA'
         - required:
             - d
           type: object
@@ -206,7 +206,7 @@ components:
     RecE:
       type: object
       allOf:
-        - $ref: "#/components/schemas/RecA"
+        - $ref: '#/components/schemas/RecA'
         - required:
             - a
             - e
@@ -227,7 +227,7 @@ components:
     RecG:
       type: object
       allOf:
-        - $ref: "#/components/schemas/RecF"
+        - $ref: '#/components/schemas/RecF'
         - type: object
           properties:
             g:
@@ -237,7 +237,7 @@ components:
     RecH:
       type: object
       allOf:
-        - $ref: "#/components/schemas/RecG"
+        - $ref: '#/components/schemas/RecG'
         - required:
             - f
             - g
@@ -250,7 +250,7 @@ components:
     RecI:
       type: object
       allOf:
-        - $ref: "#/components/schemas/RecG"
+        - $ref: '#/components/schemas/RecG'
         - required:
             - g
             - i
@@ -266,9 +266,9 @@ components:
     RecK:
       type: object
       allOf:
-        - $ref: "#/components/schemas/RecA"
-        - $ref: "#/components/schemas/RecF"
-        - $ref: "#/components/schemas/RecL"
+        - $ref: '#/components/schemas/RecA'
+        - $ref: '#/components/schemas/RecF'
+        - $ref: '#/components/schemas/RecL'
         - required:
             - a
             - first-name
@@ -295,7 +295,7 @@ components:
     Resource:
       type: object
       allOf:
-        - $ref: "#/components/schemas/ResourceBase"
+        - $ref: '#/components/schemas/ResourceBase'
         - required:
             - spec
           type: object
@@ -304,7 +304,7 @@ components:
               type: object
               properties: {}
             status:
-              $ref: "#/components/schemas/Status"
+              $ref: '#/components/schemas/Status'
     ResourceBase:
       required:
         - group
@@ -318,9 +318,9 @@ components:
         version:
           type: string
         kind:
-          $ref: "#/components/schemas/ResourceKind"
+          $ref: '#/components/schemas/ResourceKind'
         metadata:
-          $ref: "#/components/schemas/Metadata"
+          $ref: '#/components/schemas/Metadata'
     ResourceKind:
       type: string
       enum:
@@ -329,17 +329,17 @@ components:
     Service:
       type: object
       allOf:
-        - $ref: "#/components/schemas/Resource"
+        - $ref: '#/components/schemas/Resource'
         - required:
             - spec
           type: object
           properties:
             kind:
               allOf:
-                - $ref: "#/components/schemas/ResourceKind"
+                - $ref: '#/components/schemas/ResourceKind'
               default: Service
             spec:
-              $ref: "#/components/schemas/ServiceSpec"
+              $ref: '#/components/schemas/ServiceSpec'
     ServiceSpec:
       required:
         - clusterIP

@@ -465,7 +465,6 @@ public class MapperCommonUtils {
                 .map(en -> en.toString().trim());
     }
 
-
     public static Optional<Object> getConstantValues(Optional<Symbol> symbol) {
         if (symbol.isPresent() && symbol.get() instanceof ConstantSymbol constantSymbol) {
             Object constValue = constantSymbol.constValue();

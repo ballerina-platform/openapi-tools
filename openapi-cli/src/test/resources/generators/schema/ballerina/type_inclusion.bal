@@ -37,6 +37,12 @@ public type ServiceSpec record {
     string clusterIP;
 };
 
+public type AcceptedRecK record {|
+    *http:Accepted;
+    RecK body;
+    map<string|string[]> headers;
+|};
+
 public type Service record {
     *Resource;
     ResourceKind kind = "Service";
@@ -109,8 +115,3 @@ public type RecI record {
     string i;
     int g;
 };
-
-public type RecKAccepted record {|
-    *http:Accepted;
-    RecK body;
-|};
