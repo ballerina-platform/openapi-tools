@@ -33,6 +33,7 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -462,5 +463,15 @@ public class MapperCommonUtils {
                                 .findFirst()
                 ).flatMap(SpecificFieldNode::valueExpr)
                 .map(en -> en.toString().trim());
+    }
+
+    public static Optional<Object> getConstantValues(Optional<Symbol> symbol) {
+        if (symbol.isPresent() && symbol.get() instanceof ConstantSymbol constantSymbol) {
+            Object constValue = constantSymbol.constValue();
+            if (constValue instanceof ConstantValue value) {
+                return Optional.of(value.value());
+            }
+        }
+        return Optional.empty();
     }
 }

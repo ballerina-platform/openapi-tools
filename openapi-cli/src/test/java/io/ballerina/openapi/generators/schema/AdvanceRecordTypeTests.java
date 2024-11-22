@@ -108,4 +108,22 @@ public class AdvanceRecordTypeTests {
         serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
         syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
     }
+
+    @Test(description = "Generate record for schema has allOf types ")
+    public void generateTypeForTypeInclusions() throws IOException, BallerinaOpenApiException,
+            FormatterException {
+        Path definitionPath = RES_DIR.resolve("swagger/inclusion_types.yaml");
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        assertGeneratedSyntaxTreeContainsExpectedSyntaxTree("schema/ballerina/type_inclusion.bal",
+                syntaxTree);
+    }
 }

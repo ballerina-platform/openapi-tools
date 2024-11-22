@@ -18,6 +18,7 @@
 package io.ballerina.openapi.service.mapper.parameter;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -27,6 +28,9 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getConstantValues;
 
 /**
  * This {@link AbstractParameterMapper} class represents the abstract parameter mapper.
@@ -55,8 +59,13 @@ public abstract class AbstractParameterMapper {
         parameterList.forEach(operationInventory::setParameter);
     }
 
-    static Object getDefaultValue(DefaultableParameterNode parameterNode) {
+    static Object getDefaultValue(DefaultableParameterNode parameterNode, SemanticModel semanticModel) {
         Node defaultValueExpression = parameterNode.expression();
+        Optional<Symbol> symbol = semanticModel.symbol(defaultValueExpression);
+        Optional<Object> constantValues = getConstantValues(symbol);
+        if (constantValues.isPresent()) {
+            return constantValues.get();
+        }
         if (MapperCommonUtils.isNotSimpleValueLiteralKind(defaultValueExpression.kind())) {
             return null;
         }

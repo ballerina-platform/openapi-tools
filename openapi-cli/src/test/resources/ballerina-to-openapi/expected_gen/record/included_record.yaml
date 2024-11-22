@@ -1,0 +1,357 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "7080"
+paths:
+  /pods:
+    get:
+      operationId: getPods
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pod'
+  /services:
+    get:
+      operationId: getServices
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+  /recB:
+    get:
+      operationId: getRecb
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecB'
+  /recC:
+    get:
+      operationId: getRecc
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecC'
+  /recD:
+    post:
+      operationId: postRecd
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecD'
+  /recE:
+    post:
+      operationId: postRece
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecE'
+  /recH:
+    post:
+      operationId: postRech
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecH'
+  /recI:
+    post:
+      operationId: postReci
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecI'
+  /recJ:
+    post:
+      operationId: postRecj
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecK'
+components:
+  schemas:
+    Metadata:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+    Pod:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+        - required:
+            - spec
+          type: object
+          properties:
+            kind:
+              allOf:
+                - $ref: '#/components/schemas/ResourceKind'
+              default: Pod
+            spec:
+              $ref: '#/components/schemas/PodSpec'
+    PodSpec:
+      required:
+        - nodeName
+      type: object
+      properties:
+        nodeName:
+          type: string
+    RecA:
+      required:
+        - aa
+      type: object
+      properties:
+        a:
+          type: string
+          default: a
+        aa:
+          type: string
+      additionalProperties: false
+    RecB:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/RecA'
+        - required:
+            - b
+          type: object
+          properties:
+            b:
+              type: integer
+              format: int64
+          additionalProperties: false
+    RecC:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/RecA'
+        - required:
+            - c
+          type: object
+          properties:
+            aa:
+              type: string
+              default: aa
+            c:
+              type: integer
+              format: int64
+          additionalProperties: false
+    RecD:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/RecA'
+        - required:
+            - d
+          type: object
+          properties:
+            a:
+              type: string
+              default: aad
+            d:
+              type: integer
+              format: int64
+          additionalProperties: false
+    RecE:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/RecA'
+        - required:
+            - a
+            - e
+          type: object
+          properties:
+            a:
+              type: string
+            e:
+              type: string
+          additionalProperties: false
+    RecF:
+      type: object
+      properties:
+        f:
+          type: integer
+          format: int64
+      additionalProperties: false
+    RecG:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/RecF'
+        - type: object
+          properties:
+            g:
+              type: integer
+              format: int64
+          additionalProperties: false
+    RecH:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/RecG'
+        - required:
+            - f
+            - g
+            - h
+          type: object
+          properties:
+            h:
+              type: string
+          additionalProperties: false
+    RecI:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/RecG'
+        - required:
+            - g
+            - i
+          type: object
+          properties:
+            f:
+              type: integer
+              format: int64
+              default: 10
+            i:
+              type: string
+          additionalProperties: false
+    RecK:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/RecA'
+        - $ref: '#/components/schemas/RecF'
+        - $ref: '#/components/schemas/RecL'
+        - required:
+            - a
+            - first-name
+            - k
+          type: object
+          properties:
+            k:
+              type: integer
+              format: int64
+            a:
+              type: string
+          additionalProperties: false
+    RecL:
+      required:
+        - id
+      type: object
+      properties:
+        first-name:
+          type: string
+        id:
+          type: integer
+          format: int64
+      additionalProperties: false
+    Resource:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResourceBase'
+        - required:
+            - spec
+          type: object
+          properties:
+            spec:
+              type: object
+              properties: {}
+            status:
+              $ref: '#/components/schemas/Status'
+    ResourceBase:
+      required:
+        - group
+        - kind
+        - metadata
+        - version
+      type: object
+      properties:
+        group:
+          type: string
+        version:
+          type: string
+        kind:
+          $ref: '#/components/schemas/ResourceKind'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+    ResourceKind:
+      type: string
+      enum:
+        - Service
+        - Pod
+    Service:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+        - required:
+            - spec
+          type: object
+          properties:
+            kind:
+              allOf:
+                - $ref: '#/components/schemas/ResourceKind'
+              default: Service
+            spec:
+              $ref: '#/components/schemas/ServiceSpec'
+    ServiceSpec:
+      required:
+        - clusterIP
+      type: object
+      properties:
+        clusterIP:
+          type: string
+    Status:
+      required:
+        - observedGeneration
+      type: object
+      properties:
+        observedGeneration:
+          type: integer
+          format: int64
