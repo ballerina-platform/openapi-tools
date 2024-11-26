@@ -115,8 +115,12 @@ public class ServiceTypeGenerator extends ServiceGenerator {
                 createToken(SyntaxKind.CLOSE_BRACE_TOKEN));
 
         return createTypeDefinitionNode(getServiceMetadata(), null, createToken(TYPE_KEYWORD),
-                createIdentifierToken(GeneratorConstants.SERVICE_TYPE_NAME), objectTypeDescriptorNode,
+                createIdentifierToken(getServiceObjectTypeName()), objectTypeDescriptorNode,
                 createToken(SEMICOLON_TOKEN));
+    }
+
+    protected String getServiceObjectTypeName() {
+        return oasServiceMetadata.getServiceObjectTypeName();
     }
 
     protected MetadataNode getServiceMetadata() {

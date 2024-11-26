@@ -38,6 +38,7 @@ public class OASServiceMetadata {
     private final String srcPackage;
     private final String srcFile;
     private final boolean isUsingSanitizedOas;
+    private final String serviceObjectTypeName;
 
     private OASServiceMetadata(Builder serviceMetadataBuilder) {
         this.openAPI = serviceMetadataBuilder.openAPI;
@@ -50,6 +51,7 @@ public class OASServiceMetadata {
         this.srcPackage = serviceMetadataBuilder.srcPackage;
         this.srcFile = serviceMetadataBuilder.srcFile;
         this.isUsingSanitizedOas = serviceMetadataBuilder.isUsingSanitizedOas;
+        this.serviceObjectTypeName = serviceMetadataBuilder.serviceObjectTypeName;
     }
 
     public OpenAPI getOpenAPI() {
@@ -91,6 +93,10 @@ public class OASServiceMetadata {
     public boolean isUsingSanitizedOas() {
         return isUsingSanitizedOas;
     }
+
+    public String getServiceObjectTypeName() {
+        return serviceObjectTypeName;
+    }
     /**
      * Service generation meta data builder class.
      */
@@ -108,6 +114,7 @@ public class OASServiceMetadata {
         private String srcPackage = "";
         private String srcFile = "";
         private boolean isUsingSanitizedOas = false;
+        private String serviceObjectTypeName = "OASServiceType";
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
@@ -156,6 +163,11 @@ public class OASServiceMetadata {
 
         public Builder withIsUsingSanitizedOas(boolean isUsingSanitizedOas) {
             this.isUsingSanitizedOas = isUsingSanitizedOas;
+            return this;
+        }
+
+        public Builder withServiceObjectTypeName(String serviceObjectTypeName) {
+            this.serviceObjectTypeName = serviceObjectTypeName;
             return this;
         }
 
