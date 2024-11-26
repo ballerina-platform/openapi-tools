@@ -383,6 +383,11 @@ public class AuthConfigGeneratorImp {
      *          # Enables the inbound payload validation functionality which provided by the constraint package.
      *          # Enabled by default
      *          boolean validation = true;
+     *          # Enables or disables relaxed data binding on the service side. Disabled by default.
+     *          # When enabled, the JSON data will be projected to the Ballerina record type and during the projection,
+     *          # nil values will be considered as optional fields and absent fields will be considered for
+     *          # nilable types
+     *          boolean laxDataBinding = true;
      * |};
      * </pre>
      * Scenario 1 : For openapi contracts with no authentication mechanism given, auth field will not be generated
@@ -1333,6 +1338,18 @@ public class AuthConfigGeneratorImp {
                 validationMetadata, null, validationFieldType, validationFieldName,
                 equalToken, createRequiredExpressionNode(createToken(TRUE_KEYWORD)), semicolonToken);
         recordFieldNodes.add(validateFieldNode);
+
+        // add laxBinding for data binding
+        MetadataNode laxDataBindingMetadata = getMetadataNode("Enables or disables relaxed data binding on " +
+                "the client side. Disabled by default. When enabled, the JSON data will be projected to " +
+                "the Ballerina record type and during the projection, nil values will be considered as optional " +
+                "fields and absent fields will be considered for nilable types");
+        IdentifierToken laxDataBindingFieldName = AbstractNodeFactory.createIdentifierToken("laxDataBinding");
+        TypeDescriptorNode laxDataBindingFieldType = createSimpleNameReferenceNode(createIdentifierToken(BOOLEAN));
+        RecordFieldWithDefaultValueNode laxDataBindingFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
+                laxDataBindingMetadata, null, laxDataBindingFieldType, laxDataBindingFieldName,
+                equalToken, createRequiredExpressionNode(createToken(TRUE_KEYWORD)), semicolonToken);
+        recordFieldNodes.add(laxDataBindingFieldNode);
         return recordFieldNodes;
     }
 
