@@ -38,7 +38,13 @@ public class TestConstants {
             "    http:ProxyConfig proxy?;\n" +
             "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
             "Enabled by default\n" +
-            "    boolean validation = true; " +
+            "    boolean validation = true;\n" +
+            "    # Enables or disables relaxed data binding on the client side. Disabled by default.\n" +
+            "    # When enabled, the JSON data will be projected to the Ballerina record type and during the " +
+            "projection, \n" +
+            "    # nil values will be considered as optional fields and absent fields will be considered for " +
+            "nilable types\n" +
+            "    boolean laxDataBinding = true;\n" +
             "|};";
 
     public static final String CLIENT_HTTP1_SETTINGS = "# Provides settings related to HTTP/1.x protocol.\n" +
@@ -210,6 +216,12 @@ public class TestConstants {
             "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
             "Enabled by default\n" +
             "    boolean validation = true;\n" +
+            "    # Enables or disables relaxed data binding on the client side. Disabled by default.\n" +
+            "    # When enabled, the JSON data will be projected to the Ballerina record type and during the " +
+            "projection, \n" +
+            "    # nil values will be considered as optional fields and absent fields will be considered for " +
+            "nilable types\n" +
+            "    boolean laxDataBinding = true;\n" +
             "|};";
     public static final String CONNECTION_CONFIG_MIXED_AUTH = "" +
             "# Provides a set of configurations for controlling the behaviours when communicating with a " +
@@ -248,6 +260,12 @@ public class TestConstants {
             "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
             "Enabled by default\n" +
             "    boolean validation = true;\n" +
+            "    # Enables or disables relaxed data binding on the client side. Disabled by default.\n" +
+            "    # When enabled, the JSON data will be projected to the Ballerina record type and during the " +
+            "projection, \n" +
+            "    # nil values will be considered as optional fields and absent fields will be considered for " +
+            "nilable types\n" +
+            "    boolean laxDataBinding = true;\n" +
             "|};";
 
     public static final String CONNECTION_CONFIG_HTTP_VERSION_1_1 = "" +
@@ -284,6 +302,12 @@ public class TestConstants {
             "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
             "    Enabled by default\n" +
             "    boolean validation = true;\n" +
+            "    # Enables or disables relaxed data binding on the client side. Disabled by default.\n" +
+            "    # When enabled, the JSON data will be projected to the Ballerina record type and during the " +
+            "projection,\n" +
+            "    # nil values will be considered as optional fields and absent fields will be considered for " +
+            "nilable types\n" +
+            "    boolean laxDataBinding = true;\n" +
             "|};";
     public static final String OAUTH2_REFRESH_TOKEN_GRANT_CONFIG_RECORD = "#OAuth2ClientCredentialsGrantConfigs" +
             "publictypeOAuth2ClientCredentialsGrantConfigrecord{|*http:OAuth2ClientCredentialsGrantConfig;" +

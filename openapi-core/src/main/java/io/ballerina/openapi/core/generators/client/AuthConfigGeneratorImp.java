@@ -1340,10 +1340,11 @@ public class AuthConfigGeneratorImp {
         recordFieldNodes.add(validateFieldNode);
 
         // add laxBinding for data binding
-        MetadataNode laxDataBindingMetadata = getMetadataNode("Enables or disables relaxed data binding on " +
-                "the client side. Disabled by default. When enabled, the JSON data will be projected to " +
-                "the Ballerina record type and during the projection, nil values will be considered as optional " +
-                "fields and absent fields will be considered for nilable types");
+        String apiComment = "Enables or disables relaxed data binding on the client side. " +
+                "Disabled by default.\nWhen enabled, the JSON data will be projected to the Ballerina record type" +
+                " and during the projection, \nnil values will be considered as optional fields and absent fields " +
+                "will be considered for nilable types";
+        MetadataNode laxDataBindingMetadata = getMetadataNode(apiComment);
         IdentifierToken laxDataBindingFieldName = AbstractNodeFactory.createIdentifierToken("laxDataBinding");
         TypeDescriptorNode laxDataBindingFieldType = createSimpleNameReferenceNode(createIdentifierToken(BOOLEAN));
         RecordFieldWithDefaultValueNode laxDataBindingFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
