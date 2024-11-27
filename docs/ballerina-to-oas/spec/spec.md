@@ -1228,7 +1228,7 @@ oneOf:
 >```ballerina
 > type RecB record {|
 >    *packageA:RecA;
->     string b = "c";
+>     string b = "b";
 >|};
 >```
 > In the OpenAPI Specification (OAS) mapping for `RecB`, the default value access API cannot retrieve default values
@@ -1239,10 +1239,8 @@ oneOf:
 >   properties:
 >     a:
 >       type: integer
->       default: 10
 >     c:
 >      type: string
->      default: c
 >   additionalProperties: false
 > RecB:
 >   type: object
@@ -1253,8 +1251,8 @@ oneOf:
 >     type: object
 >     properties:
 >       b:
->        type: integer
->        format: int64
+>        type: string
+>        default: b
 >       a:
 >        type: integer
 >       c:
