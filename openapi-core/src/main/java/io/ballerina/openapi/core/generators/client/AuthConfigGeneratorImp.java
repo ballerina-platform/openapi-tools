@@ -383,6 +383,9 @@ public class AuthConfigGeneratorImp {
      *          # Enables the inbound payload validation functionality which provided by the constraint package.
      *          # Enabled by default
      *          boolean validation = true;
+     *          # Enables relaxed data binding on the client side. When enabled, `nil` values are treated as optional,
+     *          # and absent fields are handled as `nilable` types. Enabled by default.
+     *          boolean laxDataBinding = true;
      * |};
      * </pre>
      * Scenario 1 : For openapi contracts with no authentication mechanism given, auth field will not be generated
@@ -929,7 +932,8 @@ public class AuthConfigGeneratorImp {
      *             compression: config.compression,
      *             circuitBreaker: config.circuitBreaker,
      *             retryConfig: config.retryConfig,
-     *             validation: config.validation
+     *             validation: config.validation,
+     *             laxDataBinding: config.laxDataBinding
      *         };
      * </pre>
      *
@@ -1152,6 +1156,9 @@ public class AuthConfigGeneratorImp {
      *     # Enables the inbound payload validation functionality which provided by the constraint package.
      *     Enabled by default
      *     boolean validation = true;
+     *     # Enables relaxed data binding on the client side. When enabled, `nil` values are treated as optional,
+     *     # and absent fields are handled as `nilable` types. Enabled by default.
+     *     boolean laxDataBinding = true;
      * </pre>
      *
      * @return {@link List<Node>}   ClientConfig record fields' node list
@@ -1333,6 +1340,17 @@ public class AuthConfigGeneratorImp {
                 validationMetadata, null, validationFieldType, validationFieldName,
                 equalToken, createRequiredExpressionNode(createToken(TRUE_KEYWORD)), semicolonToken);
         recordFieldNodes.add(validateFieldNode);
+
+        // add laxBinding for data binding
+        String apiComment = "Enables relaxed data binding on the client side. When enabled, `nil` values are treated " +
+                "as optional, \nand absent fields are handled as `nilable` types. Enabled by default.";
+        MetadataNode laxDataBindingMetadata = getMetadataNode(apiComment);
+        IdentifierToken laxDataBindingFieldName = AbstractNodeFactory.createIdentifierToken("laxDataBinding");
+        TypeDescriptorNode laxDataBindingFieldType = createSimpleNameReferenceNode(createIdentifierToken(BOOLEAN));
+        RecordFieldWithDefaultValueNode laxDataBindingFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
+                laxDataBindingMetadata, null, laxDataBindingFieldType, laxDataBindingFieldName,
+                equalToken, createRequiredExpressionNode(createToken(TRUE_KEYWORD)), semicolonToken);
+        recordFieldNodes.add(laxDataBindingFieldNode);
         return recordFieldNodes;
     }
 
