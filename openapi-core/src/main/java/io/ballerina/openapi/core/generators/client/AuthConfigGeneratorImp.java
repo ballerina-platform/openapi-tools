@@ -383,10 +383,8 @@ public class AuthConfigGeneratorImp {
      *          # Enables the inbound payload validation functionality which provided by the constraint package.
      *          # Enabled by default
      *          boolean validation = true;
-     *          # Enables or disables relaxed data binding on the service side. Disabled by default.
-     *          # When enabled, the JSON data will be projected to the Ballerina record type and during the projection,
-     *          # nil values will be considered as optional fields and absent fields will be considered for
-     *          # nilable types
+     *          # Enables relaxed data binding on the client side. When enabled, `nil` values are treated as optional,
+     *          # and absent fields are handled as `nilable` types. Enabled by default.
      *          boolean laxDataBinding = true;
      * |};
      * </pre>
@@ -934,7 +932,8 @@ public class AuthConfigGeneratorImp {
      *             compression: config.compression,
      *             circuitBreaker: config.circuitBreaker,
      *             retryConfig: config.retryConfig,
-     *             validation: config.validation
+     *             validation: config.validation,
+     *             laxDataBinding: config.laxDataBinding
      *         };
      * </pre>
      *
@@ -1157,6 +1156,9 @@ public class AuthConfigGeneratorImp {
      *     # Enables the inbound payload validation functionality which provided by the constraint package.
      *     Enabled by default
      *     boolean validation = true;
+     *     # Enables relaxed data binding on the client side. When enabled, `nil` values are treated as optional,
+     *     # and absent fields are handled as `nilable` types. Enabled by default.
+     *     boolean laxDataBinding = true;
      * </pre>
      *
      * @return {@link List<Node>}   ClientConfig record fields' node list
@@ -1340,10 +1342,8 @@ public class AuthConfigGeneratorImp {
         recordFieldNodes.add(validateFieldNode);
 
         // add laxBinding for data binding
-        String apiComment = "Enables or disables relaxed data binding on the client side. " +
-                "Disabled by default.\nWhen enabled, the JSON data will be projected to the Ballerina record type" +
-                " and during the projection, \nnil values will be considered as optional fields and absent fields " +
-                "will be considered for nilable types";
+        String apiComment = "Enables relaxed data binding on the client side. When enabled, `nil` values are treated " +
+                "as optional, \nand absent fields are handled as `nilable` types. Enabled by default.";
         MetadataNode laxDataBindingMetadata = getMetadataNode(apiComment);
         IdentifierToken laxDataBindingFieldName = AbstractNodeFactory.createIdentifierToken("laxDataBinding");
         TypeDescriptorNode laxDataBindingFieldType = createSimpleNameReferenceNode(createIdentifierToken(BOOLEAN));
