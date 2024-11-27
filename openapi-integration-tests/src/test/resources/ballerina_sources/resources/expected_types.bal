@@ -102,4 +102,8 @@ public type ConnectionConfig record {|
     http:ProxyConfig proxy?;
     # Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default
     boolean validation = true;
+    # Enables or disables relaxed data binding on the client side. Disabled by default.
+    # When enabled, the JSON data will be projected to the Ballerina record type and during the projection,
+    # nil values will be considered as optional fields and absent fields will be considered for nilable types
+    boolean laxDataBinding = true;
 |};
