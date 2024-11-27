@@ -17,10 +17,10 @@
 plugins {
     id "base"
     id 'maven-publish'
-    id "com.github.spotbugs" version "5.0.14"
-    id "com.github.johnrengelman.shadow" version "8.1.1"
-    id "de.undercouch.download" version "5.4.0"
-    id "net.researchgate.release" version "2.8.0"
+    id "com.github.spotbugs" version "${spotbugsPluginVersion}"
+    id "com.github.johnrengelman.shadow" version "${shadowJarPluginVersion}"
+    id "de.undercouch.download" version "${downloadPluginVersion}"
+    id "net.researchgate.release" version "${releasePluginVersion}"
     id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
     id "org.sonarqube" version "4.0.0.2929"
 }
@@ -54,7 +54,7 @@ ext.stdlibTaskVersion = project.stdlibTaskVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
 ext.stdlibUrlVersion = project.stdlibUrlVersion
-ext.stdlibXmldataVersion = project.stdlibXmldataVersion
+ext.stdlibDataXmldataVersion = project.stdlibDataXmldataVersion
 ext.stdlibGraphqlVersion = project.stdlibGraphqlVersion
 ext.stdlibGrpcVersion = project.stdlibGrpcVersion
 ext.stdlibWebsubVersion = project.stdlibWebsubVersion
@@ -129,7 +129,7 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:oauth2-ballerina:${stdlibOAuth2Version}"
         ballerinaStdLibs "io.ballerina.stdlib:uuid-ballerina:${stdlibUuidVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:url-ballerina:${stdlibUrlVersion}"
-        ballerinaStdLibs "io.ballerina.lib:data.xmldata-ballerina:${stdlibXmldataVersion}"
+        ballerinaStdLibs "io.ballerina.lib:data.xmldata-ballerina:${stdlibDataXmldataVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${observeVersion}"
         ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:graphql-ballerina:${stdlibGraphqlVersion}"
