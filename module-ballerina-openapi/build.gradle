@@ -340,6 +340,7 @@ ballerinaBuild.dependsOn checkstyleMain
 ballerinaBuild.dependsOn checkstyleTest
 ballerinaBuild.dependsOn jar
 ballerinaBuild.finalizedBy revertTomlFile
+ballerinaBuild.dependsOn test
 build.dependsOn ballerinaBuild
 
 publishToMavenLocal.dependsOn build
