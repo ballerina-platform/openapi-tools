@@ -71,7 +71,8 @@ public class QueryParameterMapper extends AbstractParameterMapper {
             this.semanticModel = additionalData.semanticModel();
             this.typeMapper = typeMapper;
             if (parameterNode instanceof DefaultableParameterNode defaultableQueryParam) {
-                this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam);
+                this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableQueryParam,
+                        additionalData.semanticModel());
             }
         }
     }
