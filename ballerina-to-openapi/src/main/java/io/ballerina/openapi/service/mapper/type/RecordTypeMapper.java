@@ -21,6 +21,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -49,6 +50,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getConstantValues;
 import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
 import static io.ballerina.openapi.service.mapper.Constants.NAME_CONFIG;
 import static io.ballerina.openapi.service.mapper.Constants.VALUE;
@@ -76,14 +78,17 @@ public class RecordTypeMapper extends AbstractTypeMapper {
 
     public static Schema getSchema(RecordTypeSymbol typeSymbol, Components components, String recordName,
                                    AdditionalData additionalData) {
+        Set<String> fieldsOnlyForRequiredList = new HashSet<>();
         ObjectSchema schema = new ObjectSchema();
         Set<String> requiredFields = new HashSet<>();
 
         Map<String, RecordFieldSymbol> recordFieldMap = new LinkedHashMap<>(typeSymbol.fieldDescriptors());
-        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, additionalData);
-
-        Map<String, Schema> properties = mapRecordFields(recordFieldMap, components, requiredFields,
-                recordName, false, additionalData);
+        List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, additionalData,
+                recordName, fieldsOnlyForRequiredList);
+        RecordFieldMappingContext mappingContext = new RecordFieldMappingContext(
+                recordFieldMap, components, requiredFields, recordName, false,
+                true, additionalData, fieldsOnlyForRequiredList);
+        Map<String, Schema> properties = mapRecordFields(mappingContext);
 
         Optional<TypeSymbol> restFieldType = typeSymbol.restTypeDescriptor();
         if (restFieldType.isPresent()) {
@@ -95,8 +100,8 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             schema.additionalProperties(false);
         }
 
-        schema.setProperties(properties);
         schema.setRequired(requiredFields.stream().toList());
+        schema.setProperties(properties);
         if (!allOfSchemaList.isEmpty()) {
             ObjectSchema schemaWithAllOf = new ObjectSchema();
             allOfSchemaList.add(schema);
@@ -108,7 +113,8 @@ public class RecordTypeMapper extends AbstractTypeMapper {
 
     static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, Components components,
                                            Map<String, RecordFieldSymbol> recordFieldMap,
-                                           AdditionalData additionalData) {
+                                           AdditionalData additionalData, String recordName,
+                                           Set<String> fieldsOnlyForRequiredList) {
         List<Schema> allOfSchemaList = new ArrayList<>();
         List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
         for (TypeSymbol typeInclusion : typeInclusions) {
@@ -125,19 +131,148 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                         .typeDescriptor();
                 Map<String, RecordFieldSymbol> includedRecordFieldMap = includedRecordTypeSymbol.fieldDescriptors();
                 for (Map.Entry<String, RecordFieldSymbol> includedRecordField : includedRecordFieldMap.entrySet()) {
-                    recordFieldMap.remove(includedRecordField.getKey());
+                    if (!recordFieldMap.containsKey(includedRecordField.getKey())) {
+                        continue;
+                    }
+                    RecordFieldSymbol recordFieldSymbol = recordFieldMap.get(includedRecordField.getKey());
+                    RecordFieldSymbol includedRecordFieldValue = includedRecordField.getValue();
+
+                    if (!includedRecordFieldValue.typeDescriptor().equals(recordFieldSymbol.typeDescriptor())) {
+                        continue;
+                    }
+                    IncludedFieldContext context = new IncludedFieldContext(recordFieldMap, recordName, typeInclusion,
+                            includedRecordField, recordFieldSymbol, includedRecordFieldValue);
+                    eliminateRedundantFields(context, additionalData, fieldsOnlyForRequiredList);
                 }
             }
         }
         return allOfSchemaList;
     }
 
-    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                      Components components, Set<String> requiredFields,
-                                                      String recordName, boolean treatNilableAsOptional,
-                                                      boolean inferNameFromJsonData,
-                                                      AdditionalData additionalData) {
+    private static void eliminateRedundantFields(IncludedFieldContext context, AdditionalData additionalData,
+                                                 Set<String> fieldsOnlyForRequiredList) {
+        Map<String, RecordFieldSymbol> recordFieldMap = context.recordFieldMap();
+        String recordName = context.recordName();
+        TypeSymbol typeInclusion = context.typeInclusion();
+        Map.Entry<String, RecordFieldSymbol> includedRecordField = context.includedRecordField();
+        RecordFieldSymbol recordFieldSymbol = context.recordFieldSymbol();
+        RecordFieldSymbol includedRecordFieldValue = context.includedRecordFieldValue();
+
+        boolean recordHasDefault = recordFieldSymbol.hasDefaultValue();
+        boolean includedHasDefault = includedRecordFieldValue.hasDefaultValue();
+        boolean hasTypeInclusionName = typeInclusion.getName().isPresent();
+        boolean isIncludedOptional = includedRecordFieldValue.isOptional();
+        boolean isRecordFieldOptional = recordFieldSymbol.isOptional();
+        boolean recordFieldName = recordFieldSymbol.getName().isPresent();
+
+        if (recordHasDefault && includedHasDefault && hasTypeInclusionName) {
+            Optional<Object> recordFieldDefaultValueOpt = getRecordFieldDefaultValue(recordName,
+                    includedRecordField.getKey(), additionalData.moduleMemberVisitor(),
+                    additionalData.semanticModel());
+
+            Optional<Object> includedFieldDefaultValueOpt = getRecordFieldDefaultValue(
+                    typeInclusion.getName().get(), includedRecordField.getKey(),
+                    additionalData.moduleMemberVisitor(), additionalData.semanticModel());
+
+            /*
+              This check the scenarios
+              ex:
+              type RecA record {|
+                  string a = "a";
+                  string aa;
+              |};
+              type RecD record {|
+                  *RecA;
+                  string a = "aad";
+                  int d;
+              |};
+             */
+            boolean defaultsAreEqual = recordFieldDefaultValueOpt.isPresent()
+                    && includedFieldDefaultValueOpt.isPresent()
+                    && recordFieldDefaultValueOpt.get().toString()
+                    .equals(includedFieldDefaultValueOpt.get().toString());
+
+            /*
+              This checks the scenario where RecA has `a` defaultable field. In this case, the
+              .hasDefaultValue() API returns true for both records, but RecA provides the value of the default.
+              ex:
+              type RecA record {|
+                  string a = "a";
+                  string aa;
+              |};
+              type RecB record {|
+                  *RecA;
+                  int b;
+              |};
+             */
+            boolean onlyIncludedHasDefault = recordFieldDefaultValueOpt.isEmpty() &&
+                    includedFieldDefaultValueOpt.isPresent();
+
+            if (defaultsAreEqual || onlyIncludedHasDefault) {
+                recordFieldMap.remove(includedRecordField.getKey());
+            }
+        } else if (!recordHasDefault && !includedHasDefault) {
+            recordFieldMap.remove(includedRecordField.getKey());
+        }
+        if (!isRecordFieldOptional && isIncludedOptional && !recordHasDefault && recordFieldName) {
+            fieldsOnlyForRequiredList.add(MapperCommonUtils.unescapeIdentifier(recordFieldSymbol.getName().get()));
+            recordFieldMap.remove(includedRecordField.getKey());
+        }
+    }
+
+    /**
+     * Encapsulates the context of included fields in a record for processing.
+     *
+     * @param recordFieldMap         A map containing record field symbols.
+     * @param recordName             The name of the record being processed.
+     * @param typeInclusion          The type symbol representing type inclusions in the record.
+     * @param includedRecordField    An entry representing the included record field and its symbol.
+     * @param recordFieldSymbol      The symbol of the current record field being processed.
+     * @param includedRecordFieldValue The symbol of the field in the included record.
+     */
+    public record IncludedFieldContext(
+            Map<String, RecordFieldSymbol> recordFieldMap,
+            String recordName,
+            TypeSymbol typeInclusion,
+            Map.Entry<String, RecordFieldSymbol> includedRecordField,
+            RecordFieldSymbol recordFieldSymbol,
+            RecordFieldSymbol includedRecordFieldValue) {
+    }
+
+    /**
+     * Encapsulates the context needed for mapping record fields to schemas.
+     *
+     * @param recordFieldMap        A map containing record field symbols.
+     * @param components            Components used for managing and storing schemas during mapping.
+     * @param requiredFields        A set of field names that are required in the mapped schema.
+     * @param recordName            The name of the record being processed.
+     * @param treatNilableAsOptional Flag indicating whether nilable fields should be treated as optional.
+     * @param inferNameFromJsonData Flag indicating whether field names should be inferred from JSON data.
+     * @param additionalData        Additional data required for schema generation and field processing.
+     * @param fieldsOnlyForRequiredList A set of fields that should be exclusively marked as required.
+     */
+    public record RecordFieldMappingContext(
+            Map<String, RecordFieldSymbol> recordFieldMap,
+            Components components,
+            Set<String> requiredFields,
+            String recordName,
+            boolean treatNilableAsOptional,
+            boolean inferNameFromJsonData,
+            AdditionalData additionalData,
+            Set<String> fieldsOnlyForRequiredList) {
+    }
+
+    public static Map<String, Schema> mapRecordFields(RecordFieldMappingContext context) {
+        Map<String, RecordFieldSymbol> recordFieldMap = context.recordFieldMap();
+        Components components = context.components();
+        Set<String> requiredFields = context.requiredFields();
+        String recordName = context.recordName();
+        boolean treatNilableAsOptional = context.treatNilableAsOptional();
+        boolean inferNameFromJsonData = context.inferNameFromJsonData();
+        AdditionalData additionalData = context.additionalData();
+        Set<String> fieldsOnlyForRequiredList = context.fieldsOnlyForRequiredList();
         Map<String, Schema> properties = new LinkedHashMap<>();
+
         for (Map.Entry<String, RecordFieldSymbol> recordField : recordFieldMap.entrySet()) {
             RecordFieldSymbol recordFieldSymbol = recordField.getValue();
             String recordFieldName = getRecordFieldName(inferNameFromJsonData, recordField,
@@ -145,6 +280,9 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             if (!recordFieldSymbol.isOptional() && !recordFieldSymbol.hasDefaultValue() &&
                     (!treatNilableAsOptional || !UnionTypeMapper.hasNilableType(recordFieldSymbol.typeDescriptor()))) {
                 requiredFields.add(recordFieldName);
+            }
+            if (!fieldsOnlyForRequiredList.isEmpty()) {
+                requiredFields.addAll(fieldsOnlyForRequiredList);
             }
             String recordFieldDescription = getRecordFieldTypeDescription(recordFieldSymbol);
             Schema recordFieldSchema = TypeMapperImpl.getTypeSchema(recordFieldSymbol.typeDescriptor(),
@@ -154,7 +292,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             }
             if (recordFieldSymbol.hasDefaultValue()) {
                 Optional<Object> recordFieldDefaultValueOpt = getRecordFieldDefaultValue(recordName, recordFieldName,
-                        additionalData.moduleMemberVisitor());
+                        additionalData.moduleMemberVisitor(), additionalData.semanticModel());
                 if (recordFieldDefaultValueOpt.isPresent()) {
                     TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValueOpt.get());
                 } else {
@@ -168,14 +306,6 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         return properties;
     }
 
-    public static Map<String, Schema> mapRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                      Components components, Set<String> requiredFields,
-                                                      String recordName, boolean treatNilableAsOptional,
-                                                      AdditionalData additionalData) {
-        return mapRecordFields(recordFieldMap, components, requiredFields, recordName, treatNilableAsOptional,
-                true, additionalData);
-    }
-
     private static String getRecordFieldName(boolean inferNameFromJsonData,
                                              Map.Entry<String, RecordFieldSymbol> recordFieldEntry,
                                              SemanticModel semanticModel) {
@@ -185,17 +315,19 @@ public class RecordTypeMapper extends AbstractTypeMapper {
     }
 
     public static Optional<Object> getRecordFieldDefaultValue(String recordName, String fieldName,
-                                                    ModuleMemberVisitor moduleMemberVisitor) {
+                                                              ModuleMemberVisitor moduleMemberVisitor,
+                                                              SemanticModel semanticModel) {
         Optional<TypeDefinitionNode> recordDefNodeOpt = moduleMemberVisitor.getTypeDefinitionNode(recordName);
         if (recordDefNodeOpt.isPresent() &&
                 recordDefNodeOpt.get().typeDescriptor() instanceof RecordTypeDescriptorNode recordDefNode) {
-            return getRecordFieldDefaultValue(fieldName, recordDefNode);
+            return getRecordFieldDefaultValue(fieldName, recordDefNode, semanticModel);
         }
         return Optional.empty();
     }
 
     private static Optional<Object> getRecordFieldDefaultValue(String fieldName,
-                                                               RecordTypeDescriptorNode recordDefNode) {
+                                                               RecordTypeDescriptorNode recordDefNode,
+                                                               SemanticModel semanticModel) {
         NodeList<Node> recordFields = recordDefNode.fields();
         RecordFieldWithDefaultValueNode defaultValueNode = recordFields.stream()
                 .filter(field -> field instanceof RecordFieldWithDefaultValueNode)
@@ -206,6 +338,11 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             return Optional.empty();
         }
         ExpressionNode defaultValueExpression = defaultValueNode.expression();
+        Optional<Symbol> symbol = semanticModel.symbol(defaultValueExpression);
+        Optional<Object> value = getConstantValues(symbol);
+        if (value.isPresent()) {
+            return value;
+        }
         if (MapperCommonUtils.isNotSimpleValueLiteralKind(defaultValueExpression.kind())) {
             return Optional.empty();
         }

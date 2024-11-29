@@ -512,7 +512,7 @@ function testInvalidImplFunctionSignature() {
     OkAlbumArray|NotFoundErrorMessage|error res = albumClient->getAlbums3(genre = "Hard Rock");
     if res is error {
         test:assertTrue(res is ClientMethodInvocationError);
-        test:assertTrue(res.message().includes("client method invocation failed: java.lang.ClassCastException: " +
+        test:assertTrue(res.message().includes("error in invoking client remote method: " +
                 "class io.ballerina.runtime.internal.values.TypedescValueImpl cannot be cast to class io.ballerina.runtime.internal.values.MapValueImpl"));
     } else {
         test:assertFail("invalid response type");

@@ -18,19 +18,9 @@
 package io.ballerina.openapi.client;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
-import io.ballerina.runtime.api.PredefinedTypes;
-import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import static io.ballerina.runtime.api.constants.RuntimeConstants.CURRENT_TRANSACTION_CONTEXT_PROPERTY;
-import static io.ballerina.runtime.observability.ObservabilityConstants.KEY_OBSERVER_CONTEXT;
 
 /**
  * This class contains the generated client's native code.
@@ -38,12 +28,6 @@ import static io.ballerina.runtime.observability.ObservabilityConstants.KEY_OBSE
  * @since 1.9.0
  */
 public class GeneratedClient {
-
-    static final String MAIN_STRAND = "MAIN_STRAND";
-    static final String SRC_HANDLER = "SRC_HANDLER";
-    static final String REMOTE_ADDRESS = "REMOTE_ADDRESS";
-    static final String ORIGIN_HOST = "ORIGIN_HOST";
-    static final String POOLED_BYTE_BUFFER_FACTORY = "POOLED_BYTE_BUFFER_FACTORY";
 
     public static Object invokeResource(Environment env, BObject client, BArray pathParams, BArray params) {
         String functionName = env.getFunctionName();
@@ -80,14 +64,12 @@ public class GeneratedClient {
         int pathLength = (int) path.getLength();
         int paramLength = (int) params.getLength();
 
-        Object[] paramFeed = new Object[(pathLength + paramLength) * 2];
+        Object[] paramFeed = new Object[pathLength + paramLength];
         for (int i = 0; i < pathLength; i++) {
-            paramFeed[i * 2] = path.get(i);
-            paramFeed[i * 2 + 1] = true;
+            paramFeed[i] = path.get(i);
         }
         for (int i = 0; i < paramLength; i++) {
-            paramFeed[(pathLength + i) * 2] = params.get(i);
-            paramFeed[(pathLength + i) * 2 + 1] = true;
+            paramFeed[pathLength + i] = params.get(i);
         }
 
         return invokeClientMethod(env, client, methodName, paramFeed);
@@ -97,49 +79,22 @@ public class GeneratedClient {
                                              String methodName) {
         int paramLength = (int) params.getLength();
 
-        Object[] paramFeed = new Object[paramLength * 2];
+        Object[] paramFeed = new Object[paramLength];
         for (int i = 0; i < paramLength; i++) {
-            paramFeed[i * 2] = params.get(i);
-            paramFeed[i * 2 + 1] = true;
+            paramFeed[i] = params.get(i);
         }
 
         return invokeClientMethod(env, client, methodName, paramFeed);
     }
 
     private static Object invokeClientMethod(Environment env, BObject client, String methodName, Object[] paramFeed) {
-        Future balFuture = env.markAsync();
-        Map<String, Object> propertyMap = getPropertiesToPropagate(env);
-        env.getRuntime().invokeMethodAsyncSequentially(client, methodName, null, null, new Callback() {
-            @Override
-            public void notifySuccess(Object result) {
-                balFuture.complete(result);
+        return env.yieldAndRun(() -> {
+            try {
+                return env.getRuntime().callMethod(client, methodName, null, paramFeed);
+            } catch (BError bError) {
+                return ClientUtil.createHttpError("client method invocation failed: " +
+                        bError.getErrorMessage(), bError);
             }
-
-            @Override
-            public void notifyFailure(BError bError) {
-                BError invocationError = ClientUtil.createHttpError("client method invocation failed: " +
-                                bError.getErrorMessage(), bError);
-                balFuture.complete(invocationError);
-            }
-        }, propertyMap, PredefinedTypes.TYPE_NULL, paramFeed);
-        return null;
-    }
-
-    private static Map<String, Object> getPropertiesToPropagate(Environment env) {
-        String[] keys = {CURRENT_TRANSACTION_CONTEXT_PROPERTY, KEY_OBSERVER_CONTEXT, SRC_HANDLER, MAIN_STRAND,
-                POOLED_BYTE_BUFFER_FACTORY, REMOTE_ADDRESS, ORIGIN_HOST};
-        Map<String, Object> subMap = new HashMap<>();
-        for (String key : keys) {
-            Object value = env.getStrandLocal(key);
-            if (value != null) {
-                subMap.put(key, value);
-            }
-        }
-        String strandParentFunctionName = Objects.isNull(env.getStrandMetadata()) ? null :
-                env.getStrandMetadata().getParentFunctionName();
-        if (Objects.nonNull(strandParentFunctionName) && strandParentFunctionName.equals("onMessage")) {
-            subMap.put(MAIN_STRAND, true);
-        }
-        return subMap;
+        });
     }
 }

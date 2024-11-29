@@ -1,0 +1,133 @@
+openapi: 3.0.1
+info:
+  title: PayloadV
+  version: 2.0.0
+servers:
+  - url: "{server}:{port}/payloadV"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "7080"
+paths:
+  /Pods:
+    get:
+      operationId: getPods
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pod'
+  /Services:
+    get:
+      operationId: getServices
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+components:
+  schemas:
+    Metadata:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+    Pod:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+        - required:
+            - spec
+          type: object
+          properties:
+            kind:
+              allOf:
+                - $ref: '#/components/schemas/ResourceKind'
+              default: Pod
+            spec:
+              $ref: '#/components/schemas/PodSpec'
+    PodSpec:
+      required:
+        - nodeName
+      type: object
+      properties:
+        nodeName:
+          type: string
+    Resource:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ResourceBase'
+        - required:
+            - spec
+          type: object
+          properties:
+            spec:
+              type: object
+              properties: {}
+            status:
+              $ref: '#/components/schemas/Status'
+    ResourceBase:
+      required:
+        - group
+        - kind
+        - metadata
+        - version
+      type: object
+      properties:
+        group:
+          type: string
+        version:
+          type: string
+        kind:
+          $ref: '#/components/schemas/ResourceKind'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+    ResourceKind:
+      type: string
+      enum:
+        - Service
+        - Pod
+    Service:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+        - required:
+            - spec
+          type: object
+          properties:
+            kind:
+              allOf:
+                - $ref: '#/components/schemas/ResourceKind'
+              default: Service
+            spec:
+              $ref: '#/components/schemas/ServiceSpec'
+    ServiceSpec:
+      required:
+        - clusterIP
+      type: object
+      properties:
+        clusterIP:
+          type: string
+    Status:
+      required:
+        - observedGeneration
+      type: object
+      properties:
+        observedGeneration:
+          type: integer
+          format: int64

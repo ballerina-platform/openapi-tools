@@ -38,6 +38,7 @@ import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.openapi.core.generators.type.model.RecordMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -67,6 +68,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.TYPE_KEYWORD;
 import static io.ballerina.openapi.core.generators.type.diagnostic.TypeGenerationDiagnosticMessages.OAS_TYPE_102;
+import static io.ballerina.openapi.core.generators.type.diagnostic.TypeGenerationDiagnosticMessages.OAS_TYPE_103;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for allOf schemas.
@@ -94,11 +96,13 @@ import static io.ballerina.openapi.core.generators.type.diagnostic.TypeGeneratio
  */
 public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
     private final List<Schema<?>> restSchemas = new LinkedList<>();
+    private final Map<String, Schema> allProperties = new HashMap<>();
 
     public AllOfRecordTypeGenerator(Schema schema, String typeName, boolean ignoreNullableFlag,
                                     HashMap<String, TypeDefinitionNode> subTypesMap,
                                     HashMap<String, NameReferenceNode> pregeneratedTypeMap) {
         super(schema, typeName, ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
+        allProperties.putAll(getAllPropertiesFromComposedSchema(schema));
     }
 
     /**
@@ -201,6 +205,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 if (Objects.isNull(required)) {
                     required = new ArrayList<>();
                 }
+                updateRFieldsWithRequiredProperties(properties, required);
                 required.addAll(requiredFields);
                 recordFieldList.addAll(addRecordFields(required, properties.entrySet(), typeName));
                 addAdditionalSchemas(allOfSchema);
@@ -230,6 +235,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             List<String> required = refSchema.getRequired();
             if (Objects.nonNull(required)) {
                 requiredFields.removeAll(required);
+                updateRFieldsWithRequiredProperties(properties, required);
             }
             Set<Map.Entry<String, Schema<?>>> fieldProperties = new HashSet<>();
             for (Map.Entry<String, Schema<?>> property : properties.entrySet()) {
@@ -240,6 +246,14 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
             recordFieldList.addAll(addRecordFields(requiredFields, fieldProperties, typeName));
         } catch (BallerinaOpenApiException e) {
             throw new OASTypeGenException(e.getMessage());
+        }
+    }
+
+    private void updateRFieldsWithRequiredProperties(Map<String, Schema<?>> properties, List<String> required) {
+        for (String field: required) {
+            if (!properties.containsKey(field) && allProperties.containsKey(field)) {
+                properties.put(field, allProperties.get(field));
+            }
         }
     }
 
@@ -319,5 +333,49 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
         if (refSchema.getAdditionalProperties() != null && refSchema.getAdditionalProperties() instanceof Schema) {
             restSchemas.add((Schema<?>) refSchema.getAdditionalProperties());
         }
+    }
+
+    public Map<String, Schema> getAllPropertiesFromComposedSchema(Schema schemaV) {
+        Map<String, Schema> properties = new HashMap<>();
+        if (!(schemaV instanceof ComposedSchema composedSchema)) {
+            return new HashMap<>();
+        }
+        // Process allOf, anyOf, and oneOf schemas, including nested composed schemas
+        try {
+            addPropertiesFromSchemas(composedSchema.getAllOf(), properties);
+            addPropertiesFromSchemas(composedSchema.getAnyOf(), properties);
+            addPropertiesFromSchemas(composedSchema.getOneOf(), properties);
+        } catch (InvalidReferenceException e) {
+            diagnostics.add(new TypeGeneratorDiagnostic(OAS_TYPE_103, e.getMessage()));
+        }
+        return properties;
+    }
+
+    private void addPropertiesFromSchemas(List<Schema> schemas, Map<String, Schema> properties)
+            throws InvalidReferenceException {
+        if (schemas != null) {
+            for (Schema<?> schema : schemas) {
+                if (schema instanceof ComposedSchema composedSchema) {
+                    // Recursively resolve nested composed schemas
+                    properties.putAll(getAllPropertiesFromComposedSchema(composedSchema));
+                } else {
+                    // Add properties from standard schemas or resolved references
+                    properties.putAll(resolveAndGetProperties(schema, GeneratorMetaData.getInstance().getOpenAPI()));
+                }
+            }
+        }
+    }
+
+    private Map<String, Schema> resolveAndGetProperties(Schema schema, OpenAPI openapi)
+            throws InvalidReferenceException {
+        if (schema.get$ref() != null) {
+            String refName;
+            refName = GeneratorUtils.extractReferenceType(schema.get$ref());
+            schema = openapi.getComponents().getSchemas().get(refName);
+        }
+        if (schema instanceof ComposedSchema composedSchema) {
+            return getAllPropertiesFromComposedSchema(composedSchema);
+        }
+        return schema != null && schema.getProperties() != null ? schema.getProperties() : new HashMap<>();
     }
 }

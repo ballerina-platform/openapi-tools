@@ -80,7 +80,8 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
             this.description = apiDocs.get(headerParameter.getName().get());
             this.treatNilableAsOptional = treatNilableAsOptional;
             if (parameterNode instanceof DefaultableParameterNode defaultableHeaderParam) {
-                this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableHeaderParam);
+                this.defaultValue = AbstractParameterMapper.getDefaultValue(defaultableHeaderParam,
+                        additionalData.semanticModel());
             }
             this.typeMapper = typeMapper;
         }

@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v2
         with:
-          distribution: 'adopt'
-          java-version: 17.0.7
+          distribution: 'temurin'
+          java-version: 21.0.3
       - name: Check for Ballerina to OpenAPI release
         run: |
           BAL_TO_OPENAPI_VERSION=$(grep -w "ballerinaToOpenAPIVersion" gradle.properties | cut -d= -f2)

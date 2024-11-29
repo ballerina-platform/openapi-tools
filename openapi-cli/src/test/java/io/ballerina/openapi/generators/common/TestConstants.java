@@ -38,7 +38,11 @@ public class TestConstants {
             "    http:ProxyConfig proxy?;\n" +
             "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
             "Enabled by default\n" +
-            "    boolean validation = true; " +
+            "    boolean validation = true;\n" +
+            "    # Enables relaxed data binding on the client side. When enabled, `nil` values are treated " +
+            "as optional,\n" +
+            "    # and absent fields are handled as `nilable` types. Enabled by default.\n" +
+            "    boolean laxDataBinding = true;\n" +
             "|};";
 
     public static final String CLIENT_HTTP1_SETTINGS = "# Provides settings related to HTTP/1.x protocol.\n" +
@@ -210,6 +214,10 @@ public class TestConstants {
             "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
             "Enabled by default\n" +
             "    boolean validation = true;\n" +
+            "    # Enables relaxed data binding on the client side. When enabled, `nil` values are treated " +
+            "as optional,\n" +
+            "    # and absent fields are handled as `nilable` types. Enabled by default.\n" +
+            "    boolean laxDataBinding = true;\n" +
             "|};";
     public static final String CONNECTION_CONFIG_MIXED_AUTH = "" +
             "# Provides a set of configurations for controlling the behaviours when communicating with a " +
@@ -248,6 +256,10 @@ public class TestConstants {
             "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
             "Enabled by default\n" +
             "    boolean validation = true;\n" +
+            "    # Enables relaxed data binding on the client side. When enabled, `nil` values are treated " +
+            "as optional,\n" +
+            "    # and absent fields are handled as `nilable` types. Enabled by default.\n" +
+            "    boolean laxDataBinding = true;\n" +
             "|};";
 
     public static final String CONNECTION_CONFIG_HTTP_VERSION_1_1 = "" +
@@ -284,6 +296,10 @@ public class TestConstants {
             "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
             "    Enabled by default\n" +
             "    boolean validation = true;\n" +
+            "    # Enables relaxed data binding on the client side. When enabled, `nil` values are treated " +
+            "as optional,\n" +
+            "    # and absent fields are handled as `nilable` types. Enabled by default.\n" +
+            "    boolean laxDataBinding = true;\n" +
             "|};";
     public static final String OAUTH2_REFRESH_TOKEN_GRANT_CONFIG_RECORD = "#OAuth2ClientCredentialsGrantConfigs" +
             "publictypeOAuth2ClientCredentialsGrantConfigrecord{|*http:OAuth2ClientCredentialsGrantConfig;" +

@@ -57,14 +57,14 @@ paths:
         "200":
           description: Ok
           headers:
-            Last-Modified:
-              schema:
-                type: string
             Cache-Control:
               schema:
                 type: string
                 default: "must-revalidate,private,max-age=3600"
             ETag:
+              schema:
+                type: string
+            Last-Modified:
               schema:
                 type: string
           content:

@@ -32,6 +32,7 @@ import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -113,8 +114,11 @@ public class TypeMapperImpl implements TypeMapper {
     public Map<String, Schema> getSchemaForRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
                                                         Set<String> requiredFields, String recordName,
                                                         boolean treatNilableAsOptional) {
-        return RecordTypeMapper.mapRecordFields(recordFieldMap, components, requiredFields, recordName,
-                treatNilableAsOptional, false, componentMapperData);
+
+        RecordTypeMapper.RecordFieldMappingContext context = new RecordTypeMapper.RecordFieldMappingContext(
+                recordFieldMap, components, requiredFields, recordName, treatNilableAsOptional,
+                false, componentMapperData, new HashSet<>());
+        return RecordTypeMapper.mapRecordFields(context);
     }
 
     public TypeSymbol getReferredType(TypeSymbol typeSymbol) {

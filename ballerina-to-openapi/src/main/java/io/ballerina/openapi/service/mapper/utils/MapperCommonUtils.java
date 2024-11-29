@@ -570,6 +570,16 @@ public class MapperCommonUtils {
         return Optional.empty();
     }
 
+    public static Optional<Object> getConstantValues(Optional<Symbol> symbol) {
+        if (symbol.isPresent() && symbol.get() instanceof ConstantSymbol constantSymbol) {
+            Object constValue = constantSymbol.constValue();
+            if (constValue instanceof ConstantValue value) {
+                return Optional.of(value.value());
+            }
+        }
+        return Optional.empty();
+    }
+
     public static Node getTypeDescriptor(TypeDefinitionNode typeDefinitionNode) {
         Node node = typeDefinitionNode.typeDescriptor();
         if (node instanceof DistinctTypeDescriptorNode distinctTypeDescriptorNode) {

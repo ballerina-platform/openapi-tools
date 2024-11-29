@@ -413,8 +413,8 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         project = BuildProject.load(path);
 
         Map<String, PackageManifest.Platform> platforms = project.currentPackage().manifest().platforms();
-        if (Objects.nonNull(platforms) && platforms.containsKey("java17")) {
-            Optional<Map<String, Object>> nativeDependency = platforms.get("java17").dependencies().stream().filter(
+        if (Objects.nonNull(platforms) && platforms.containsKey("java21")) {
+            Optional<Map<String, Object>> nativeDependency = platforms.get("java21").dependencies().stream().filter(
                     dependency -> dependency.containsKey("groupId") &&
                             dependency.get("groupId").equals("io.ballerina.openapi")
                             && dependency.containsKey("artifactId") &&
@@ -439,7 +439,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
     private NodeList<DocumentMemberDeclarationNode> populateClientNativeDependency(
             NodeList<DocumentMemberDeclarationNode> tomlMembers, String version) {
         String desc = "This dependency is added automatically by the OpenAPI tool. DO NOT REMOVE UNLESS REQUIRED";
-        tomlMembers = tomlMembers.add(SampleNodeGenerator.createTableArray("platform.java17.dependency", desc));
+        tomlMembers = tomlMembers.add(SampleNodeGenerator.createTableArray("platform.java21.dependency", desc));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("groupId", "io.ballerina.openapi", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("artifactId", "client-native", null));
         tomlMembers = tomlMembers.add(SampleNodeGenerator.createStringKV("version", version, null));
