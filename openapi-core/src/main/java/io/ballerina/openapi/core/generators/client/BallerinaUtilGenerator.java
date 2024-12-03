@@ -137,6 +137,8 @@ public class BallerinaUtilGenerator {
     private static final String GET_PATH_FOR_QUERY_PARAM = "getPathForQueryParam";
     private static final String GET_SERIALIZED_RECORD_ARRAY = "getSerializedRecordArray";
     private static final String CREATE_MULTIPART_BODY_PARTS = "createBodyParts";
+    private static final String CONSTRUCT_ENTITY = "constructEntity";
+    private static final String POPULATE_ENCODING_INFO = "populateEncodingInfo";
     private static final String GET_VALIDATED_RESPONSE_FOR_DEFAULT_MAPPING = "getValidatedResponseForDefaultMapping";
     private static final String CREATE_STATUS_CODE_RESPONSE_BINDING_ERROR = "createStatusCodeResponseBindingError";
 
@@ -253,6 +255,8 @@ public class BallerinaUtilGenerator {
         }
         if (requestBodyMultipartFormDatafound) {
             functionNameList.add(CREATE_MULTIPART_BODY_PARTS);
+            functionNameList.add(CONSTRUCT_ENTITY);
+            functionNameList.add(POPULATE_ENCODING_INFO);
         }
         if (defaultStatusCodeResponseBindingFound) {
             functionNameList.addAll(Arrays.asList(
