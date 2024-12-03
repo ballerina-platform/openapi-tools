@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.ballerina.openapi.generators.common.GeneratorTestUtils.compareGeneratedSyntaxTreeWithExpectedSyntaxTree;
 import static io.ballerina.openapi.generators.common.GeneratorTestUtils.getDiagnostics;
 
 /**
@@ -208,6 +209,20 @@ public class UtilGenerationTests {
         SyntaxTree schemaSyntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
         List<Diagnostic> diagnostics = getDiagnostics(clientSyntaxTree, schemaSyntaxTree, ballerinaClientGenerator);
         Assert.assertTrue(diagnostics.isEmpty());
+    }
+
+    @Test(description = "Test for generating request body and utils when operation has multipart form-data " +
+            "media type with array")
+    public void testRequestBodyWithMultipartMediaArrayType() throws IOException, BallerinaOpenApiException,
+            ClientException {
+        Path expectedClientPath = RESDIR.resolve("../ballerina/multipart_formdata_array_client.bal");
+        Path expectedUtilsPath = RESDIR.resolve("../ballerina/multipart_formdata_array_utils.bal");
+        Path definitionPath = RESDIR.resolve("swagger/multipart_formdata_array.yaml");
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath);
+        SyntaxTree clientSyntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedClientPath, clientSyntaxTree);
+        SyntaxTree utilsSyntaxTree = ballerinaClientGenerator.getBallerinaUtilGenerator().generateUtilSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedUtilsPath, utilsSyntaxTree);
     }
 
     private boolean checkUtil(List<String> invalidFunctionNames, SyntaxTree utilSyntaxTree) {
