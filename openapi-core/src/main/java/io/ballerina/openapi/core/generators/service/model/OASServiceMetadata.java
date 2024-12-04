@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.core.generators.service.model;
 
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -114,7 +115,7 @@ public class OASServiceMetadata {
         private String srcPackage = "";
         private String srcFile = "";
         private boolean isUsingSanitizedOas = false;
-        private String serviceObjectTypeName = "OASServiceType";
+        private String serviceObjectTypeName = GeneratorConstants.SERVICE_TYPE_NAME;
 
         public Builder withOpenAPI(OpenAPI openAPI) {
             this.openAPI = openAPI;
