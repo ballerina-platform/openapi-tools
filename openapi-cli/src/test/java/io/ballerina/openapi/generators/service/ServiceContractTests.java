@@ -42,6 +42,23 @@ public class ServiceContractTests {
     Filter filter = new Filter(list1, list2);
     SyntaxTree syntaxTree;
 
+    @Test(description = "Test default service object type name")
+    public void testDefaultServiceTypeNameInGeneratedService() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/service_type/default_service_type_name.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        ServiceContractGenerator serviceContractGenerator = new ServiceContractGenerator(oasServiceMetadata,
+                ballerinaServiceGenerator.getFunctionsList());
+        syntaxTree = serviceContractGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "service_type/default_service_type_name.bal", syntaxTree);
+    }
+
     @Test(description = "Test custom service object type name")
     public void testCustomServiceTypeNameInGeneratedService() throws IOException, BallerinaOpenApiException {
         Path definitionPath = RES_DIR.resolve("swagger/service_type/custom_service_type_name.yaml");
@@ -60,13 +77,14 @@ public class ServiceContractTests {
                 "service_type/custom_service_type_name.bal", syntaxTree);
     }
 
-    @Test(description = "Test default service object type name")
-    public void testDefaultServiceTypeNameInGeneratedService() throws IOException, BallerinaOpenApiException {
-        Path definitionPath = RES_DIR.resolve("swagger/service_type/default_service_type_name.yaml");
+    @Test(description = "Test custom service object type name with special characters")
+    public void testCustomServiceTypeNameWithSpecialCharacters() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/service_type/custom_name_with_special_characters.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
                 .withOpenAPI(openAPI)
                 .withFilters(filter)
+                .withServiceObjectTypeName("CustomServiceObject%$&TypeName1")
                 .build();
         TypeHandler.createInstance(openAPI, false);
         ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
@@ -74,6 +92,78 @@ public class ServiceContractTests {
                 ballerinaServiceGenerator.getFunctionsList());
         syntaxTree = serviceContractGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
-                "service_type/default_service_type_name.bal", syntaxTree);
+                "service_type/custom_name_with_special_characters.bal", syntaxTree);
+    }
+
+    @Test(description = "Test custom service object type name with an empty value")
+    public void testCustomServiceTypeNameWithEmptyValue() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/service_type/custom_name_with_empty_value.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .withServiceObjectTypeName("")
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        ServiceContractGenerator serviceContractGenerator = new ServiceContractGenerator(oasServiceMetadata,
+                ballerinaServiceGenerator.getFunctionsList());
+        syntaxTree = serviceContractGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "service_type/custom_name_with_empty_value.bal", syntaxTree);
+    }
+
+    @Test(description = "Test custom service object type name with a whitespace")
+    public void testCustomServiceTypeNameWithWhitespace() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/service_type/custom_name_with_whitespace.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .withServiceObjectTypeName("CustomServiceObject TypeName2")
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        ServiceContractGenerator serviceContractGenerator = new ServiceContractGenerator(oasServiceMetadata,
+                ballerinaServiceGenerator.getFunctionsList());
+        syntaxTree = serviceContractGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "service_type/custom_name_with_whitespace.bal", syntaxTree);
+    }
+
+    @Test(description = "Test custom service object type name with only special characters")
+    public void testCustomServiceTypeNameWithOnlySpecialCharacters() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/service_type/custom_name_only_special_characters.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .withServiceObjectTypeName("%$@#")
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        ServiceContractGenerator serviceContractGenerator = new ServiceContractGenerator(oasServiceMetadata,
+                ballerinaServiceGenerator.getFunctionsList());
+        syntaxTree = serviceContractGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "service_type/custom_name_only_special_characters.bal", syntaxTree);
+    }
+
+    @Test(description = "Test custom service object type name with only whitespace")
+    public void testCustomServiceTypeNameWithOnlyWhitespace() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/service_type/custom_name_only_whitespace.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .withServiceObjectTypeName("    ")
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        ServiceContractGenerator serviceContractGenerator = new ServiceContractGenerator(oasServiceMetadata,
+                ballerinaServiceGenerator.getFunctionsList());
+        syntaxTree = serviceContractGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "service_type/custom_name_only_whitespace.bal", syntaxTree);
     }
 }

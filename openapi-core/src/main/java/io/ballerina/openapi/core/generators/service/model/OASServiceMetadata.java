@@ -168,7 +168,14 @@ public class OASServiceMetadata {
         }
 
         public Builder withServiceObjectTypeName(String serviceObjectTypeName) {
-            this.serviceObjectTypeName = serviceObjectTypeName;
+            if (serviceObjectTypeName == null || serviceObjectTypeName.trim().isEmpty()) {
+                this.serviceObjectTypeName = GeneratorConstants.SERVICE_TYPE_NAME;
+            } else {
+                this.serviceObjectTypeName = serviceObjectTypeName.replaceAll("[^a-zA-Z0-9]", "");
+                if (this.serviceObjectTypeName.isEmpty()) {
+                    this.serviceObjectTypeName = GeneratorConstants.SERVICE_TYPE_NAME;
+                }
+            }
             return this;
         }
 
