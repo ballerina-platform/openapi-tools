@@ -231,38 +231,88 @@ isolated function getPathForQueryParam(map<anydata> queryParam, map<Encoding> en
     return restOfPath;
 }
 
-isolated function createBodyParts(record {|anydata...;|} anyRecord, map<Encoding> encodingMap = {}) returns mime:Entity[]|error {
+isolated function createBodyParts(record {|anydata...;|} anyRecord, map<Encoding> encodingMap = {})
+returns mime:Entity[]|error {
     mime:Entity[] entities = [];
     foreach [string, anydata] [key, value] in anyRecord.entries() {
         Encoding encodingData = encodingMap.hasKey(key) ? encodingMap.get(key) : {};
-        mime:Entity entity = new mime:Entity();
+        string contentDisposition = string `form-data; name=${key};`;
         if value is record {byte[] fileContent; string fileName;} {
-            entity.setContentDisposition(mime:getContentDispositionObject(string `form-data; name=${key};  filename=${value.fileName}`));
-            entity.setByteArray(value.fileContent);
+            string fileContentDisposition = string `${contentDisposition} filename=${value.fileName}`;
+            mime:Entity entity = check constructEntity(fileContentDisposition, encodingData,
+                    value.fileContent);
+            entities.push(entity);
         } else if value is byte[] {
-            entity.setContentDisposition(mime:getContentDispositionObject(string `form-data; name=${key};`));
-            entity.setByteArray(value);
-        } else if value is SimpleBasicType|SimpleBasicType[] {
-            entity.setContentDisposition(mime:getContentDispositionObject(string `form-data; name=${key};`));
-            entity.setText(value.toString());
-        } else if value is record {}|record {}[] {
-            entity.setContentDisposition(mime:getContentDispositionObject(string `form-data; name=${key};`));
-            entity.setJson(value.toJson());
-        }
-        if encodingData?.contentType is string {
-            check entity.setContentType(encodingData?.contentType.toString());
-        }
-        map<any>? headers = encodingData?.headers;
-        if headers is map<any> {
-            foreach var [headerName, headerValue] in headers.entries() {
-                if headerValue is SimpleBasicType {
-                    entity.setHeader(headerName, headerValue.toString());
+            mime:Entity entity = check constructEntity(contentDisposition, encodingData, value);
+            entities.push(entity);
+        } else if value is SimpleBasicType {
+            mime:Entity entity = check constructEntity(contentDisposition, encodingData,
+                    value.toString());
+            entities.push(entity);
+        } else if value is SimpleBasicType[] {
+            if encodingData.explode {
+                foreach SimpleBasicType member in value {
+                    mime:Entity entity = check constructEntity(contentDisposition, encodingData,
+                            member.toString());
+                    entities.push(entity);
                 }
+            } else {
+                string[] valueStrArray = from SimpleBasicType val in value
+                    select val.toString();
+                mime:Entity entity = check constructEntity(contentDisposition, encodingData,
+                        string:'join(",", ...valueStrArray));
+                entities.push(entity);
+            }
+        } else if value is record {} {
+            mime:Entity entity = check constructEntity(contentDisposition, encodingData,
+                    value.toString());
+            entities.push(entity);
+        } else if value is record {}[] {
+            if encodingData.explode {
+                foreach record {} member in value {
+                    mime:Entity entity = check constructEntity(contentDisposition, encodingData,
+                            member.toString());
+                    entities.push(entity);
+                }
+            } else {
+                string[] valueStrArray = from record {} val in value
+                    select val.toJsonString();
+                mime:Entity entity = check constructEntity(contentDisposition, encodingData,
+                        string:'join(",", ...valueStrArray));
+                entities.push(entity);
             }
         }
-        entities.push(entity);
     }
     return entities;
+}
+
+isolated function constructEntity(string contentDisposition, Encoding encoding,
+        string|byte[]|record {} data) returns mime:Entity|error {
+    mime:Entity entity = new mime:Entity();
+    entity.setContentDisposition(mime:getContentDispositionObject(contentDisposition));
+    if data is byte[] {
+        entity.setByteArray(data);
+    } else if data is string {
+        entity.setText(data);
+    } else {
+        entity.setJson(data.toJson());
+    }
+    check populateEncodingInfo(entity, encoding);
+    return entity;
+}
+
+isolated function populateEncodingInfo(mime:Entity entity, Encoding encoding) returns error? {
+    if encoding?.contentType is string {
+        check entity.setContentType(encoding?.contentType.toString());
+    }
+    map<any>? headers = encoding?.headers;
+    if headers is map<any> {
+        foreach var [headerName, headerValue] in headers.entries() {
+            if headerValue is SimpleBasicType {
+                entity.setHeader(headerName, headerValue.toString());
+            }
+        }
+    }
 }
 
 isolated function getValidatedResponseForDefaultMapping(http:StatusCodeResponse|error response, int[] nonDefaultStatusCodes) returns http:StatusCodeResponse|error {
