@@ -169,7 +169,11 @@ public class OASServiceMetadata {
         }
 
         public Builder withServiceObjectTypeName(String serviceObjectTypeName) {
-            this.serviceObjectTypeName = GeneratorUtils.escapeIdentifier(serviceObjectTypeName);
+            if (serviceObjectTypeName == null || serviceObjectTypeName.trim().isEmpty()) {
+                this.serviceObjectTypeName = GeneratorConstants.SERVICE_TYPE_NAME;
+            } else {
+                this.serviceObjectTypeName = GeneratorUtils.escapeIdentifier(serviceObjectTypeName);
+            }
             return this;
         }
 

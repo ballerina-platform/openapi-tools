@@ -112,4 +112,40 @@ public class ServiceContractTests {
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "service_type/custom_name_with_whitespace.bal", syntaxTree);
     }
+
+    @Test(description = "Test custom service object type name with an empty value")
+    public void testCustomServiceTypeNameWithEmptyValue() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/service_type/custom_name_with_empty_value.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .withServiceObjectTypeName("")
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        ServiceContractGenerator serviceContractGenerator = new ServiceContractGenerator(oasServiceMetadata,
+                ballerinaServiceGenerator.getFunctionsList());
+        syntaxTree = serviceContractGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "service_type/custom_name_with_empty_value.bal", syntaxTree);
+    }
+
+    @Test(description = "Test custom service object type name with only whitespace")
+    public void testCustomServiceTypeNameWithOnlyWhitespace() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("swagger/service_type/custom_name_only_whitespace.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .withServiceObjectTypeName("    ")
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator ballerinaServiceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        ServiceContractGenerator serviceContractGenerator = new ServiceContractGenerator(oasServiceMetadata,
+                ballerinaServiceGenerator.getFunctionsList());
+        syntaxTree = serviceContractGenerator.generateSyntaxTree();
+        CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
+                "service_type/custom_name_only_whitespace.bal", syntaxTree);
+    }
 }
