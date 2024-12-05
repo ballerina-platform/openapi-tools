@@ -19,6 +19,7 @@
 package io.ballerina.openapi.core.generators.service.model;
 
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -168,14 +169,7 @@ public class OASServiceMetadata {
         }
 
         public Builder withServiceObjectTypeName(String serviceObjectTypeName) {
-            if (serviceObjectTypeName == null || serviceObjectTypeName.trim().isEmpty()) {
-                this.serviceObjectTypeName = GeneratorConstants.SERVICE_TYPE_NAME;
-            } else {
-                this.serviceObjectTypeName = serviceObjectTypeName.replaceAll("[^a-zA-Z0-9]", "");
-                if (this.serviceObjectTypeName.isEmpty()) {
-                    this.serviceObjectTypeName = GeneratorConstants.SERVICE_TYPE_NAME;
-                }
-            }
+            this.serviceObjectTypeName = GeneratorUtils.escapeIdentifier(serviceObjectTypeName);
             return this;
         }
 
