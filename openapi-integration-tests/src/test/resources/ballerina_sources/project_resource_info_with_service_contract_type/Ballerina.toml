@@ -1,0 +1,4 @@
+[package]
+org= "ballerina"
+name= "service_contract"
+version= "2.0.0"
