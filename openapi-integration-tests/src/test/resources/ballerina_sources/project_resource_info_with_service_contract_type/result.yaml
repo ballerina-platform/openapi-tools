@@ -1,0 +1,83 @@
+openapi: 3.0.1
+info:
+  title: V1
+  version: 2.0.0
+servers:
+  - url: "http://{server}:{port}/v1"
+    variables:
+      server:
+        default: localhost
+      port:
+        default: "8080"
+paths:
+  /user:
+    post:
+      tags:
+        - user
+      operationId: postUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            examples:
+              user01:
+                value:
+                  id: "123"
+                  name: Jessica
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                Jessica:
+                  value:
+                    id: "123"
+                    name: Jessica
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    User:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      additionalProperties: false

@@ -100,7 +100,7 @@ public type Examples readonly & record {|
 |};
 
 # Annotation for additional OpenAPI information of a Ballerina resource function.
-public const annotation ResourceInformation ResourceInfo on object function;
+public const annotation ResourceInformation ResourceInfo on object function, object field;
 
 # Annotation for additional OpenAPI information of a Ballerina service.
 public annotation ServiceInformation ServiceInfo on service, type;
