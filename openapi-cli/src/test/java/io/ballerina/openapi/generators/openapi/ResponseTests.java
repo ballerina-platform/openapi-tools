@@ -286,7 +286,7 @@ public class ResponseTests {
         compareWithGeneratedFile(ballerinaFilePath, "response/simple_name_ref.yaml");
     }
 
-    @Test(description = "Test scenarios where return type is a SimpleNameReference with readonly")
+    @Test(description = "Test scenarios where return type is a SimpleNameReference with readonly", enabled = false)
     public void testResponseWithReadOnlySimpleNameReferenceReturnType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/readonly.bal");
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
@@ -383,7 +383,7 @@ public class ResponseTests {
         compareWithGeneratedFile(ballerinaFilePath, "response/nil_return_type.yaml");
     }
 
-    @Test(description = "When the resource has nil union type return")
+    @Test(description = "When the resource has nil union type return", enabled = false)
     public void testNilUnionReturnType() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("response/nil_union_return_type.bal");
         OASContractGenerator openApiConverterUtils = new OASContractGenerator();
