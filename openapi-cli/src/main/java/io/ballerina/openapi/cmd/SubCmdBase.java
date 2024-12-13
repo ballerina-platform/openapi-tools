@@ -77,7 +77,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
     private static final String COMMAND_IDENTIFIER = "openapi-%s";
     private static final String COMMA = ",";
 
-    private static final String INFO_OUTPUT_WRITTEN_MSG = "INFO: %sed OpenAPI definition file was successfully" +
+    private static final String INFO_OUTPUT_WRITTEN_MSG = "INFO: %s OpenAPI definition file was successfully" +
             " written to: %s%n";
     private static final String WARNING_INVALID_OUTPUT_FORMAT = "WARNING: invalid output format. The output format" +
             " should be either \"json\" or \"yaml\".Defaulting to format of the input file";
@@ -93,7 +93,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
             "parsing the OpenAPI definition file";
     protected static final String FOUND_PARSER_DIAGNOSTICS = "found the following parser diagnostic messages:";
     private static final String ERROR_OCCURRED_WHILE_WRITING_THE_OUTPUT_OPENAPI_FILE = "ERROR: error occurred while " +
-            "writing the %sed OpenAPI definition file%n";
+            "writing the %s OpenAPI definition file%n";
     private static final String WARNING_SWAGGER_V2_FOUND = "WARNING: Swagger version 2.0 found in the OpenAPI " +
             "definition. The generated OpenAPI definition will be in OpenAPI version 3.0.x";
 
@@ -103,6 +103,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
     private Path targetPath = Paths.get(System.getProperty("user.dir"));
     private boolean exitWhenFinish = true;
     private final CommandType cmdType;
+    private final String infoMsgPrefix;
 
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     public boolean helpFlag;
@@ -125,14 +126,16 @@ public abstract class SubCmdBase implements BLauncherCmd {
     @CommandLine.Option(names = {"--operations"}, description = "Operations that need to be included when sanitizing.")
     public String operations;
 
-    protected SubCmdBase(CommandType cmdType) {
+    protected SubCmdBase(CommandType cmdType, String infoMsgPrefix) {
         this.cmdType = cmdType;
+        this.infoMsgPrefix = infoMsgPrefix;
     }
 
-    protected SubCmdBase(CommandType cmdType, PrintStream errorStream, boolean exitWhenFinish) {
+    protected SubCmdBase(CommandType cmdType, String infoMsgPrefix, PrintStream errorStream, boolean exitWhenFinish) {
         this.cmdType = cmdType;
         this.errorStream = errorStream;
         this.exitWhenFinish = exitWhenFinish;
+        this.infoMsgPrefix = infoMsgPrefix;
     }
 
     public void printHelpText() {
@@ -198,11 +201,13 @@ public abstract class SubCmdBase implements BLauncherCmd {
         return Optional.of(openAPI);
     }
 
-    public Optional<OpenAPI> getFilteredOpenAPI(String openAPIFileContent) {
+    public Optional<OpenAPI> getFilteredOpenAPI(String openAPIFileContent, boolean enableResolver) {
         // Read the contents of the file with default parser options
         // Flattening will be done after filtering the operations
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(enableResolver);
         SwaggerParseResult parserResult = new OpenAPIParser().readContents(openAPIFileContent, null,
-                new ParseOptions());
+                parseOptions);
         if (!parserResult.getMessages().isEmpty() &&
                 parserResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
             errorStream.println(ERROR_UNSUPPORTED_OPENAPI_VERSION);
@@ -287,9 +292,9 @@ public abstract class SubCmdBase implements BLauncherCmd {
         try {
             CodegenUtils.writeFile(targetPath.resolve(outputFileNameWithExt),
                     outputFileNameWithExt.endsWith(JSON_EXTENSION) ? Json.pretty(openAPI) : Yaml.pretty(openAPI));
-            infoStream.printf(INFO_OUTPUT_WRITTEN_MSG, cmdType.getName(), targetPath.resolve(outputFileNameWithExt));
+            infoStream.printf(INFO_OUTPUT_WRITTEN_MSG, infoMsgPrefix, targetPath.resolve(outputFileNameWithExt));
         } catch (IOException exception) {
-            errorStream.printf(ERROR_OCCURRED_WHILE_WRITING_THE_OUTPUT_OPENAPI_FILE, cmdType.getName());
+            errorStream.printf(ERROR_OCCURRED_WHILE_WRITING_THE_OUTPUT_OPENAPI_FILE, infoMsgPrefix);
             exitError();
         }
     }

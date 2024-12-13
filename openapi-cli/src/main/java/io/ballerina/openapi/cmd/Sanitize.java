@@ -38,12 +38,14 @@ import java.util.Optional;
 )
 public class Sanitize extends SubCmdBase {
 
+    private static final String INFO_MSG_PREFIX = "Sanitized";
+
     public Sanitize() {
-        super(CommandType.SANITIZE);
+        super(CommandType.SANITIZE, INFO_MSG_PREFIX);
     }
 
     public Sanitize(PrintStream errorStream, boolean exitWhenFinish) {
-        super(CommandType.SANITIZE, errorStream, exitWhenFinish);
+        super(CommandType.SANITIZE, INFO_MSG_PREFIX, errorStream, exitWhenFinish);
     }
 
     @Override
@@ -53,7 +55,7 @@ public class Sanitize extends SubCmdBase {
 
     @Override
     public Optional<OpenAPI> generate(String openAPIFileContent) {
-        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent);
+        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent, true);
         return filteredOpenAPI.flatMap(this::sanitizeOpenAPI);
     }
 
