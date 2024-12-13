@@ -51,13 +51,14 @@ public class Flatten extends SubCmdBase {
 
     private static final String ERROR_OCCURRED_WHILE_GENERATING_SCHEMA_NAMES = "ERROR: error occurred while " +
             "generating schema names";
+    private static final String INFO_MSG_PREFIX = "Flattened";
 
     public Flatten() {
-        super(CommandType.FLATTEN);
+        super(CommandType.FLATTEN, INFO_MSG_PREFIX);
     }
 
     public Flatten(PrintStream errorStream, boolean exitWhenFinish) {
-        super(CommandType.FLATTEN, errorStream, exitWhenFinish);
+        super(CommandType.FLATTEN, INFO_MSG_PREFIX, errorStream, exitWhenFinish);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class Flatten extends SubCmdBase {
 
     @Override
     public Optional<OpenAPI> generate(String openAPIFileContent) {
-        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent);
+        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent, false);
         if (filteredOpenAPI.isEmpty()) {
             return Optional.empty();
         }

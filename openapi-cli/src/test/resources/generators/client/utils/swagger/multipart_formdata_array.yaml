@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: Multipart Form-Data API
+  description: API to handle multipart form-data requests.
+  version: "1.0.0"
+paths:
+  /upload:
+    post:
+      summary: Upload a file with metadata and tags
+      description: Accepts a file upload along with metadata and tags as a multipart form-data request.
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to be uploaded.
+                metadata:
+                  type: object
+                  additionalProperties: true
+                  description: Additional metadata associated with the file.
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: List of tags associated with the file.
+              required:
+                - file
+            encoding:
+              file:
+                contentType: application/octet-stream
+                style: form
+              metadata:
+                contentType: application/json
+                style: form
+              tags:
+                contentType: text/plain
+                style: form
+                explode: true
+      responses:
+        "200":
+          description: File uploaded successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: File uploaded successfully.
+                  file:
+                    type: string
+                    description: The name of the uploaded file.
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    description: List of tags associated with the uploaded file.
