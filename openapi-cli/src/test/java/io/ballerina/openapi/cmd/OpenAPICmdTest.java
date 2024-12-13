@@ -1130,7 +1130,8 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
 
     @Test(description = "Test openapi sanitize sub command with unresolved parameter schema")
     public void testSanitizeCmdWithUnresolvedParameterSchema() throws IOException {
-        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/sanitize/sanitized_openapi_unresolved_expected.yaml"));
+        Path expectedFilePath = resourceDir.resolve(
+                Paths.get("cmd/sanitize/sanitized_openapi_unresolved_expected.yaml"));
         String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_unresolved.yaml", "-o", tmpDir.toString()};
         Sanitize sanitize = new Sanitize();
         new CommandLine(sanitize).parseArgs(args);
