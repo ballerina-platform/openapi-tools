@@ -103,6 +103,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
     private Path targetPath = Paths.get(System.getProperty("user.dir"));
     private boolean exitWhenFinish = true;
     private final CommandType cmdType;
+    private final String infoMsgPrefix;
 
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     public boolean helpFlag;
@@ -125,14 +126,16 @@ public abstract class SubCmdBase implements BLauncherCmd {
     @CommandLine.Option(names = {"--operations"}, description = "Operations that need to be included when sanitizing.")
     public String operations;
 
-    protected SubCmdBase(CommandType cmdType) {
+    protected SubCmdBase(CommandType cmdType, String infoMsgPrefix) {
         this.cmdType = cmdType;
+        this.infoMsgPrefix = infoMsgPrefix;
     }
 
-    protected SubCmdBase(CommandType cmdType, PrintStream errorStream, boolean exitWhenFinish) {
+    protected SubCmdBase(CommandType cmdType, String infoMsgPrefix, PrintStream errorStream, boolean exitWhenFinish) {
         this.cmdType = cmdType;
         this.errorStream = errorStream;
         this.exitWhenFinish = exitWhenFinish;
+        this.infoMsgPrefix = infoMsgPrefix;
     }
 
     public void printHelpText() {
@@ -198,11 +201,13 @@ public abstract class SubCmdBase implements BLauncherCmd {
         return Optional.of(openAPI);
     }
 
-    public Optional<OpenAPI> getFilteredOpenAPI(String openAPIFileContent) {
+    public Optional<OpenAPI> getFilteredOpenAPI(String openAPIFileContent, boolean enableResolver) {
         // Read the contents of the file with default parser options
         // Flattening will be done after filtering the operations
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(enableResolver);
         SwaggerParseResult parserResult = new OpenAPIParser().readContents(openAPIFileContent, null,
-                new ParseOptions());
+                parseOptions);
         if (!parserResult.getMessages().isEmpty() &&
                 parserResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
             errorStream.println(ERROR_UNSUPPORTED_OPENAPI_VERSION);
