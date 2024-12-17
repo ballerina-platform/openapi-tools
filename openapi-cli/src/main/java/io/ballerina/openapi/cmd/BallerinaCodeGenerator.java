@@ -577,9 +577,9 @@ public class BallerinaCodeGenerator {
                 .build();
         TypeHandler.createInstance(openAPIDef, options.nullable);
         ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
-        List<GenSrcFile> sourceFiles = new ArrayList<>();
+        List<GenSrcFile> sourceFiles;
         if (options.singleFile) {
-            generateSingleFileForService(serviceGenerationHandler, oasServiceMetadata, sourceFiles);
+            sourceFiles = List.of(generateSingleFileForService(serviceGenerationHandler, oasServiceMetadata));
         } else {
             sourceFiles = generateFilesForService(serviceGenerationHandler, oasServiceMetadata);
         }
@@ -608,19 +608,18 @@ public class BallerinaCodeGenerator {
         return sourceFiles;
     }
 
-    private static void generateSingleFileForService(ServiceGenerationHandler serviceGenerationHandler,
-                                                     OASServiceMetadata oasServiceMetadata,
-                                                     List<GenSrcFile> sourceFiles) throws
+    public static GenSrcFile generateSingleFileForService(ServiceGenerationHandler serviceGenerationHandler,
+                                                          OASServiceMetadata oasServiceMetadata) throws
             BallerinaOpenApiException, FormatterException {
         SyntaxTree syntaxTree = serviceGenerationHandler.generateSingleSyntaxTree(oasServiceMetadata);
         if (!oasServiceMetadata.generateWithoutDataBinding()) {
             syntaxTree = SingleFileGenerator.combineSyntaxTrees(syntaxTree,
                     TypeHandler.getInstance().generateTypeSyntaxTree());
         }
-        sourceFiles.add(new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
+        return new GenSrcFile(GenSrcFile.GenFileType.GEN_SRC, oasServiceMetadata.getSrcPackage(),
                 oasServiceMetadata.getSrcFile(),
                 (oasServiceMetadata.getLicenseHeader().isBlank() ? DEFAULT_FILE_HEADER :
-                        oasServiceMetadata.getLicenseHeader()) + Formatter.format(syntaxTree).toSourceCode()));
+                        oasServiceMetadata.getLicenseHeader()) + Formatter.format(syntaxTree).toSourceCode());
     }
 
     private void printDiagnostic(List<Diagnostic> diagnostics) {
