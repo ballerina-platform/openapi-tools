@@ -57,13 +57,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OperationListResult'
+                $ref: "#/components/schemas/OperationListResult"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       x-ms-examples:
         Operations_List:
           parameters:
@@ -315,13 +315,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubDescriptionListResult'
+                $ref: "#/components/schemas/IotHubDescriptionListResult"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_ListBySubscription:
@@ -418,7 +418,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OperationInputs'
+              $ref: "#/components/schemas/OperationInputs"
         required: true
       responses:
         200:
@@ -428,13 +428,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubNameAvailabilityInfo'
+                $ref: "#/components/schemas/IotHubNameAvailabilityInfo"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_CheckNameAvailability:
@@ -478,13 +478,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSubscriptionQuotaListResult'
+                $ref: "#/components/schemas/UserSubscriptionQuotaListResult"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         ResourceProviderCommon_GetSubscriptionQuota:
@@ -538,13 +538,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubDescriptionListResult'
+                $ref: "#/components/schemas/IotHubDescriptionListResult"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_ListByResourceGroup:
@@ -656,7 +656,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FailoverInput'
+              $ref: "#/components/schemas/FailoverInput"
         required: true
       responses:
         200:
@@ -670,7 +670,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       x-ms-examples:
         IotHub_ManualFailover:
           parameters:
@@ -722,7 +722,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TestAllRoutesInput'
+              $ref: "#/components/schemas/TestAllRoutesInput"
         required: true
       responses:
         200:
@@ -730,13 +730,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TestAllRoutesResult'
+                $ref: "#/components/schemas/TestAllRoutesResult"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_TestAllRoutes:
@@ -801,7 +801,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TestRouteInput'
+                $ref: "#/components/schemas/TestRouteInput"
           required: true
         responses:
           200:
@@ -809,13 +809,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/TestRouteResult'
+                  $ref: "#/components/schemas/TestRouteResult"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_TestRoute:
@@ -889,13 +889,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/EndpointHealthDataListResult'
+                  $ref: "#/components/schemas/EndpointHealthDataListResult"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_GetEndpointHealth:
@@ -957,13 +957,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubDescription'
+                $ref: "#/components/schemas/IotHubDescription"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_Get:
@@ -1085,7 +1085,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IotHubDescription'
+              $ref: "#/components/schemas/IotHubDescription"
         required: true
       responses:
         200:
@@ -1095,7 +1095,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubDescription'
+                $ref: "#/components/schemas/IotHubDescription"
         201:
           description: This is a long running operation. The operation returns a 201
             if the validation is complete. The response includes an Azure-AsyncOperation
@@ -1105,13 +1105,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubDescription'
+                $ref: "#/components/schemas/IotHubDescription"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_CreateOrUpdate:
@@ -1330,7 +1330,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubDescription'
+                $ref: "#/components/schemas/IotHubDescription"
         202:
           description: The Iot Hub resource provider always returns a 202 Accepted
             status code with valid Location and Retry-After headers. The resource
@@ -1344,7 +1344,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubDescription'
+                $ref: "#/components/schemas/IotHubDescription"
         204:
           description: Once the long running delete operation completes successfully,
             a 204 No Content status code is returned when the status polling request
@@ -1358,13 +1358,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_Delete:
@@ -1531,7 +1531,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TagsResource'
+              $ref: "#/components/schemas/TagsResource"
         required: true
       responses:
         200:
@@ -1539,7 +1539,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubDescription'
+                $ref: "#/components/schemas/IotHubDescription"
       x-ms-examples:
         IotHubResource_Update:
           parameters:
@@ -1667,13 +1667,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/SharedAccessSignatureAuthorizationRule'
+                  $ref: "#/components/schemas/SharedAccessSignatureAuthorizationRule"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_GetKeysForKeyName:
@@ -1733,13 +1733,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/RegistryStatistics'
+                  $ref: "#/components/schemas/RegistryStatistics"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_GetStats:
@@ -1796,13 +1796,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/CertificateListDescription'
+                  $ref: "#/components/schemas/CertificateListDescription"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           Certificates_ListByIotHub:
@@ -1877,13 +1877,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/CertificateDescription'
+                  $ref: "#/components/schemas/CertificateDescription"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           Certificates_Get:
@@ -1962,7 +1962,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CertificateBodyDescription'
+                $ref: "#/components/schemas/CertificateBodyDescription"
           required: true
         responses:
           200:
@@ -1971,20 +1971,20 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/CertificateDescription'
+                  $ref: "#/components/schemas/CertificateDescription"
           201:
             description: If certificate didn't exist creation was successful, the operation
               returns HTTP status code of 201 (OK).
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/CertificateDescription'
+                  $ref: "#/components/schemas/CertificateDescription"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           Certificates_CreateOrUpdate:
@@ -2087,7 +2087,7 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           Certificates_Delete:
@@ -2159,13 +2159,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/CertificateWithNonceDescription'
+                  $ref: "#/components/schemas/CertificateWithNonceDescription"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           Certificates_GenerateVerificationCode:
@@ -2245,7 +2245,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CertificateVerificationDescription'
+                $ref: "#/components/schemas/CertificateVerificationDescription"
           required: true
         responses:
           200:
@@ -2253,13 +2253,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/CertificateDescription'
+                  $ref: "#/components/schemas/CertificateDescription"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           Certificates_Verify:
@@ -2339,13 +2339,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/EventHubConsumerGroupsListResult'
+                  $ref: "#/components/schemas/EventHubConsumerGroupsListResult"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_ListEventHubConsumerGroups:
@@ -2424,13 +2424,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/EventHubConsumerGroupInfo'
+                  $ref: "#/components/schemas/EventHubConsumerGroupInfo"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_ListEventHubConsumerGroups:
@@ -2505,13 +2505,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/EventHubConsumerGroupInfo'
+                  $ref: "#/components/schemas/EventHubConsumerGroupInfo"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_CreateEventHubConsumerGroup:
@@ -2589,7 +2589,7 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_DeleteEventHubConsumerGroup:
@@ -2645,7 +2645,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExportDevicesRequest'
+                $ref: "#/components/schemas/ExportDevicesRequest"
           required: true
         responses:
           200:
@@ -2653,13 +2653,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/JobResponse'
+                  $ref: "#/components/schemas/JobResponse"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_ExportDevices:
@@ -2723,7 +2723,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImportDevicesRequest'
+                $ref: "#/components/schemas/ImportDevicesRequest"
           required: true
         responses:
           200:
@@ -2731,13 +2731,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/JobResponse'
+                  $ref: "#/components/schemas/JobResponse"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_ImportDevices:
@@ -2803,13 +2803,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JobResponseListResult'
+                $ref: "#/components/schemas/JobResponseListResult"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_ListJobs:
@@ -2880,13 +2880,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/JobResponse'
+                  $ref: "#/components/schemas/JobResponse"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_GetJob:
@@ -2950,13 +2950,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SharedAccessSignatureAuthorizationRuleListResult'
+                $ref: "#/components/schemas/SharedAccessSignatureAuthorizationRuleListResult"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_ListKeys:
@@ -3034,13 +3034,13 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/IotHubQuotaMetricInfoListResult'
+                  $ref: "#/components/schemas/IotHubQuotaMetricInfoListResult"
           default:
             description: DefaultErrorResponse
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/ErrorDetails'
+                  $ref: "#/components/schemas/ErrorDetails"
         deprecated: false
         x-ms-examples:
           IotHubResource_GetQuotaMetrics:
@@ -3104,13 +3104,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IotHubSkuDescriptionListResult'
+                $ref: "#/components/schemas/IotHubSkuDescriptionListResult"
         default:
           description: DefaultErrorResponse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorDetails'
+                $ref: "#/components/schemas/ErrorDetails"
       deprecated: false
       x-ms-examples:
         IotHubResource_GetValidSkus:
@@ -3176,7 +3176,7 @@ components:
           description: The name of the certificate.
           readOnly: true
         properties:
-          $ref: '#/components/schemas/CertificateProperties'
+          $ref: "#/components/schemas/CertificateProperties"
         type:
           type: string
           description: The resource type.
@@ -3190,7 +3190,7 @@ components:
           type: array
           description: The array of Certificate objects.
           items:
-            $ref: '#/components/schemas/CertificateDescription'
+            $ref: "#/components/schemas/CertificateDescription"
       description: The JSON-serialized array of Certificate objects.
     CertificateProperties:
       type: object
@@ -3291,7 +3291,7 @@ components:
           description: The name of the certificate.
           readOnly: true
         properties:
-          $ref: '#/components/schemas/CertificatePropertiesWithNonce'
+          $ref: "#/components/schemas/CertificatePropertiesWithNonce"
         type:
           type: string
           description: The resource type.
@@ -3307,7 +3307,7 @@ components:
             device queue. See: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messaging#cloud-to-device-messages.'
           format: duration
         feedback:
-          $ref: '#/components/schemas/FeedbackProperties'
+          $ref: "#/components/schemas/FeedbackProperties"
         maxDeliveryCount:
           maximum: 1E+2
           minimum: 1
@@ -3355,7 +3355,7 @@ components:
           type: array
           description: JSON-serialized array of Endpoint health data
           items:
-            $ref: '#/components/schemas/EndpointHealthData'
+            $ref: "#/components/schemas/EndpointHealthData"
       description: The JSON-serialized array of EndpointHealthData objects with a
         next link.
     EnrichmentProperties:
@@ -3437,7 +3437,7 @@ components:
           type: array
           description: List of consumer groups objects
           items:
-            $ref: '#/components/schemas/EventHubConsumerGroupInfo'
+            $ref: "#/components/schemas/EventHubConsumerGroupInfo"
       description: The JSON-serialized array of Event Hub-compatible consumer group
         names with a next link.
     EventHubProperties:
@@ -3602,7 +3602,7 @@ components:
     IotHubDescription:
       description: The description of the IoT hub.
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: "#/components/schemas/Resource"
     IotHubDescriptionListResult:
       type: object
       properties:
@@ -3614,7 +3614,7 @@ components:
           type: array
           description: The array of IotHubDescription objects.
           items:
-            $ref: '#/components/schemas/IotHubDescription'
+            $ref: "#/components/schemas/IotHubDescription"
       description: The JSON-serialized array of IotHubDescription objects with a next
         link.
     IotHubLocationDescription:
@@ -3666,9 +3666,9 @@ components:
           description: The shared access policies you can use to secure a connection
             to the IoT hub.
           items:
-            $ref: '#/components/schemas/SharedAccessSignatureAuthorizationRule'
+            $ref: "#/components/schemas/SharedAccessSignatureAuthorizationRule"
         cloudToDevice:
-          $ref: '#/components/schemas/CloudToDeviceProperties'
+          $ref: "#/components/schemas/CloudToDeviceProperties"
         comments:
           type: string
           description: IoT hub comments.
@@ -3678,7 +3678,7 @@ components:
         eventHubEndpoints:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/EventHubProperties'
+            $ref: "#/components/schemas/EventHubProperties"
           description: The Event Hub-compatible endpoint properties. The only possible
             keys to this dictionary is events. This key has to be present in the dictionary
             while making create or update calls for the IoT hub.
@@ -3699,17 +3699,17 @@ components:
           type: array
           description: The IP filter rules.
           items:
-            $ref: '#/components/schemas/IpFilterRule'
+            $ref: "#/components/schemas/IpFilterRule"
         locations:
           type: array
           description: Primary and secondary location for iot hub
           readOnly: true
           items:
-            $ref: '#/components/schemas/IotHubLocationDescription'
+            $ref: "#/components/schemas/IotHubLocationDescription"
         messagingEndpoints:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/MessagingEndpointProperties'
+            $ref: "#/components/schemas/MessagingEndpointProperties"
           description: The messaging endpoint properties for the file upload notification
             queue.
         provisioningState:
@@ -3717,7 +3717,7 @@ components:
           description: The provisioning state.
           readOnly: true
         routing:
-          $ref: '#/components/schemas/RoutingProperties'
+          $ref: "#/components/schemas/RoutingProperties"
         state:
           type: string
           description: The hub state.
@@ -3725,7 +3725,7 @@ components:
         storageEndpoints:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/StorageEndpointProperties'
+            $ref: "#/components/schemas/StorageEndpointProperties"
           description: The list of Azure Storage endpoints where you can upload files.
             Currently you can configure only one Azure Storage account and that MUST
             have its key as $default. Specifying more than one storage account causes
@@ -3762,7 +3762,7 @@ components:
           type: array
           description: The array of quota metrics objects.
           items:
-            $ref: '#/components/schemas/IotHubQuotaMetricInfo'
+            $ref: "#/components/schemas/IotHubQuotaMetricInfo"
       description: The JSON-serialized array of IotHubQuotaMetricInfo objects with
         a next link.
     IotHubSkuDescription:
@@ -3772,13 +3772,13 @@ components:
       type: object
       properties:
         capacity:
-          $ref: '#/components/schemas/IotHubCapacity'
+          $ref: "#/components/schemas/IotHubCapacity"
         resourceType:
           type: string
           description: The type of the resource.
           readOnly: true
         sku:
-          $ref: '#/components/schemas/IotHubSkuInfo'
+          $ref: "#/components/schemas/IotHubSkuInfo"
       description: SKU properties.
     IotHubSkuDescriptionListResult:
       type: object
@@ -3791,7 +3791,7 @@ components:
           type: array
           description: The array of IotHubSkuDescription.
           items:
-            $ref: '#/components/schemas/IotHubSkuDescription'
+            $ref: "#/components/schemas/IotHubSkuDescription"
       description: The JSON-serialized array of IotHubSkuDescription objects with
         a next link.
     IotHubSkuInfo:
@@ -3927,13 +3927,13 @@ components:
           type: array
           description: The array of JobResponse objects.
           items:
-            $ref: '#/components/schemas/JobResponse'
+            $ref: "#/components/schemas/JobResponse"
       description: The JSON-serialized array of JobResponse objects with a next link.
     MatchedRoute:
       type: object
       properties:
         properties:
-          $ref: '#/components/schemas/RouteProperties'
+          $ref: "#/components/schemas/RouteProperties"
       description: Routes that matched
     MessagingEndpointProperties:
       type: object
@@ -4017,7 +4017,7 @@ components:
             resource provider.
           readOnly: true
           items:
-            $ref: '#/components/schemas/Operation'
+            $ref: "#/components/schemas/Operation"
       description: Result of the request to list IoT Hub operations. It contains a
         list of operations and a URL link to get the next set of results.
     RegistryStatistics:
@@ -4071,7 +4071,7 @@ components:
       type: object
       properties:
         location:
-          $ref: '#/components/schemas/RouteErrorRange'
+          $ref: "#/components/schemas/RouteErrorRange"
         message:
           type: string
           description: Route error message
@@ -4101,9 +4101,9 @@ components:
       type: object
       properties:
         end:
-          $ref: '#/components/schemas/RouteErrorPosition'
+          $ref: "#/components/schemas/RouteErrorPosition"
         start:
-          $ref: '#/components/schemas/RouteErrorPosition'
+          $ref: "#/components/schemas/RouteErrorPosition"
       description: Range of route errors
     RouteProperties:
       required:
@@ -4159,25 +4159,25 @@ components:
             to, based on the routing rules. This list does not include the built-in
             Event Hubs endpoint.
           items:
-            $ref: '#/components/schemas/RoutingEventHubProperties'
+            $ref: "#/components/schemas/RoutingEventHubProperties"
         serviceBusQueues:
           type: array
           description: The list of Service Bus queue endpoints that IoT hub routes
             the messages to, based on the routing rules.
           items:
-            $ref: '#/components/schemas/RoutingServiceBusQueueEndpointProperties'
+            $ref: "#/components/schemas/RoutingServiceBusQueueEndpointProperties"
         serviceBusTopics:
           type: array
           description: The list of Service Bus topic endpoints that the IoT hub routes
             the messages to, based on the routing rules.
           items:
-            $ref: '#/components/schemas/RoutingServiceBusTopicEndpointProperties'
+            $ref: "#/components/schemas/RoutingServiceBusTopicEndpointProperties"
         storageContainers:
           type: array
           description: The list of storage container endpoints that IoT hub routes
             messages to, based on the routing rules.
           items:
-            $ref: '#/components/schemas/RoutingStorageContainerProperties'
+            $ref: "#/components/schemas/RoutingStorageContainerProperties"
       description: The properties related to the custom endpoints to which your IoT
         hub routes messages based on the routing rules. A maximum of 10 custom endpoints
         are allowed across all endpoint types for paid hubs and only 1 custom endpoint
@@ -4227,15 +4227,15 @@ components:
       type: object
       properties:
         endpoints:
-          $ref: '#/components/schemas/RoutingEndpoints'
+          $ref: "#/components/schemas/RoutingEndpoints"
         enrichments:
           type: array
           description: 'The list of user-provided enrichments that the IoT hub applies
             to messages to be delivered to built-in and custom endpoints. See: https://aka.ms/telemetryoneventgrid'
           items:
-            $ref: '#/components/schemas/EnrichmentProperties'
+            $ref: "#/components/schemas/EnrichmentProperties"
         fallbackRoute:
-          $ref: '#/components/schemas/FallbackRouteProperties'
+          $ref: "#/components/schemas/FallbackRouteProperties"
         routes:
           type: array
           description: The list of user-provided routing rules that the IoT hub uses
@@ -4243,7 +4243,7 @@ components:
             rules are allowed for paid hubs and a maximum of 5 routing rules are allowed
             for free hubs.
           items:
-            $ref: '#/components/schemas/RouteProperties'
+            $ref: "#/components/schemas/RouteProperties"
       description: 'The routing related properties of the IoT hub. See: https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messaging'
     RoutingServiceBusQueueEndpointProperties:
       required:
@@ -4416,7 +4416,7 @@ components:
           type: array
           description: The list of shared access policies.
           items:
-            $ref: '#/components/schemas/SharedAccessSignatureAuthorizationRule'
+            $ref: "#/components/schemas/SharedAccessSignatureAuthorizationRule"
       description: The list of shared access policies with a next link.
     StorageEndpointProperties:
       required:
@@ -4451,7 +4451,7 @@ components:
       type: object
       properties:
         message:
-          $ref: '#/components/schemas/RoutingMessage'
+          $ref: "#/components/schemas/RoutingMessage"
         routingSource:
           type: string
           description: Routing source
@@ -4465,7 +4465,7 @@ components:
             modelAsString: true
             name: RoutingSource
         twin:
-          $ref: '#/components/schemas/RoutingTwin'
+          $ref: "#/components/schemas/RoutingTwin"
       description: Input for testing all routes
     TestAllRoutesResult:
       type: object
@@ -4474,7 +4474,7 @@ components:
           type: array
           description: JSON-serialized array of matched routes
           items:
-            $ref: '#/components/schemas/MatchedRoute'
+            $ref: "#/components/schemas/MatchedRoute"
       description: Result of testing all routes
     TestRouteInput:
       required:
@@ -4482,17 +4482,17 @@ components:
       type: object
       properties:
         message:
-          $ref: '#/components/schemas/RoutingMessage'
+          $ref: "#/components/schemas/RoutingMessage"
         route:
-          $ref: '#/components/schemas/RouteProperties'
+          $ref: "#/components/schemas/RouteProperties"
         twin:
-          $ref: '#/components/schemas/RoutingTwin'
+          $ref: "#/components/schemas/RoutingTwin"
       description: Input for testing route
     TestRouteResult:
       type: object
       properties:
         details:
-          $ref: '#/components/schemas/TestRouteResultDetails'
+          $ref: "#/components/schemas/TestRouteResultDetails"
         result:
           type: string
           description: Result of testing route
@@ -4511,7 +4511,7 @@ components:
           type: array
           description: JSON-serialized list of route compilation errors
           items:
-            $ref: '#/components/schemas/RouteCompilationError'
+            $ref: "#/components/schemas/RouteCompilationError"
       description: Detailed result of testing a route
     UserSubscriptionQuota:
       type: object
@@ -4528,7 +4528,7 @@ components:
           description: Numerical limit on IotHub type
           format: int32
         name:
-          $ref: '#/components/schemas/Name'
+          $ref: "#/components/schemas/Name"
         type:
           type: string
           description: Response type
@@ -4545,7 +4545,7 @@ components:
         value:
           type: array
           items:
-            $ref: '#/components/schemas/UserSubscriptionQuota'
+            $ref: "#/components/schemas/UserSubscriptionQuota"
       description: Json-serialized array of User subscription quota response
   parameters:
     api-version:

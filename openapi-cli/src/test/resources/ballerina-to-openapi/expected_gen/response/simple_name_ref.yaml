@@ -25,7 +25,7 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/ReturnValueStr'
+                $ref: "#/components/schemas/ReturnValueStr"
   /lift02:
     get:
       operationId: getLift02
@@ -41,7 +41,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueIntNil'
+                $ref: "#/components/schemas/ReturnValueIntNil"
   /lift03:
     get:
       operationId: getLift03
@@ -57,7 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueIntArray'
+                $ref: "#/components/schemas/ReturnValueIntArray"
   /lift05:
     get:
       operationId: getLift05
@@ -73,7 +73,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueMapJson'
+                $ref: "#/components/schemas/ReturnValueMapJson"
   /lift06:
     get:
       operationId: getLift06
@@ -89,7 +89,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueJson'
+                $ref: "#/components/schemas/ReturnValueJson"
   /lift07:
     get:
       operationId: getLift07
@@ -105,7 +105,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueMapRec'
+                $ref: "#/components/schemas/ReturnValueMapRec"
   /lift08:
     get:
       operationId: getLift08
@@ -121,7 +121,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueMapString'
+                $ref: "#/components/schemas/ReturnValueMapString"
   /lift09:
     get:
       operationId: getLift09
@@ -137,7 +137,7 @@ paths:
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/ReturnValueXML'
+                $ref: "#/components/schemas/ReturnValueXML"
   /lift10:
     get:
       operationId: getLift10
@@ -169,7 +169,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValuePrimitiveUnion'
+                $ref: "#/components/schemas/ReturnValuePrimitiveUnion"
   /lift12:
     get:
       operationId: getLift12
@@ -185,7 +185,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReturnValueRecUnion'
+                $ref: "#/components/schemas/ReturnValueRecUnion"
   /res13:
     get:
       operationId: getRes13
@@ -215,7 +215,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResUnion'
+                $ref: "#/components/schemas/ErrorResUnion"
   /res16:
     get:
       operationId: getRes16
@@ -231,7 +231,7 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/StrNil'
+                $ref: "#/components/schemas/StrNil"
   /res17:
     get:
       operationId: getRes17
@@ -247,7 +247,7 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/StrArray'
+                $ref: "#/components/schemas/StrArray"
   /res19:
     get:
       operationId: getRes19
@@ -263,7 +263,7 @@ paths:
           content:
             application/octet-stream:
               schema:
-                $ref: '#/components/schemas/ByteArr'
+                $ref: "#/components/schemas/ByteArr"
 components:
   schemas:
     ReturnValueJson:
@@ -274,8 +274,8 @@ components:
       nullable: true
     ReturnValueRecUnion:
       oneOf:
-        - $ref: '#/components/schemas/Pet'
-        - $ref: '#/components/schemas/Dog'
+        - $ref: "#/components/schemas/Pet"
+        - $ref: "#/components/schemas/Dog"
     ReturnValueIntArray:
       type: array
       items:
@@ -301,7 +301,7 @@ components:
     ReturnValueMapRec:
       type: object
       additionalProperties:
-        $ref: '#/components/schemas/Pet'
+        $ref: "#/components/schemas/Pet"
     ReturnValueStr:
       type: string
     StrNil:

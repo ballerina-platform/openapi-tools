@@ -41,7 +41,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
   /pets/{petId}:
     get:
       summary: Info for a specific pet
@@ -55,14 +55,14 @@ paths:
           description: The id of the pet to retrieve
           required: true
           schema:
-            $ref: '#/components/schemas/PetId'
+            $ref: "#/components/schemas/PetId"
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
 components:
   schemas:
     PetId:
@@ -91,7 +91,7 @@ components:
        - name
      properties:
        id:
-         $ref: '#/components/schemas/PetId'
+         $ref: "#/components/schemas/PetId"
        age:
          type: integer
          format: int32
@@ -112,4 +112,4 @@ components:
          example: doggy
          description: Name of the pet
        category:
-         $ref: '#/components/schemas/Category'
+         $ref: "#/components/schemas/Category"

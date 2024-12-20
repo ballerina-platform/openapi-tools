@@ -19,13 +19,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Test'
+                $ref: "#/components/schemas/Test"
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
         "404":
           description: NotFound
 components:

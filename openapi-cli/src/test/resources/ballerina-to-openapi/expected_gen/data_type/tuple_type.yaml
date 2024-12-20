@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
       responses:
         "202":
           description: Accepted
@@ -67,11 +67,11 @@ components:
                 format: double
               - type: number
                 format: float
-              - $ref: '#/components/schemas/User'
+              - $ref: "#/components/schemas/User"
         tuples:
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/ReturnTypes'
+            - $ref: "#/components/schemas/ReturnTypes"
         unionTuple:
           type: array
           nullable: true

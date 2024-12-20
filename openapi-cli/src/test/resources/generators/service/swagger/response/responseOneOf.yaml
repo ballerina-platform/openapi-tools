@@ -34,14 +34,14 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/User'
-                  - $ref: '#/components/schemas/Pet'
-                  - $ref: '#/components/schemas/PetForm'
+                  - $ref: "#/components/schemas/User"
+                  - $ref: "#/components/schemas/Pet"
+                  - $ref: "#/components/schemas/PetForm"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
 
 components:
   schemas:

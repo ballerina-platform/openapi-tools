@@ -19,7 +19,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError'
+                $ref: "#/components/schemas/ResponseError"
         "202":
           description: Accepted
   /pet02:
@@ -31,7 +31,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError02'
+                $ref: "#/components/schemas/ResponseError02"
         "202":
           description: Accepted
   /pet03:
@@ -43,7 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError03'
+                $ref: "#/components/schemas/ResponseError03"
         "202":
           description: Accepted
   /pet04:
@@ -55,7 +55,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError04'
+                $ref: "#/components/schemas/ResponseError04"
         "202":
           description: Accepted
   /pet05:
@@ -67,7 +67,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError05'
+                $ref: "#/components/schemas/ResponseError05"
         "202":
           description: Accepted
   /pet06:
@@ -79,7 +79,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError06'
+                $ref: "#/components/schemas/ResponseError06"
         "202":
           description: Accepted
   /pet07:
@@ -91,7 +91,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError07'
+                $ref: "#/components/schemas/ResponseError07"
         "202":
           description: Accepted
   /items:
@@ -105,7 +105,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AidPackage'
+                  $ref: "#/components/schemas/AidPackage"
 components:
   schemas:
     ResponseError:
@@ -118,7 +118,7 @@ components:
           format: int64
           nullable: true
         resError:
-          $ref: '#/components/schemas/ResponseError'
+          $ref: "#/components/schemas/ResponseError"
     ResponseError02:
       required:
         - id
@@ -130,7 +130,7 @@ components:
           nullable: true
         resError:
           oneOf:
-            - $ref: '#/components/schemas/ResponseError02'
+            - $ref: "#/components/schemas/ResponseError02"
             - type: string
     ResponseError03:
       required:
@@ -144,7 +144,7 @@ components:
         resError:
           type: array
           items:
-            $ref: '#/components/schemas/ResponseError03'
+            $ref: "#/components/schemas/ResponseError03"
     ResponseError04:
       required:
         - id
@@ -159,7 +159,7 @@ components:
           items:
             type: array
             items:
-              $ref: '#/components/schemas/ResponseError04'
+              $ref: "#/components/schemas/ResponseError04"
     ResponseError05:
       required:
         - id
@@ -172,7 +172,7 @@ components:
         resError:
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/ResponseError05'
+            - $ref: "#/components/schemas/ResponseError05"
     ResponseError06:
       required:
         - id
@@ -186,7 +186,7 @@ components:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/ResponseError06'
+            $ref: "#/components/schemas/ResponseError06"
     ResponseError07:
       required:
         - id
@@ -201,7 +201,7 @@ components:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/ResponseError07'
+            $ref: "#/components/schemas/ResponseError07"
     AidPackageItem:
       required:
         - totalAmount
@@ -211,7 +211,7 @@ components:
           type: number
           format: double
         aidPackage:
-          $ref: '#/components/schemas/AidPackage'
+          $ref: "#/components/schemas/AidPackage"
     AidPackage:
       required:
         - status
@@ -222,4 +222,4 @@ components:
         aidPackageItems:
           type: array
           items:
-            $ref: '#/components/schemas/AidPackageItem'
+            $ref: "#/components/schemas/AidPackageItem"

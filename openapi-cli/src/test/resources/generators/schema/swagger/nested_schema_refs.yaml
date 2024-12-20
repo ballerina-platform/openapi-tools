@@ -33,7 +33,7 @@ components:
           x-insert-after: gid
     UserCompact:
       allOf:
-        - $ref: '#/components/schemas/AsanaResource'
+        - $ref: "#/components/schemas/AsanaResource"
         - type: object
           description: A user object represents an account in Asana that can be given
             access to various workspaces, projects, and tasks.
@@ -46,7 +46,7 @@ components:
               example: Greg Sanchez
     ProjectStatusCompact:
       allOf:
-        - $ref: '#/components/schemas/AsanaResource'
+        - $ref: "#/components/schemas/AsanaResource"
         - type: object
           description: A project status is an update on the progress of a particular
             project, and is sent out to all project followers when created.
@@ -56,17 +56,17 @@ components:
               type: string
               example: Status Update - Jun 15
     ProjectStatusRequest:
-      $ref: '#/components/schemas/ProjectStatusBase'
+      $ref: "#/components/schemas/ProjectStatusBase"
     ProjectStatusBase:
       allOf:
-        - $ref: '#/components/schemas/ProjectStatusCompact'
+        - $ref: "#/components/schemas/ProjectStatusCompact"
         - type: object
           required:
             - text
             - color
           properties:
             author:
-              $ref: '#/components/schemas/UserCompact'
+              $ref: "#/components/schemas/UserCompact"
             modified_at:
               description: The time at which this project status was last modified.
             text:
@@ -118,9 +118,9 @@ components:
 paths:
   /projects/{project_gid}/project_statuses:
     parameters:
-      - $ref: '#/components/parameters/project_path_gid'
-      - $ref: '#/components/parameters/pretty'
-      - $ref: '#/components/parameters/fields'
+      - $ref: "#/components/parameters/project_path_gid"
+      - $ref: "#/components/parameters/pretty"
+      - $ref: "#/components/parameters/fields"
     post:
       summary: Create a project status
       description: Creates a new status update on the project.
@@ -136,7 +136,7 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/ProjectStatusRequest'
+                  $ref: "#/components/schemas/ProjectStatusRequest"
       responses:
         201:
           description: Successfully created a new story.

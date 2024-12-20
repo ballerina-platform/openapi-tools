@@ -12,7 +12,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/StringObject'
+                $ref: "#/components/schemas/StringObject"
     post:
       operationId: op2
       responses:
@@ -21,7 +21,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/IntegerObject'
+                $ref: "#/components/schemas/IntegerObject"
     delete:
       operationId: op3
       responses:
@@ -30,7 +30,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/NumberObject'
+                $ref: "#/components/schemas/NumberObject"
 servers:
   - url: https://app.launchdarkly.com/api/v2
 components:

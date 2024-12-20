@@ -71,7 +71,7 @@ paths:
         content:
           application/epub+zip:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
       responses:
         '200':
           description: OK

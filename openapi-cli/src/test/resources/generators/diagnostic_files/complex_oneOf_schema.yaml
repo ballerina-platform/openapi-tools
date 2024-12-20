@@ -67,7 +67,7 @@ components:
         - properties:
             zipCode:
               type: integer
-        - $ref: '#/components/schemas/CountryDetails'
+        - $ref: "#/components/schemas/CountryDetails"
     CountryDetails:
       properties:
         iso_code:

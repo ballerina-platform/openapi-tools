@@ -28,7 +28,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Scores'
+              $ref: "#/components/schemas/Scores"
         required: true
       responses:
         '200':
@@ -36,7 +36,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scores'
+                $ref: "#/components/schemas/Scores"
 components:
   schemas:
     Scores:

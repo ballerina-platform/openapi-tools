@@ -6,7 +6,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
       responses:
         "200":
           description: Ok
@@ -38,7 +38,7 @@ components:
         name:
           type: string
         tagType:
-          $ref: '#/components/schemas/TagType'
+          $ref: "#/components/schemas/TagType"
     Pet:
       required:
         - id
@@ -52,4 +52,4 @@ components:
         name:
           type: string
         tag:
-          $ref: '#/components/schemas/Tag'
+          $ref: "#/components/schemas/Tag"

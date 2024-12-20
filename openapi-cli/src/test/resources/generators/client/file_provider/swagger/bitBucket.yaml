@@ -202,7 +202,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/pullrequest'
+                $ref: "#/components/schemas/pullrequest"
               example:
                 type: pullrequest
                 description: Everything is awesome!
@@ -311,7 +311,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - pullrequest
@@ -344,7 +344,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/repository'
+                $ref: "#/components/schemas/repository"
               example:
                 scm: git
                 website: www.example.com
@@ -413,13 +413,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         404:
           description: If no repository exists at this location.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - repository
@@ -483,7 +483,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/repository'
+              $ref: "#/components/schemas/repository"
         required: false
       responses:
         200:
@@ -491,7 +491,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/repository'
+                $ref: "#/components/schemas/repository"
               example:
                 scm: git
                 website: www.example.com
@@ -560,13 +560,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         401:
           description: If the request was not authenticated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - repository:admin
@@ -605,13 +605,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         404:
           description: If the repository does not exist.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - repository:delete
@@ -650,27 +650,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/issue'
+                $ref: "#/components/schemas/issue"
         403:
           description: When the authenticated user isn't authorized to access the
             issue.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         404:
           description: The specified repository or issue does not exist or does not
             have the issue tracker enabled.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         410:
           description: The specified issue is unavailable.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - issue
@@ -713,14 +713,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         404:
           description: The specified repository or issue does not exist or does not
             have the issue tracker enabled.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - issue:write
@@ -754,14 +754,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/paginated_issues'
+                $ref: "#/components/schemas/paginated_issues"
         404:
           description: The specified repository does not exist or does not have the
             issue tracker enabled.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - issue
@@ -800,7 +800,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/issue'
+              $ref: "#/components/schemas/issue"
         required: true
       responses:
         201:
@@ -813,27 +813,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/issue'
+                $ref: "#/components/schemas/issue"
         401:
           description: When the request wasn't authenticated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         403:
           description: When the authenticated user isn't authorized to create the
             issue.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         404:
           description: The specified repository does not exist or does not have the
             issue tracker enabled.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - issue:write
@@ -878,7 +878,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/paginated_issue_comments'
+                $ref: "#/components/schemas/paginated_issue_comments"
       security:
         - oauth2:
             - issue
@@ -923,7 +923,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/issue_comment'
+              $ref: "#/components/schemas/issue_comment"
         required: true
       responses:
         201:
@@ -939,7 +939,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - issue:write
@@ -985,7 +985,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/issue_comment'
+                $ref: "#/components/schemas/issue_comment"
       security:
         - oauth2:
             - issue
@@ -1037,7 +1037,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/issue_comment'
+              $ref: "#/components/schemas/issue_comment"
         required: true
       responses:
         200:
@@ -1045,14 +1045,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/issue_comment'
+                $ref: "#/components/schemas/issue_comment"
         400:
           description: 'If the input was invalid, or if the update to the comment
             is detected as spam '
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - issue:write
@@ -1119,13 +1119,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/workspace'
+                $ref: "#/components/schemas/workspace"
         404:
           description: If no workspace exists for the specified name or UUID.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2: []
   /workspaces/{workspace}/projects/{project_key}:
@@ -1158,25 +1158,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/project'
+                $ref: "#/components/schemas/project"
         401:
           description: The request wasn't authenticated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         403:
           description: The requesting user isn't authorized to access the project.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         404:
           description: A project isn't hosted at this location.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - project
@@ -1229,7 +1229,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/project'
+              $ref: "#/components/schemas/project"
         required: true
       responses:
         200:
@@ -1244,7 +1244,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/project'
+                $ref: "#/components/schemas/project"
         201:
           description: A new project has been created.
           headers:
@@ -1255,14 +1255,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/project'
+                $ref: "#/components/schemas/project"
         403:
           description: The requesting user isn't authorized to update or create the
             project.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         404:
           description: A workspace doesn't exist at the location. Note that the project's
             absence from this location doesn't raise a 404, since a PUT at a non-existent
@@ -1270,7 +1270,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - project:write
@@ -1316,13 +1316,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
         404:
           description: A project isn't hosted at this location.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
       security:
         - oauth2:
             - project:write
@@ -1330,7 +1330,7 @@ components:
   schemas:
     comment:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Comment
           type: object
           properties:
@@ -1365,12 +1365,12 @@ components:
                   type: string
                   description: The user's content rendered as HTML.
             user:
-              $ref: '#/components/schemas/user'
+              $ref: "#/components/schemas/user"
             deleted:
               type: boolean
               description: Indicates whether the comment is deleted
             parent:
-              $ref: '#/components/schemas/comment'
+              $ref: "#/components/schemas/comment"
             inline:
               description: The comment's anchor line detail
               required:
@@ -1428,12 +1428,12 @@ components:
             `issue_comment`).
     issue_comment:
       allOf:
-        - $ref: '#/components/schemas/comment'
+        - $ref: "#/components/schemas/comment"
         - title: Issue Comment
           type: object
           properties:
             issue:
-              $ref: '#/components/schemas/issue'
+              $ref: "#/components/schemas/issue"
           description: A issue comment.
     paginated_issue_comments:
       title: Paginated Issue Comments
@@ -1477,11 +1477,11 @@ components:
           uniqueItems: true
           type: array
           items:
-            $ref: '#/components/schemas/issue_comment'
+            $ref: "#/components/schemas/issue_comment"
       description: A paginated list of issue comments.
     workspace:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Workspace
           type: object
           properties:
@@ -1600,7 +1600,7 @@ components:
       type: object
       properties:
         repository:
-          $ref: '#/components/schemas/repository'
+          $ref: "#/components/schemas/repository"
         branch:
           title: Pull Request Branch
           type: object
@@ -1630,7 +1630,7 @@ components:
               type: string
     pullrequest:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Pull Request
           type: object
           properties:
@@ -1829,11 +1829,11 @@ components:
                 - OPEN
                 - DECLINED
             author:
-              $ref: '#/components/schemas/account'
+              $ref: "#/components/schemas/account"
             source:
-              $ref: '#/components/schemas/pullrequest_endpoint'
+              $ref: "#/components/schemas/pullrequest_endpoint"
             destination:
-              $ref: '#/components/schemas/pullrequest_endpoint'
+              $ref: "#/components/schemas/pullrequest_endpoint"
             merge_commit:
               title: Pull Request Commit
               type: object
@@ -1855,7 +1855,7 @@ components:
               description: A boolean flag indicating if merging the pull request closes
                 the source branch.
             closed_by:
-              $ref: '#/components/schemas/account'
+              $ref: "#/components/schemas/account"
             reason:
               type: string
               description: Explains why a pull request was declined. This field is only
@@ -1874,7 +1874,7 @@ components:
                 request when it was created. For performance reasons, the API only includes
                 this list on a pull request's `self` URL.
               items:
-                $ref: '#/components/schemas/account'
+                $ref: "#/components/schemas/account"
             participants:
               type: array
               description: "        The list of users that are collaborating on this\
@@ -1888,11 +1888,11 @@ components:
               \ this list when an API requests a pull request by\n        id.\n  \
               \      "
               items:
-                $ref: '#/components/schemas/participant'
+                $ref: "#/components/schemas/participant"
           description: A pull request object.
     component:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Component
           type: object
           properties:
@@ -1919,7 +1919,7 @@ components:
           description: A component as defined in a repository's issue tracker.
     version:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Version
           type: object
           properties:
@@ -1946,7 +1946,7 @@ components:
           description: A version as defined in a repository's issue tracker.
     milestone:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Milestone
           type: object
           properties:
@@ -1973,7 +1973,7 @@ components:
           description: A milestone as defined in a repository's issue tracker.
     user:
       allOf:
-        - $ref: '#/components/schemas/account'
+        - $ref: "#/components/schemas/account"
         - title: User
           type: object
           properties:
@@ -1986,12 +1986,12 @@ components:
           description: A user object.
     participant:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Participant
           type: object
           properties:
             user:
-              $ref: '#/components/schemas/user'
+              $ref: "#/components/schemas/user"
             role:
               type: string
               description: The type of the participant
@@ -2018,7 +2018,7 @@ components:
             pull requests.
     author:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Author
           type: object
           properties:
@@ -2027,12 +2027,12 @@ components:
               description: The raw author value from the repository. This may be the
                 only value available if the author does not match a user in Bitbucket.
             user:
-              $ref: '#/components/schemas/account'
+              $ref: "#/components/schemas/account"
               description: The account of the user
           description: The author of a change in a repository
     base_commit:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Base Commit
           type: object
           properties:
@@ -2045,7 +2045,7 @@ components:
               format: date-time
               description: The date of the base commit
             author:
-              $ref: '#/components/schemas/author'
+              $ref: "#/components/schemas/author"
             message:
               type: string
               description: The message of the base commit
@@ -2072,22 +2072,22 @@ components:
               type: array
               description: The parent base commit
               items:
-                $ref: '#/components/schemas/base_commit'
+                $ref: "#/components/schemas/base_commit"
           description: The common base type for both repository and snippet commits.
     commit:
       allOf:
-        - $ref: '#/components/schemas/base_commit'
+        - $ref: "#/components/schemas/base_commit"
         - title: Commit
           type: object
           properties:
             repository:
-              $ref: '#/components/schemas/repository'
+              $ref: "#/components/schemas/repository"
             participants:
               minItems: 0
               type: array
               description: The participants of the commit
               items:
-                $ref: '#/components/schemas/participant'
+                $ref: "#/components/schemas/participant"
           description: A repository commit object.
     ref:
       title: Ref
@@ -2136,11 +2136,11 @@ components:
           type: string
           description: The name of the ref.
         target:
-          $ref: '#/components/schemas/commit'
+          $ref: "#/components/schemas/commit"
       description: A ref object, representing a branch or tag in a repository.
     branch:
       allOf:
-        - $ref: '#/components/schemas/ref'
+        - $ref: "#/components/schemas/ref"
         - title: Branch
           type: object
           properties:
@@ -2161,14 +2161,14 @@ components:
           description: A branch object, representing a branch in a repository.
     team:
       allOf:
-        - $ref: '#/components/schemas/account'
+        - $ref: "#/components/schemas/account"
         - title: Team
           type: object
           description: A team object.
       description: A team object.
     project:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Project
           type: object
           properties:
@@ -2203,7 +2203,7 @@ components:
               type: string
               description: The project's key.
             owner:
-              $ref: '#/components/schemas/team'
+              $ref: "#/components/schemas/team"
             name:
               type: string
               description: The name of the project.
@@ -2230,7 +2230,7 @@ components:
                         Projects are used by teams to organize repositories.
     account:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Account
           type: object
           properties:
@@ -2331,7 +2331,7 @@ components:
           description: An account object.
     repository:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Repository
           type: object
           properties:
@@ -2456,14 +2456,14 @@ components:
               type: boolean
               description: Indicates whether the repository is private
             parent:
-              $ref: '#/components/schemas/repository'
+              $ref: "#/components/schemas/repository"
             scm:
               type: string
               description: source control
               enum:
                 - git
             owner:
-              $ref: '#/components/schemas/account'
+              $ref: "#/components/schemas/account"
             name:
               type: string
               description: The name of the repository
@@ -2505,9 +2505,9 @@ components:
                 - no_public_forks
                 - no_forks
             project:
-              $ref: '#/components/schemas/project'
+              $ref: "#/components/schemas/project"
             mainbranch:
-              $ref: '#/components/schemas/branch'
+              $ref: "#/components/schemas/branch"
           description: A Bitbucket repository.
     object:
       type: object
@@ -2523,7 +2523,7 @@ components:
         propertyName: type
     issue:
       allOf:
-        - $ref: '#/components/schemas/object'
+        - $ref: "#/components/schemas/object"
         - title: Issue
           type: object
           properties:
@@ -2595,14 +2595,14 @@ components:
               type: integer
               description: The ID of the issue
             repository:
-              $ref: '#/components/schemas/repository'
+              $ref: "#/components/schemas/repository"
             title:
               type: string
               description: The title of the issue
             reporter:
-              $ref: '#/components/schemas/user'
+              $ref: "#/components/schemas/user"
             assignee:
-              $ref: '#/components/schemas/user'
+              $ref: "#/components/schemas/user"
             created_on:
               type: string
               format: date-time
@@ -2646,11 +2646,11 @@ components:
                 - critical
                 - blocker
             milestone:
-              $ref: '#/components/schemas/milestone'
+              $ref: "#/components/schemas/milestone"
             version:
-              $ref: '#/components/schemas/version'
+              $ref: "#/components/schemas/version"
             component:
-              $ref: '#/components/schemas/component'
+              $ref: "#/components/schemas/component"
             votes:
               type: integer
               description: The number of votes
@@ -2740,7 +2740,7 @@ components:
           uniqueItems: true
           type: array
           items:
-            $ref: '#/components/schemas/issue'
+            $ref: "#/components/schemas/issue"
           description: An array of issues
       description: A paginated list of issues.
   securitySchemes:

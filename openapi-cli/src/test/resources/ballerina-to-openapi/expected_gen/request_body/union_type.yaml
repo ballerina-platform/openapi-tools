@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ABC'
+              $ref: "#/components/schemas/ABC"
       responses:
         "202":
           description: Accepted
@@ -36,7 +36,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ABC'
+              $ref: "#/components/schemas/ABC"
           application/xml:
             schema: {}
       responses:
@@ -52,8 +52,8 @@ paths:
           application/json:
             schema:
               oneOf:
-                - $ref: '#/components/schemas/ABC'
-                - $ref: '#/components/schemas/Remote'
+                - $ref: "#/components/schemas/ABC"
+                - $ref: "#/components/schemas/Remote"
           application/xml:
             schema: {}
       responses:
@@ -68,7 +68,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ABC'
+              $ref: "#/components/schemas/ABC"
           text/plain:
             schema:
               type: string
@@ -87,7 +87,7 @@ paths:
           application/json:
             schema:
               oneOf:
-                - $ref: '#/components/schemas/ABC'
+                - $ref: "#/components/schemas/ABC"
                 - type: integer
                   format: int64
       responses:

@@ -11,7 +11,7 @@ paths:
       summary: Gets a list of users.
       responses:
        '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
   /users/{id}:
     get:
       summary: Gets a user by ID.
@@ -27,11 +27,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
 # Descriptions of common components
 components:
   responses:
@@ -40,13 +40,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
     Unauthorized:
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
   schemas:
     # Schema for error response body
     Error:

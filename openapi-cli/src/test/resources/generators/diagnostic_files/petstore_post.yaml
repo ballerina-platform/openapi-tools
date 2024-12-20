@@ -19,7 +19,7 @@ paths:
         content:
           application/xml:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
   /pets/{petId}:
     post:
       summary: Get funtion with path parameters

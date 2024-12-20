@@ -27,9 +27,9 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Pet'
-                  - $ref: '#/components/schemas/Dog'
-                  - $ref: '#/components/schemas/Cat'
+                  - $ref: "#/components/schemas/Pet"
+                  - $ref: "#/components/schemas/Dog"
+                  - $ref: "#/components/schemas/Cat"
 
 components:
   schemas:

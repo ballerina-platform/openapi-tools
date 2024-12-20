@@ -9,7 +9,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
       responses:
         '101':
           description: Switching protocols
@@ -20,7 +20,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
       responses:
         '201':
           description: Created
@@ -30,7 +30,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
       responses:
         '301':
           description: Moved Permanently
@@ -41,7 +41,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
       responses:
         '401':
           description: Unauthorized

@@ -23,8 +23,8 @@ paths:
                   - type: boolean
                   - type: integer
                     format: int64
-                  - $ref: '#/components/schemas/Pet'
-                  - $ref: '#/components/schemas/Cat'
+                  - $ref: "#/components/schemas/Pet"
+                  - $ref: "#/components/schemas/Cat"
             text/plain:
               schema:
                 type: string
@@ -33,7 +33,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     ErrorPayload:

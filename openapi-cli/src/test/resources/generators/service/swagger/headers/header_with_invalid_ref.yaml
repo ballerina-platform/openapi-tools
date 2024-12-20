@@ -16,7 +16,7 @@ paths:
         - name: X-User
           in: header
           schema:
-            $ref: '#/components/schemas/User'
+            $ref: "#/components/schemas/User"
       responses:
         "200":
           description: Ok

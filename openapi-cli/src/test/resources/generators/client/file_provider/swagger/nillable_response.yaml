@@ -37,7 +37,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PetDetails'
+                $ref: "#/components/schemas/PetDetails"
         '204':
           description: The status information cannot be retrieved for the specified request ID.
           content: {}

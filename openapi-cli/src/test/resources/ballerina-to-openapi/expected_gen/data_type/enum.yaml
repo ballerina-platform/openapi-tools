@@ -19,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Link'
+              $ref: "#/components/schemas/Link"
       responses:
         "202":
           description: Accepted
@@ -32,7 +32,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order'
+              $ref: "#/components/schemas/Order"
       responses:
         "202":
           description: Accepted

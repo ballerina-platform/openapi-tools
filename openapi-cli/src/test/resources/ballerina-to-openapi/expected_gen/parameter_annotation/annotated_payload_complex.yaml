@@ -25,7 +25,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Student'
+              $ref: "#/components/schemas/Student"
       responses:
         "201":
           description: Created

@@ -22,4 +22,4 @@ components:
         pet:
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Pet'
+            - $ref: "#/components/schemas/Pet"

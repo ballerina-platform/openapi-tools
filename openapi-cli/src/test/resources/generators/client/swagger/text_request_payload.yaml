@@ -14,7 +14,7 @@ paths:
         content:
           text/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
       responses:
         200:
           description: successful operation

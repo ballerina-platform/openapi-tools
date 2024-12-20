@@ -22,7 +22,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Product'
+                  $ref: "#/components/schemas/Product"
 components:
   schemas:
     Price:
@@ -55,5 +55,5 @@ components:
         description:
           type: string
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
       description: Represents a product

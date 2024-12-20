@@ -25,23 +25,23 @@ paths:
           content:
             application/fhir+json:
               schema:
-                $ref: '#/components/schemas/Patient'
+                $ref: "#/components/schemas/Patient"
             application/fhir+xml:
               schema:
-                $ref: '#/components/schemas/Patient'
+                $ref: "#/components/schemas/Patient"
 components:
   schemas:
     Extension:
-      $ref: '#/components/schemas/ExtensionExtension'
+      $ref: "#/components/schemas/ExtensionExtension"
     Identifier:
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             value:
               type: string
             assigner:
-              $ref: '#/components/schemas/Reference'
+              $ref: "#/components/schemas/Reference"
             id:
               type: string
             element:
@@ -49,7 +49,7 @@ components:
               format: int64
     Reference:
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             reference:
@@ -57,7 +57,7 @@ components:
             type:
               type: string
             identifier:
-              $ref: '#/components/schemas/Identifier'
+              $ref: "#/components/schemas/Identifier"
             display:
               type: string
             id:
@@ -75,21 +75,21 @@ components:
           format: int64
     ExtensionExtension:
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             extension:
               type: array
               items:
-                $ref: '#/components/schemas/Extension'
+                $ref: "#/components/schemas/Extension"
     Patient:
       type: object
       properties:
         ext:
           type: array
           items:
-            $ref: '#/components/schemas/Extension'
+            $ref: "#/components/schemas/Extension"
         id:
           type: string
         ref:
-          $ref: '#/components/schemas/Reference'
+          $ref: "#/components/schemas/Reference"

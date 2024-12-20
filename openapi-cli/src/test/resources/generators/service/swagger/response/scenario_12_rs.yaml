@@ -34,9 +34,9 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/User'
-                  - $ref: '#/components/schemas/Pet'
-                  - $ref: '#/components/schemas/PetForm'
+                  - $ref: "#/components/schemas/User"
+                  - $ref: "#/components/schemas/Pet"
+                  - $ref: "#/components/schemas/PetForm"
 components:
   schemas:
     User:

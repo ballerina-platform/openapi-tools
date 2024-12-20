@@ -28,7 +28,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/LiftRecord'
+                  $ref: "#/components/schemas/LiftRecord"
   /lift:
     get:
       summary: "Returns a `Lift` by `id` (id: \"panorama\")"
@@ -49,7 +49,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LiftRecord'
+                $ref: "#/components/schemas/LiftRecord"
 components:
   schemas:
     LiftRecord:

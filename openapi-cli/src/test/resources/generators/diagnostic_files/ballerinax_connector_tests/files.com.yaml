@@ -352,7 +352,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ActionNotificationExportEntity'
+                $ref: "#/components/schemas/ActionNotificationExportEntity"
           x-ms-summary: The ActionNotificationExports object.
         400:
           description: Bad Request
@@ -422,7 +422,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ActionNotificationExportEntity'
+                $ref: "#/components/schemas/ActionNotificationExportEntity"
           x-ms-summary: The ActionNotificationExports object.
         400:
           description: Bad Request
@@ -526,7 +526,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionNotificationExportResultEntity'
+                  $ref: "#/components/schemas/ActionNotificationExportResultEntity"
           x-ms-summary: A list of ActionNotificationExportResults objects.
         400:
           description: Bad Request
@@ -649,7 +649,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyEntity'
+                $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: The ApiKey object.
         400:
           description: Bad Request
@@ -874,7 +874,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyEntity'
+                $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: The ApiKey object.
         400:
           description: Bad Request
@@ -942,7 +942,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyEntity'
+                $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: The ApiKeys object.
         400:
           description: Bad Request
@@ -1181,7 +1181,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyEntity'
+                $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: The ApiKeys object.
         400:
           description: Bad Request
@@ -1348,7 +1348,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ApiKeyEntity'
+                  $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: A list of ApiKeys objects.
         400:
           description: Bad Request
@@ -1557,7 +1557,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyEntity'
+                $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: The ApiKeys object.
         400:
           description: Bad Request
@@ -1619,7 +1619,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsageSnapshotEntity'
+                $ref: "#/components/schemas/UsageSnapshotEntity"
           x-ms-summary: The Site object.
         400:
           description: Bad Request
@@ -1678,7 +1678,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SiteEntity'
+                $ref: "#/components/schemas/SiteEntity"
           x-ms-summary: The Site object.
         400:
           description: Bad Request
@@ -3222,7 +3222,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SiteEntity'
+                $ref: "#/components/schemas/SiteEntity"
           x-ms-summary: The Site object.
         400:
           description: Bad Request
@@ -3314,7 +3314,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/IpAddressEntity'
+                  $ref: "#/components/schemas/IpAddressEntity"
           x-ms-summary: A list of IpAddresses objects.
         400:
           description: Bad Request
@@ -3401,7 +3401,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DnsRecordEntity'
+                  $ref: "#/components/schemas/DnsRecordEntity"
           x-ms-summary: A list of DnsRecords objects.
         400:
           description: Bad Request
@@ -3576,7 +3576,7 @@ paths:
             application/json:
               schema:
                 description: Test webhook status.
-                $ref: '#/components/schemas/StatusEntity'
+                $ref: "#/components/schemas/StatusEntity"
           x-ms-summary: The Behaviors object.
         400:
           description: Bad Request
@@ -3745,7 +3745,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ApiKeyEntity'
+                  $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: A list of ApiKeys objects.
         400:
           description: Bad Request
@@ -3954,7 +3954,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyEntity'
+                $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: The ApiKeys object.
         400:
           description: Bad Request
@@ -4787,7 +4787,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserEntity'
+                $ref: "#/components/schemas/UserEntity"
           x-ms-summary: The Users object.
         400:
           description: Bad Request
@@ -4891,7 +4891,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PublicKeyEntity'
+                  $ref: "#/components/schemas/PublicKeyEntity"
           x-ms-summary: A list of PublicKeys objects.
         400:
           description: Bad Request
@@ -5019,7 +5019,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicKeyEntity'
+                $ref: "#/components/schemas/PublicKeyEntity"
           x-ms-summary: The PublicKeys object.
         400:
           description: Bad Request
@@ -5122,7 +5122,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GroupUserEntity'
+                  $ref: "#/components/schemas/GroupUserEntity"
           x-ms-summary: A list of GroupUsers objects.
         400:
           description: Bad Request
@@ -5220,7 +5220,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/As2KeyEntity'
+                  $ref: "#/components/schemas/As2KeyEntity"
           x-ms-summary: A list of As2Keys objects.
         400:
           description: Bad Request
@@ -5349,7 +5349,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/As2KeyEntity'
+                $ref: "#/components/schemas/As2KeyEntity"
           x-ms-summary: The As2Keys object.
         400:
           description: Bad Request
@@ -5519,7 +5519,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ApiKeyEntity'
+                  $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: A list of ApiKeys objects.
         400:
           description: Bad Request
@@ -5728,7 +5728,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyEntity'
+                $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: The ApiKeys object.
         400:
           description: Bad Request
@@ -5998,7 +5998,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserEntity'
+                $ref: "#/components/schemas/UserEntity"
           x-ms-summary: The Users object.
         400:
           description: Bad Request
@@ -6905,7 +6905,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserEntity'
+                $ref: "#/components/schemas/UserEntity"
           x-ms-summary: The Users object.
         400:
           description: Bad Request
@@ -7179,7 +7179,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserEntity'
+                  $ref: "#/components/schemas/UserEntity"
           x-ms-summary: A list of Users objects.
         400:
           description: Bad Request
@@ -8009,7 +8009,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserEntity'
+                $ref: "#/components/schemas/UserEntity"
           x-ms-summary: The Users object.
         400:
           description: Bad Request
@@ -8106,7 +8106,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserCipherUseEntity'
+                  $ref: "#/components/schemas/UserCipherUseEntity"
           x-ms-summary: A list of UserCipherUses objects.
         400:
           description: Bad Request
@@ -8204,7 +8204,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PublicKeyEntity'
+                  $ref: "#/components/schemas/PublicKeyEntity"
           x-ms-summary: A list of PublicKeys objects.
         400:
           description: Bad Request
@@ -8324,7 +8324,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicKeyEntity'
+                $ref: "#/components/schemas/PublicKeyEntity"
           x-ms-summary: The PublicKeys object.
         400:
           description: Bad Request
@@ -8531,7 +8531,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PermissionEntity'
+                  $ref: "#/components/schemas/PermissionEntity"
           x-ms-summary: A list of Permissions objects.
         400:
           description: Bad Request
@@ -8634,7 +8634,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GroupUserEntity'
+                  $ref: "#/components/schemas/GroupUserEntity"
           x-ms-summary: A list of GroupUsers objects.
         400:
           description: Bad Request
@@ -8733,7 +8733,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/As2KeyEntity'
+                  $ref: "#/components/schemas/As2KeyEntity"
           x-ms-summary: A list of As2Keys objects.
         400:
           description: Bad Request
@@ -8854,7 +8854,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/As2KeyEntity'
+                $ref: "#/components/schemas/As2KeyEntity"
           x-ms-summary: The As2Keys object.
         400:
           description: Bad Request
@@ -9025,7 +9025,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ApiKeyEntity'
+                  $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: A list of ApiKeys objects.
         400:
           description: Bad Request
@@ -9226,7 +9226,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyEntity'
+                $ref: "#/components/schemas/ApiKeyEntity"
           x-ms-summary: The ApiKeys object.
         400:
           description: Bad Request
@@ -9386,7 +9386,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AppEntity'
+                  $ref: "#/components/schemas/AppEntity"
           x-ms-summary: A list of Apps objects.
         400:
           description: Bad Request
@@ -9453,7 +9453,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/As2KeyEntity'
+                $ref: "#/components/schemas/As2KeyEntity"
           x-ms-summary: The As2Keys object.
         400:
           description: Bad Request
@@ -9615,7 +9615,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/As2KeyEntity'
+                $ref: "#/components/schemas/As2KeyEntity"
           x-ms-summary: The As2Keys object.
         400:
           description: Bad Request
@@ -9710,7 +9710,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/As2KeyEntity'
+                  $ref: "#/components/schemas/As2KeyEntity"
           x-ms-summary: A list of As2Keys objects.
         400:
           description: Bad Request
@@ -9839,7 +9839,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/As2KeyEntity'
+                $ref: "#/components/schemas/As2KeyEntity"
           x-ms-summary: The As2Keys object.
         400:
           description: Bad Request
@@ -9909,7 +9909,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AutomationEntity'
+                $ref: "#/components/schemas/AutomationEntity"
           x-ms-summary: The Automations object.
         400:
           description: Bad Request
@@ -10398,7 +10398,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AutomationEntity'
+                $ref: "#/components/schemas/AutomationEntity"
           x-ms-summary: The Automations object.
         400:
           description: Bad Request
@@ -10564,7 +10564,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AutomationEntity'
+                  $ref: "#/components/schemas/AutomationEntity"
           x-ms-summary: A list of Automations objects.
         400:
           description: Bad Request
@@ -10980,7 +10980,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AutomationEntity'
+                $ref: "#/components/schemas/AutomationEntity"
           x-ms-summary: The Automations object.
         400:
           description: Bad Request
@@ -11136,7 +11136,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/BandwidthSnapshotEntity'
+                  $ref: "#/components/schemas/BandwidthSnapshotEntity"
           x-ms-summary: A list of BandwidthSnapshots objects.
         400:
           description: Bad Request
@@ -11308,7 +11308,7 @@ paths:
             application/json:
               schema:
                 description: Test webhook fields.
-                $ref: '#/components/schemas/StatusEntity'
+                $ref: "#/components/schemas/StatusEntity"
           x-ms-summary: The Behaviors object.
         400:
           description: Bad Request
@@ -11377,7 +11377,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BehaviorEntity'
+                $ref: "#/components/schemas/BehaviorEntity"
           x-ms-summary: The Behaviors object.
         400:
           description: Bad Request
@@ -11615,7 +11615,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BehaviorEntity'
+                $ref: "#/components/schemas/BehaviorEntity"
           x-ms-summary: The Behaviors object.
         400:
           description: Bad Request
@@ -11778,7 +11778,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/BehaviorEntity'
+                  $ref: "#/components/schemas/BehaviorEntity"
           x-ms-summary: A list of Behaviors objects.
         400:
           description: Bad Request
@@ -11929,7 +11929,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BehaviorEntity'
+                $ref: "#/components/schemas/BehaviorEntity"
           x-ms-summary: The Behaviors object.
         400:
           description: Bad Request
@@ -12109,7 +12109,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/BehaviorEntity'
+                  $ref: "#/components/schemas/BehaviorEntity"
           x-ms-summary: A list of Behaviors objects.
         400:
           description: Bad Request
@@ -12175,7 +12175,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BundleEntity'
+                $ref: "#/components/schemas/BundleEntity"
           x-ms-summary: The Bundles object.
         400:
           description: Bad Request
@@ -12538,7 +12538,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BundleEntity'
+                $ref: "#/components/schemas/BundleEntity"
           x-ms-summary: The Bundles object.
         400:
           description: Bad Request
@@ -12705,7 +12705,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/BundleEntity'
+                  $ref: "#/components/schemas/BundleEntity"
           x-ms-summary: A list of Bundles objects.
         400:
           description: Bad Request
@@ -13024,7 +13024,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BundleEntity'
+                $ref: "#/components/schemas/BundleEntity"
           x-ms-summary: The Bundles object.
         400:
           description: Bad Request
@@ -13354,7 +13354,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/BundleDownloadEntity'
+                  $ref: "#/components/schemas/BundleDownloadEntity"
           x-ms-summary: A list of BundleDownloads objects.
         400:
           description: Bad Request
@@ -13529,7 +13529,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/BundleRecipientEntity'
+                  $ref: "#/components/schemas/BundleRecipientEntity"
           x-ms-summary: A list of BundleRecipients objects.
         400:
           description: Bad Request
@@ -13719,7 +13719,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BundleRecipientEntity'
+                $ref: "#/components/schemas/BundleRecipientEntity"
           x-ms-summary: The BundleRecipients object.
         400:
           description: Bad Request
@@ -13821,7 +13821,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/BundleRegistrationEntity'
+                  $ref: "#/components/schemas/BundleRegistrationEntity"
           x-ms-summary: A list of BundleRegistrations objects.
         400:
           description: Bad Request
@@ -13904,7 +13904,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ClickwrapEntity'
+                  $ref: "#/components/schemas/ClickwrapEntity"
           x-ms-summary: A list of Clickwraps objects.
         400:
           description: Bad Request
@@ -14093,7 +14093,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClickwrapEntity'
+                $ref: "#/components/schemas/ClickwrapEntity"
           x-ms-summary: The Clickwraps object.
         400:
           description: Bad Request
@@ -14160,7 +14160,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClickwrapEntity'
+                $ref: "#/components/schemas/ClickwrapEntity"
           x-ms-summary: The Clickwraps object.
         400:
           description: Bad Request
@@ -14423,7 +14423,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClickwrapEntity'
+                $ref: "#/components/schemas/ClickwrapEntity"
           x-ms-summary: The Clickwraps object.
         400:
           description: Bad Request
@@ -14507,7 +14507,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DnsRecordEntity'
+                  $ref: "#/components/schemas/DnsRecordEntity"
           x-ms-summary: A list of DnsRecords objects.
         400:
           description: Bad Request
@@ -14687,7 +14687,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ExternalEventEntity'
+                  $ref: "#/components/schemas/ExternalEventEntity"
           x-ms-summary: A list of ExternalEvents objects.
         400:
           description: Bad Request
@@ -14800,7 +14800,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExternalEventEntity'
+                $ref: "#/components/schemas/ExternalEventEntity"
           x-ms-summary: The ExternalEvents object.
         400:
           description: Bad Request
@@ -14866,7 +14866,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExternalEventEntity'
+                $ref: "#/components/schemas/ExternalEventEntity"
           x-ms-summary: The ExternalEvents object.
         400:
           description: Bad Request
@@ -14975,7 +14975,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileEntity'
+                $ref: "#/components/schemas/FileEntity"
           x-ms-summary: The Files object.
         400:
           description: Bad Request
@@ -15258,7 +15258,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileEntity'
+                $ref: "#/components/schemas/FileEntity"
           x-ms-summary: The Files object.
         400:
           description: Bad Request
@@ -15440,7 +15440,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileEntity'
+                $ref: "#/components/schemas/FileEntity"
           x-ms-summary: The Files object.
         400:
           description: Bad Request
@@ -15532,7 +15532,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileEntity'
+                $ref: "#/components/schemas/FileEntity"
           x-ms-summary: The FileActions object.
         400:
           description: Bad Request
@@ -15641,7 +15641,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileActionEntity'
+                $ref: "#/components/schemas/FileActionEntity"
           x-ms-summary: The FileActions object.
         400:
           description: Bad Request
@@ -15738,7 +15738,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileActionEntity'
+                $ref: "#/components/schemas/FileActionEntity"
           x-ms-summary: The FileActions object.
         400:
           description: Bad Request
@@ -15899,7 +15899,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileUploadPartEntity'
+                  $ref: "#/components/schemas/FileUploadPartEntity"
           x-ms-summary: The FileActions object.
         400:
           description: Bad Request
@@ -16060,7 +16060,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileCommentEntity'
+                $ref: "#/components/schemas/FileCommentEntity"
           x-ms-summary: The FileComments object.
         400:
           description: Bad Request
@@ -16161,7 +16161,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileCommentEntity'
+                $ref: "#/components/schemas/FileCommentEntity"
           x-ms-summary: The FileComments object.
         400:
           description: Bad Request
@@ -16252,7 +16252,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileCommentEntity'
+                  $ref: "#/components/schemas/FileCommentEntity"
           x-ms-summary: A list of FileComments objects.
         400:
           description: Bad Request
@@ -16440,7 +16440,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileCommentReactionEntity'
+                $ref: "#/components/schemas/FileCommentReactionEntity"
           x-ms-summary: The FileCommentReactions object.
         400:
           description: Bad Request
@@ -16506,7 +16506,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileMigrationEntity'
+                $ref: "#/components/schemas/FileMigrationEntity"
           x-ms-summary: The FileMigrations object.
         400:
           description: Bad Request
@@ -16649,7 +16649,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileEntity'
+                  $ref: "#/components/schemas/FileEntity"
           x-ms-summary: A list of Folders objects.
         400:
           description: Bad Request
@@ -16714,7 +16714,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileEntity'
+                $ref: "#/components/schemas/FileEntity"
           x-ms-summary: The Folders object.
         400:
           description: Bad Request
@@ -16809,7 +16809,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FormFieldSetEntity'
+                  $ref: "#/components/schemas/FormFieldSetEntity"
           x-ms-summary: A list of FormFieldSets objects.
         400:
           description: Bad Request
@@ -16862,13 +16862,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/postFormFieldSets'
+              $ref: "#/components/schemas/postFormFieldSets"
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/postFormFieldSets'
+              $ref: "#/components/schemas/postFormFieldSets"
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/postFormFieldSets'
+              $ref: "#/components/schemas/postFormFieldSets"
         required: true
       responses:
         201:
@@ -16876,7 +16876,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormFieldSetEntity'
+                $ref: "#/components/schemas/FormFieldSetEntity"
           x-ms-summary: The FormFieldSets object.
         400:
           description: Bad Request
@@ -16943,7 +16943,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormFieldSetEntity'
+                $ref: "#/components/schemas/FormFieldSetEntity"
           x-ms-summary: The FormFieldSets object.
         400:
           description: Bad Request
@@ -17068,13 +17068,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/patchFormFieldSets'
+              $ref: "#/components/schemas/patchFormFieldSets"
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/patchFormFieldSets'
+              $ref: "#/components/schemas/patchFormFieldSets"
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/patchFormFieldSets'
+              $ref: "#/components/schemas/patchFormFieldSets"
         required: true
       responses:
         200:
@@ -17082,7 +17082,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormFieldSetEntity'
+                $ref: "#/components/schemas/FormFieldSetEntity"
           x-ms-summary: The FormFieldSets object.
         400:
           description: Bad Request
@@ -17183,7 +17183,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GroupUserEntity'
+                  $ref: "#/components/schemas/GroupUserEntity"
           x-ms-summary: A list of GroupUsers objects.
         400:
           description: Bad Request
@@ -18010,7 +18010,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserEntity'
+                $ref: "#/components/schemas/UserEntity"
           x-ms-summary: The Users object.
         400:
           description: Bad Request
@@ -18215,7 +18215,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PermissionEntity'
+                  $ref: "#/components/schemas/PermissionEntity"
           x-ms-summary: A list of Permissions objects.
         400:
           description: Bad Request
@@ -18390,7 +18390,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupUserEntity'
+                $ref: "#/components/schemas/GroupUserEntity"
           x-ms-summary: The GroupUsers object.
         400:
           description: Bad Request
@@ -18459,7 +18459,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupEntity'
+                $ref: "#/components/schemas/GroupEntity"
           x-ms-summary: The Groups object.
         400:
           description: Bad Request
@@ -18659,7 +18659,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupEntity'
+                $ref: "#/components/schemas/GroupEntity"
           x-ms-summary: The Groups object.
         400:
           description: Bad Request
@@ -18822,7 +18822,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GroupEntity'
+                  $ref: "#/components/schemas/GroupEntity"
           x-ms-summary: A list of Groups objects.
         400:
           description: Bad Request
@@ -18949,7 +18949,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupEntity'
+                $ref: "#/components/schemas/GroupEntity"
           x-ms-summary: The Groups object.
         400:
           description: Bad Request
@@ -19162,7 +19162,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupUserEntity'
+                $ref: "#/components/schemas/GroupUserEntity"
           x-ms-summary: The GroupUsers object.
         400:
           description: Bad Request
@@ -19264,7 +19264,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GroupUserEntity'
+                  $ref: "#/components/schemas/GroupUserEntity"
           x-ms-summary: A list of GroupUsers objects.
         400:
           description: Bad Request
@@ -19386,7 +19386,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupUserEntity'
+                $ref: "#/components/schemas/GroupUserEntity"
           x-ms-summary: The GroupUsers object.
         400:
           description: Bad Request
@@ -19514,7 +19514,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionEntity'
+                  $ref: "#/components/schemas/ActionEntity"
           x-ms-summary: A list of History objects.
         400:
           description: Bad Request
@@ -19641,7 +19641,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionEntity'
+                  $ref: "#/components/schemas/ActionEntity"
           x-ms-summary: A list of History objects.
         400:
           description: Bad Request
@@ -19769,7 +19769,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionEntity'
+                  $ref: "#/components/schemas/ActionEntity"
           x-ms-summary: A list of History objects.
         400:
           description: Bad Request
@@ -19889,7 +19889,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionEntity'
+                  $ref: "#/components/schemas/ActionEntity"
           x-ms-summary: A list of History objects.
         400:
           description: Bad Request
@@ -20075,7 +20075,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ActionEntity'
+                  $ref: "#/components/schemas/ActionEntity"
           x-ms-summary: A list of History objects.
         400:
           description: Bad Request
@@ -20659,7 +20659,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HistoryExportEntity'
+                $ref: "#/components/schemas/HistoryExportEntity"
           x-ms-summary: The HistoryExports object.
         400:
           description: Bad Request
@@ -20726,7 +20726,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HistoryExportEntity'
+                $ref: "#/components/schemas/HistoryExportEntity"
           x-ms-summary: The HistoryExports object.
         400:
           description: Bad Request
@@ -20830,7 +20830,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/HistoryExportResultEntity'
+                  $ref: "#/components/schemas/HistoryExportResultEntity"
           x-ms-summary: A list of HistoryExportResults objects.
         400:
           description: Bad Request
@@ -21005,7 +21005,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/InboxRecipientEntity'
+                  $ref: "#/components/schemas/InboxRecipientEntity"
           x-ms-summary: A list of InboxRecipients objects.
         400:
           description: Bad Request
@@ -21195,7 +21195,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InboxRecipientEntity'
+                $ref: "#/components/schemas/InboxRecipientEntity"
           x-ms-summary: The InboxRecipients object.
         400:
           description: Bad Request
@@ -21287,7 +21287,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/InboxRegistrationEntity'
+                  $ref: "#/components/schemas/InboxRegistrationEntity"
           x-ms-summary: A list of InboxRegistrations objects.
         400:
           description: Bad Request
@@ -21458,7 +21458,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/InboxUploadEntity'
+                  $ref: "#/components/schemas/InboxUploadEntity"
           x-ms-summary: A list of InboxUploads objects.
         400:
           description: Bad Request
@@ -21525,7 +21525,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountLineItemEntity'
+                $ref: "#/components/schemas/AccountLineItemEntity"
           x-ms-summary: The Invoices object.
         400:
           description: Bad Request
@@ -21610,7 +21610,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AccountLineItemEntity'
+                  $ref: "#/components/schemas/AccountLineItemEntity"
           x-ms-summary: A list of Invoices objects.
         400:
           description: Bad Request
@@ -21695,7 +21695,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PublicIpAddressEntity'
+                  $ref: "#/components/schemas/PublicIpAddressEntity"
           x-ms-summary: A list of IpAddresses objects.
         400:
           description: Bad Request
@@ -21779,7 +21779,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/IpAddressEntity'
+                  $ref: "#/components/schemas/IpAddressEntity"
           x-ms-summary: A list of IpAddresses objects.
         400:
           description: Bad Request
@@ -21881,7 +21881,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/LockEntity'
+                  $ref: "#/components/schemas/LockEntity"
           x-ms-summary: A list of Locks objects.
         400:
           description: Bad Request
@@ -22009,7 +22009,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LockEntity'
+                $ref: "#/components/schemas/LockEntity"
           x-ms-summary: The Locks object.
         400:
           description: Bad Request
@@ -22148,7 +22148,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageEntity'
+                $ref: "#/components/schemas/MessageEntity"
           x-ms-summary: The Messages object.
         400:
           description: Bad Request
@@ -22344,7 +22344,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageEntity'
+                $ref: "#/components/schemas/MessageEntity"
           x-ms-summary: The Messages object.
         400:
           description: Bad Request
@@ -22447,7 +22447,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessageEntity'
+                  $ref: "#/components/schemas/MessageEntity"
           x-ms-summary: A list of Messages objects.
         400:
           description: Bad Request
@@ -22592,7 +22592,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageEntity'
+                $ref: "#/components/schemas/MessageEntity"
           x-ms-summary: The Messages object.
         400:
           description: Bad Request
@@ -22658,7 +22658,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageCommentEntity'
+                $ref: "#/components/schemas/MessageCommentEntity"
           x-ms-summary: The MessageComments object.
         400:
           description: Bad Request
@@ -22815,7 +22815,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageCommentEntity'
+                $ref: "#/components/schemas/MessageCommentEntity"
           x-ms-summary: The MessageComments object.
         400:
           description: Bad Request
@@ -22918,7 +22918,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessageCommentEntity'
+                  $ref: "#/components/schemas/MessageCommentEntity"
           x-ms-summary: A list of MessageComments objects.
         400:
           description: Bad Request
@@ -23024,7 +23024,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageCommentEntity'
+                $ref: "#/components/schemas/MessageCommentEntity"
           x-ms-summary: The MessageComments object.
         400:
           description: Bad Request
@@ -23090,7 +23090,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageCommentReactionEntity'
+                $ref: "#/components/schemas/MessageCommentReactionEntity"
           x-ms-summary: The MessageCommentReactions object.
         400:
           description: Bad Request
@@ -23255,7 +23255,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessageCommentReactionEntity'
+                  $ref: "#/components/schemas/MessageCommentReactionEntity"
           x-ms-summary: A list of MessageCommentReactions objects.
         400:
           description: Bad Request
@@ -23361,7 +23361,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageCommentReactionEntity'
+                $ref: "#/components/schemas/MessageCommentReactionEntity"
           x-ms-summary: The MessageCommentReactions object.
         400:
           description: Bad Request
@@ -23427,7 +23427,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageReactionEntity'
+                $ref: "#/components/schemas/MessageReactionEntity"
           x-ms-summary: The MessageReactions object.
         400:
           description: Bad Request
@@ -23592,7 +23592,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessageReactionEntity'
+                  $ref: "#/components/schemas/MessageReactionEntity"
           x-ms-summary: A list of MessageReactions objects.
         400:
           description: Bad Request
@@ -23698,7 +23698,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageReactionEntity'
+                $ref: "#/components/schemas/MessageReactionEntity"
           x-ms-summary: The MessageReactions object.
         400:
           description: Bad Request
@@ -23764,7 +23764,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotificationEntity'
+                $ref: "#/components/schemas/NotificationEntity"
           x-ms-summary: The Notifications object.
         400:
           description: Bad Request
@@ -23977,7 +23977,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotificationEntity'
+                $ref: "#/components/schemas/NotificationEntity"
           x-ms-summary: The Notifications object.
         400:
           description: Bad Request
@@ -24178,7 +24178,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NotificationEntity'
+                  $ref: "#/components/schemas/NotificationEntity"
           x-ms-summary: A list of Notifications objects.
         400:
           description: Bad Request
@@ -24391,7 +24391,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotificationEntity'
+                $ref: "#/components/schemas/NotificationEntity"
           x-ms-summary: The Notifications object.
         400:
           description: Bad Request
@@ -24457,7 +24457,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountLineItemEntity'
+                $ref: "#/components/schemas/AccountLineItemEntity"
           x-ms-summary: The Payments object.
         400:
           description: Bad Request
@@ -24542,7 +24542,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AccountLineItemEntity'
+                  $ref: "#/components/schemas/AccountLineItemEntity"
           x-ms-summary: A list of Payments objects.
         400:
           description: Bad Request
@@ -24809,7 +24809,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PermissionEntity'
+                  $ref: "#/components/schemas/PermissionEntity"
           x-ms-summary: A list of Permissions objects.
         400:
           description: Bad Request
@@ -24962,7 +24962,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PermissionEntity'
+                $ref: "#/components/schemas/PermissionEntity"
           x-ms-summary: The Permissions object.
         400:
           description: Bad Request
@@ -25028,7 +25028,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectEntity'
+                $ref: "#/components/schemas/ProjectEntity"
           x-ms-summary: The Projects object.
         400:
           description: Bad Request
@@ -25193,7 +25193,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectEntity'
+                $ref: "#/components/schemas/ProjectEntity"
           x-ms-summary: The Projects object.
         400:
           description: Bad Request
@@ -25277,7 +25277,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProjectEntity'
+                  $ref: "#/components/schemas/ProjectEntity"
           x-ms-summary: A list of Projects objects.
         400:
           description: Bad Request
@@ -25369,7 +25369,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectEntity'
+                $ref: "#/components/schemas/ProjectEntity"
           x-ms-summary: The Projects object.
         400:
           description: Bad Request
@@ -25436,7 +25436,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicKeyEntity'
+                $ref: "#/components/schemas/PublicKeyEntity"
           x-ms-summary: The PublicKeys object.
         400:
           description: Bad Request
@@ -25598,7 +25598,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicKeyEntity'
+                $ref: "#/components/schemas/PublicKeyEntity"
           x-ms-summary: The PublicKeys object.
         400:
           description: Bad Request
@@ -25693,7 +25693,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PublicKeyEntity'
+                  $ref: "#/components/schemas/PublicKeyEntity"
           x-ms-summary: A list of PublicKeys objects.
         400:
           description: Bad Request
@@ -25821,7 +25821,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicKeyEntity'
+                $ref: "#/components/schemas/PublicKeyEntity"
           x-ms-summary: The PublicKeys object.
         400:
           description: Bad Request
@@ -25908,7 +25908,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RemoteServerEntity'
+                  $ref: "#/components/schemas/RemoteServerEntity"
           x-ms-summary: A list of RemoteServers objects.
         400:
           description: Bad Request
@@ -26701,7 +26701,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RemoteServerEntity'
+                $ref: "#/components/schemas/RemoteServerEntity"
           x-ms-summary: The RemoteServers object.
         400:
           description: Bad Request
@@ -26768,7 +26768,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RemoteServerEntity'
+                $ref: "#/components/schemas/RemoteServerEntity"
           x-ms-summary: The RemoteServers object.
         400:
           description: Bad Request
@@ -27634,7 +27634,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RemoteServerEntity'
+                $ref: "#/components/schemas/RemoteServerEntity"
           x-ms-summary: The RemoteServers object.
         400:
           description: Bad Request
@@ -27813,7 +27813,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RequestEntity'
+                  $ref: "#/components/schemas/RequestEntity"
           x-ms-summary: A list of Requests objects.
         400:
           description: Bad Request
@@ -27951,7 +27951,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RequestEntity'
+                $ref: "#/components/schemas/RequestEntity"
           x-ms-summary: The Requests object.
         400:
           description: Bad Request
@@ -28067,7 +28067,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RequestEntity'
+                  $ref: "#/components/schemas/RequestEntity"
           x-ms-summary: A list of Requests objects.
         400:
           description: Bad Request
@@ -28199,7 +28199,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionEntity'
+                $ref: "#/components/schemas/SessionEntity"
           x-ms-summary: The Sessions object.
         400:
           description: Bad Request
@@ -28409,7 +28409,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/SettingsChangeEntity'
+                  $ref: "#/components/schemas/SettingsChangeEntity"
           x-ms-summary: A list of SettingsChanges objects.
         400:
           description: Bad Request
@@ -28476,7 +28476,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SsoStrategyEntity'
+                $ref: "#/components/schemas/SsoStrategyEntity"
           x-ms-summary: The SsoStrategies object.
         400:
           description: Bad Request
@@ -28560,7 +28560,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/SsoStrategyEntity'
+                  $ref: "#/components/schemas/SsoStrategyEntity"
           x-ms-summary: A list of SsoStrategies objects.
         400:
           description: Bad Request
@@ -28626,7 +28626,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StyleEntity'
+                $ref: "#/components/schemas/StyleEntity"
           x-ms-summary: The Styles object.
         400:
           description: Bad Request
@@ -28785,7 +28785,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StyleEntity'
+                $ref: "#/components/schemas/StyleEntity"
           x-ms-summary: The Styles object.
         400:
           description: Bad Request
@@ -28869,7 +28869,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/SyncJobEntity'
+                  $ref: "#/components/schemas/SyncJobEntity"
           x-ms-summary: A list of SyncJobs objects.
         400:
           description: Bad Request
@@ -28953,7 +28953,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UsageSnapshotEntity'
+                  $ref: "#/components/schemas/UsageSnapshotEntity"
           x-ms-summary: A list of UsageSnapshots objects.
         400:
           description: Bad Request
@@ -29110,7 +29110,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UsageDailySnapshotEntity'
+                  $ref: "#/components/schemas/UsageDailySnapshotEntity"
           x-ms-summary: A list of UsageDailySnapshots objects.
         400:
           description: Bad Request
@@ -29205,7 +29205,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserCipherUseEntity'
+                  $ref: "#/components/schemas/UserCipherUseEntity"
           x-ms-summary: A list of UserCipherUses objects.
         400:
           description: Bad Request
@@ -29291,7 +29291,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserRequestEntity'
+                  $ref: "#/components/schemas/UserRequestEntity"
           x-ms-summary: A list of UserRequests objects.
         400:
           description: Bad Request
@@ -29407,7 +29407,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserRequestEntity'
+                $ref: "#/components/schemas/UserRequestEntity"
           x-ms-summary: The UserRequests object.
         400:
           description: Bad Request
@@ -29474,7 +29474,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserRequestEntity'
+                $ref: "#/components/schemas/UserRequestEntity"
           x-ms-summary: The UserRequests object.
         400:
           description: Bad Request
@@ -29760,7 +29760,7 @@ paths:
             application/json:
               schema:
                 description: Webhook test entity
-                $ref: '#/components/schemas/WebhookTestEntity'
+                $ref: "#/components/schemas/WebhookTestEntity"
           x-ms-summary: The WebhookTests object.
         400:
           description: Bad Request
@@ -30270,16 +30270,16 @@ components:
           example: true
         icon128:
           description: Branded icon 128x128
-          $ref: '#/components/schemas/ImageEntity'
+          $ref: "#/components/schemas/ImageEntity"
         icon16:
           description: Branded icon 16x16
-          $ref: '#/components/schemas/ImageEntity'
+          $ref: "#/components/schemas/ImageEntity"
         icon32:
           description: Branded icon 32x32
-          $ref: '#/components/schemas/ImageEntity'
+          $ref: "#/components/schemas/ImageEntity"
         icon48:
           description: Branded icon 48x48
-          $ref: '#/components/schemas/ImageEntity'
+          $ref: "#/components/schemas/ImageEntity"
         immutable_files_set_at:
           type: string
           description: Can files be modified?
@@ -30367,7 +30367,7 @@ components:
           description: Login help text
           example: Login page help text.
         logo:
-          $ref: '#/components/schemas/ImageEntity'
+          $ref: "#/components/schemas/ImageEntity"
           description: Branded logo
         max_prior_passwords:
           type: integer
@@ -30468,7 +30468,7 @@ components:
             - folder_and_site_admins
             - site_admins
         session:
-          $ref: '#/components/schemas/SessionEntity'
+          $ref: "#/components/schemas/SessionEntity"
         session_pinned_by_ip:
           type: boolean
           description: Are sessions locked to the same IP? (i.e. do users need to
@@ -30557,7 +30557,7 @@ components:
             files?
           example: true
         user:
-          $ref: '#/components/schemas/UserEntity'
+          $ref: "#/components/schemas/UserEntity"
         user_lockout:
           type: boolean
           description: Will users be locked out after incorrect login attempts?
@@ -31026,10 +31026,10 @@ components:
           example: ""
         data:
           description: Auto fields.
-          $ref: '#/components/schemas/AutoEntity'
+          $ref: "#/components/schemas/AutoEntity"
         errors:
           description: Error fields.
-          $ref: '#/components/schemas/ErrorsEntity'
+          $ref: "#/components/schemas/ErrorsEntity"
         clickwrap_id:
           type: integer
           description: Required Clickwrap id
@@ -31790,7 +31790,7 @@ components:
           description: Legal text that must be agreed to prior to accessing Bundle.
           example: '[Legal text]'
         form_field_set:
-          $ref: '#/components/schemas/FormFieldSetEntity'
+          $ref: "#/components/schemas/FormFieldSetEntity"
         id:
           type: integer
           description: Bundle ID
@@ -31870,7 +31870,7 @@ components:
           format: int32
         form_fields:
           description: Form fields
-          $ref: '#/components/schemas/FormFieldEntity'
+          $ref: "#/components/schemas/FormFieldEntity"
         skip_name:
           type: boolean
           description: Any associated InboxRegistrations or BundleRegistrations can
@@ -31941,7 +31941,7 @@ components:
       type: object
       properties:
         bundle_registration:
-          $ref: '#/components/schemas/BundleRegistrationEntity'
+          $ref: "#/components/schemas/BundleRegistrationEntity"
         download_method:
           type: string
           description: Download method (file or full_zip)
@@ -32225,7 +32225,7 @@ components:
           example: 1
         preview:
           description: File preview
-          $ref: '#/components/schemas/PreviewEntity'
+          $ref: "#/components/schemas/PreviewEntity"
       description: List Folders by path
       x-docs: null
     PreviewEntity:
@@ -32361,7 +32361,7 @@ components:
           description: Comment body.
           example: What a great file!
         reactions:
-          $ref: '#/components/schemas/FileCommentReactionEntity'
+          $ref: "#/components/schemas/FileCommentReactionEntity"
       description: List File Comments by path
       x-docs: |
         File Comments are comments attached to a file by a user.
@@ -33062,7 +33062,7 @@ components:
       type: object
       properties:
         inbox_registration:
-          $ref: '#/components/schemas/InboxRegistrationEntity'
+          $ref: "#/components/schemas/InboxRegistrationEntity"
         path:
           type: string
           description: Upload path
@@ -33106,14 +33106,14 @@ components:
           example: https://url...
         invoice_line_items:
           description: Associated invoice line items
-          $ref: '#/components/schemas/InvoiceLineItemEntity'
+          $ref: "#/components/schemas/InvoiceLineItemEntity"
         method:
           type: string
           description: Line item payment method
           example: paypal
         payment_line_items:
           description: Associated payment line items
-          $ref: '#/components/schemas/PaymentLineItemEntity'
+          $ref: "#/components/schemas/PaymentLineItemEntity"
         payment_reversed_at:
           type: string
           description: Date/time payment was reversed if applicable
@@ -33314,7 +33314,7 @@ components:
           description: Message body.
           example: We should upgrade our Files.com account!
         comments:
-          $ref: '#/components/schemas/MessageCommentEntity'
+          $ref: "#/components/schemas/MessageCommentEntity"
       description: List Messages
       x-docs: |
         Messages are part of Files.com's project management features and represent a message posted by a user to a project.
@@ -33331,7 +33331,7 @@ components:
           description: Comment body.
           example: What a great idea, thank you!
         reactions:
-          $ref: '#/components/schemas/MessageCommentReactionEntity'
+          $ref: "#/components/schemas/MessageCommentReactionEntity"
       description: List Message Comments
       x-docs: |
         A message comment represents a comment made by a user on a message.
@@ -33963,10 +33963,10 @@ components:
           example: ""
         logo:
           description: Logo
-          $ref: '#/components/schemas/ImageEntity'
+          $ref: "#/components/schemas/ImageEntity"
         thumbnail:
           description: Logo thumbnail
-          $ref: '#/components/schemas/ImageEntity'
+          $ref: "#/components/schemas/ImageEntity"
       description: Show Style
       x-docs: |
         Styles are custom sets of branding that can be applied on a per-folder basis.
@@ -34071,7 +34071,7 @@ components:
           example: ""
         data:
           description: Auto fields
-          $ref: '#/components/schemas/AutoEntity'
+          $ref: "#/components/schemas/AutoEntity"
         success:
           type: boolean
           description: The success status of the webhook test

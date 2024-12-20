@@ -22,7 +22,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Location'
+                  $ref: "#/components/schemas/Location"
 components:
   schemas:
     Links:
@@ -31,7 +31,7 @@ components:
         links:
           type: array
           items:
-            $ref: '#/components/schemas/Link'
+            $ref: "#/components/schemas/Link"
     Link:
       type: object
       properties:
@@ -49,7 +49,7 @@ components:
       description: Link details
     Location:
       allOf:
-        - $ref: '#/components/schemas/Links'
+        - $ref: "#/components/schemas/Links"
         - type: object
           properties:
             address:

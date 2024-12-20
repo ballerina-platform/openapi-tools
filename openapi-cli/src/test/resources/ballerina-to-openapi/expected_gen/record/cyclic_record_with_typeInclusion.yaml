@@ -25,21 +25,21 @@ paths:
           content:
             application/fhir+json:
               schema:
-                $ref: '#/components/schemas/Patient'
+                $ref: "#/components/schemas/Patient"
             application/fhir+xml:
               schema:
-                $ref: '#/components/schemas/Patient'
+                $ref: "#/components/schemas/Patient"
 components:
   schemas:
     Identifier:
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             value:
               type: string
             assigner:
-              $ref: '#/components/schemas/Reference'
+              $ref: "#/components/schemas/Reference"
             id:
               type: string
             element:
@@ -47,7 +47,7 @@ components:
               format: int64
     Reference:
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             reference:
@@ -55,7 +55,7 @@ components:
             type:
               type: string
             identifier:
-              $ref: '#/components/schemas/Identifier'
+              $ref: "#/components/schemas/Identifier"
             display:
               type: string
     Element:
@@ -72,4 +72,4 @@ components:
         id:
           type: string
         ref:
-          $ref: '#/components/schemas/Reference'
+          $ref: "#/components/schemas/Reference"

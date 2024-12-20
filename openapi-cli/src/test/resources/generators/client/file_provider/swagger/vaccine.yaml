@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CovidAll'
+                $ref: "#/components/schemas/CovidAll"
   '/v3/covid-19/states/{states}':
     get:
       tags:
@@ -98,7 +98,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CovidState'
+                $ref: "#/components/schemas/CovidState"
   '/v3/covid-19/continents/{continent}':
     get:
       tags:
@@ -157,7 +157,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CovidContinent'
+                $ref: "#/components/schemas/CovidContinent"
   '/v3/covid-19/countries/{country}':
     get:
       tags:
@@ -216,7 +216,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CovidCountry'
+                $ref: "#/components/schemas/CovidCountry"
   /v3/covid-19/historical/all:
     get:
       tags:
@@ -235,7 +235,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CovidHistoricalAll'
+                $ref: "#/components/schemas/CovidHistoricalAll"
   '/v3/covid-19/historical/{country}':
     get:
       tags:
@@ -261,7 +261,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CovidHistoricalCountry'
+                $ref: "#/components/schemas/CovidHistoricalCountry"
   '/v3/covid-19/historical/{country}/{province}':
     get:
       tags:
@@ -293,7 +293,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CovidHistoricalProvince'
+                $ref: "#/components/schemas/CovidHistoricalProvince"
   /v3/covid-19/vaccine:
     get:
       tags:
@@ -306,7 +306,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Vaccines'
+                $ref: "#/components/schemas/Vaccines"
   /v3/covid-19/vaccine/coverage:
     get:
       tags:
@@ -332,12 +332,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VaccineCoverage'
+                $ref: "#/components/schemas/VaccineCoverage"
               examples:
                 simpleTimeline:
-                  $ref: '#/components/examples/SimpleVaccineTimeline'
+                  $ref: "#/components/examples/SimpleVaccineTimeline"
                 fullTimeline:
-                  $ref: '#/components/examples/FullVaccineTimeline'
+                  $ref: "#/components/examples/FullVaccineTimeline"
   '/v3/covid-19/vaccine/coverage/countries/{country}':
     get:
       tags:
@@ -369,12 +369,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VaccineCountryCoverage'
+                $ref: "#/components/schemas/VaccineCountryCoverage"
               examples:
                 simpleTimeline:
-                  $ref: '#/components/examples/countrySimpleVaccineTimeline'
+                  $ref: "#/components/examples/countrySimpleVaccineTimeline"
                 fullTimeline:
-                  $ref: '#/components/examples/countryFullVaccineTimeline'
+                  $ref: "#/components/examples/countryFullVaccineTimeline"
 components:
   schemas:
     CovidAll:
@@ -754,12 +754,12 @@ components:
           type: array
           description: Trial phases
           items:
-            $ref: '#/components/schemas/Phases'
+            $ref: "#/components/schemas/Phases"
         data:
           type: array
           description: Vaccine data of each candidate
           items:
-            $ref: '#/components/schemas/Vaccine'
+            $ref: "#/components/schemas/Vaccine"
       description: Covid19-19 vaccine trial data
     Vaccine:
       properties:
@@ -796,8 +796,8 @@ components:
           description: Number of candidates
     VaccineCoverage:
       oneOf:
-        - $ref: '#/components/schemas/SimpleVaccineTimeline'
-        - $ref: '#/components/schemas/FullVaccineTimeline'
+        - $ref: "#/components/schemas/SimpleVaccineTimeline"
+        - $ref: "#/components/schemas/FullVaccineTimeline"
       description: Covid-19 vaccine coverage related data
     VaccineCountryCoverage:
       type: object
@@ -808,8 +808,8 @@ components:
           description: Country
         timeline:
           oneOf:
-            - $ref: '#/components/schemas/SimpleVaccineTimeline'
-            - $ref: '#/components/schemas/FullVaccineTimeline'
+            - $ref: "#/components/schemas/SimpleVaccineTimeline"
+            - $ref: "#/components/schemas/FullVaccineTimeline"
     SimpleVaccineTimeline:
       type: object
       properties:

@@ -46,7 +46,7 @@ paths:
         content:
           application/octet-stream:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
 components:
   schemas:
     User:

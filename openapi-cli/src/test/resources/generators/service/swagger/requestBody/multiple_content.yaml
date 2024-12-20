@@ -36,13 +36,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
           application/xml:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PetForm'
+              $ref: "#/components/schemas/PetForm"
           text/plain:
             schema:
               type: string
@@ -57,13 +57,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
           application/xml:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
           application/zip:
             schema:
-              $ref: '#/components/schemas/PetForm'
+              $ref: "#/components/schemas/PetForm"
           text/plain:
             schema:
               type: string

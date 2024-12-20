@@ -28,7 +28,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Mark'
+              $ref: "#/components/schemas/Mark"
         required: true
       responses:
         '200':
@@ -36,7 +36,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Mark'
+                $ref: "#/components/schemas/Mark"
 components:
   schemas:
     Mark:

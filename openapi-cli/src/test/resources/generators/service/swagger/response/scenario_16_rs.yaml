@@ -35,7 +35,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Error'
+                  $ref: "#/components/schemas/Error"
 
 
 

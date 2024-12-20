@@ -33,10 +33,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
             application/xml:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
             text/plain:
               schema:
                 type: string

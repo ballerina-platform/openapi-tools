@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Dog'
+              $ref: "#/components/schemas/Dog"
       responses:
         "202":
           description: Accepted
@@ -36,7 +36,7 @@ components:
           items:
             type: array
             items:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
         bark:
           type: boolean
     Pet:

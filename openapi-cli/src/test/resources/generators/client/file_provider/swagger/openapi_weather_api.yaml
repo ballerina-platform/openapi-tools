@@ -26,14 +26,14 @@ paths:
       description: "Access current weather data for any location on Earth including over 200,000 cities! Current weather is frequently updated based on global models and data from more than 40,000 weather stations."
       operationId: getCurretWeatherData
       parameters:
-        - $ref: '#/components/parameters/cityName'
-        - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/lat'
-        - $ref: '#/components/parameters/lon'
-        - $ref: '#/components/parameters/zip'
-        - $ref: '#/components/parameters/units'
-        - $ref: '#/components/parameters/lang'
-        - $ref: '#/components/parameters/mode'
+        - $ref: "#/components/parameters/cityName"
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/lat"
+        - $ref: "#/components/parameters/lon"
+        - $ref: "#/components/parameters/zip"
+        - $ref: "#/components/parameters/units"
+        - $ref: "#/components/parameters/lang"
+        - $ref: "#/components/parameters/mode"
       x-ballerina-display:
         label: "Current Weather"
       responses:
@@ -42,7 +42,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CurrentWeatherData'
+                $ref: "#/components/schemas/CurrentWeatherData"
         404:
           description: Not found response
           content:
@@ -113,7 +113,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WeatherForecast'
+                $ref: "#/components/schemas/WeatherForecast"
         404:
           description: Not found response
           content:
@@ -226,23 +226,23 @@ components:
         timezone_offset:
           type: number
         current:
-          $ref: '#/components/schemas/ForecastCurrent'
+          $ref: "#/components/schemas/ForecastCurrent"
         minutely:
           type: array
           items:
-            $ref: '#/components/schemas/Minutely'
+            $ref: "#/components/schemas/Minutely"
         hourly:
           type: array
           items:
-            $ref: '#/components/schemas/Hourly'
+            $ref: "#/components/schemas/Hourly"
         daily:
           type: array
           items:
-            $ref: '#/components/schemas/Daily'
+            $ref: "#/components/schemas/Daily"
         alerts:
           type: array
           items:
-            $ref: '#/components/schemas/Alerts'
+            $ref: "#/components/schemas/Alerts"
     Alerts:
       type: object
       properties:
@@ -292,9 +292,9 @@ components:
         dt:
           type: number
         temp:
-          $ref: '#/components/schemas/Temp'
+          $ref: "#/components/schemas/Temp"
         feels_like:
-          $ref: '#/components/schemas/FeelsLike'
+          $ref: "#/components/schemas/FeelsLike"
         moonrise:
           type: number
         moonset:
@@ -322,7 +322,7 @@ components:
         weather:
           type: array
           items:
-            $ref: '#/components/schemas/Weather'
+            $ref: "#/components/schemas/Weather"
           description: (more info Weather condition codes)
         rain:
           type: number
@@ -356,10 +356,10 @@ components:
         weather:
           type: array
           items:
-            $ref: '#/components/schemas/Weather'
+            $ref: "#/components/schemas/Weather"
           description: (more info Weather condition codes)
         rain:
-          $ref: '#/components/schemas/Rain'
+          $ref: "#/components/schemas/Rain"
     Minutely:
       type: object
       properties:
@@ -399,48 +399,48 @@ components:
         weather:
           type: array
           items:
-            $ref: '#/components/schemas/Weather'
+            $ref: "#/components/schemas/Weather"
           description: (more info Weather condition codes)
         rain:
-          $ref: '#/components/schemas/Rain'
+          $ref: "#/components/schemas/Rain"
         snow:
-          $ref: '#/components/schemas/Snow'
+          $ref: "#/components/schemas/Snow"
     CurrentWeatherData:
       title: Successful response
       type: object
       properties:
         coord:
-          $ref: '#/components/schemas/Coord'
+          $ref: "#/components/schemas/Coord"
         weather:
           type: array
           items:
-            $ref: '#/components/schemas/Weather'
+            $ref: "#/components/schemas/Weather"
           description: (more info Weather condition codes)
         base:
           type: string
           description: Internal parameter
           example: cmc stations
         main:
-          $ref: '#/components/schemas/Main'
+          $ref: "#/components/schemas/Main"
         visibility:
           type: integer
           description: Visibility, meter
           example: 16093
         wind:
-          $ref: '#/components/schemas/Wind'
+          $ref: "#/components/schemas/Wind"
         clouds:
-          $ref: '#/components/schemas/Clouds'
+          $ref: "#/components/schemas/Clouds"
         rain:
-          $ref: '#/components/schemas/Rain'
+          $ref: "#/components/schemas/Rain"
         snow:
-          $ref: '#/components/schemas/Snow'
+          $ref: "#/components/schemas/Snow"
         dt:
           type: integer
           description: Time of data calculation, unix, UTC
           format: int32
           example: 1435658272
         sys:
-          $ref: '#/components/schemas/Sys'
+          $ref: "#/components/schemas/Sys"
         id:
           type: integer
           description: City ID

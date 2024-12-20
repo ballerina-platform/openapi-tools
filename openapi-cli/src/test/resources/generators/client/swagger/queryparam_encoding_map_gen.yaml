@@ -39,7 +39,7 @@ paths:
           required: false
           schema:
             anyOf:
-              - $ref: '#/components/schemas/CreatedFilterOptions'
+              - $ref: "#/components/schemas/CreatedFilterOptions"
               - type: integer
           style: deepObject
           description: A filter on the list based on the object created field. The value can be a string with an integer Unix timestamp, or it can be a dictionary

@@ -77,4 +77,4 @@ components:
         items:
           type: array
           items:
-           $ref: '#/components/schemas/Address'
+           $ref: "#/components/schemas/Address"

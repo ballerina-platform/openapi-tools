@@ -68,12 +68,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeetingList'
+                $ref: "#/components/schemas/MeetingList"
                 description: List of meetings.
                 title: Group List
             application/xml:
               schema:
-                $ref: '#/components/schemas/MeetingList'
+                $ref: "#/components/schemas/MeetingList"
                 description: List of meetings.
                 title: Group List
           description: "HTTP Status Code:200. List of meeting objects returned."

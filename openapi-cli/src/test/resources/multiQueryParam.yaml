@@ -43,19 +43,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pet'
+                  $ref: "#/components/schemas/Pet"
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
 components:
   schemas:
     Pet:
       allOf:
-        - $ref: '#/components/schemas/NewPet'
+        - $ref: "#/components/schemas/NewPet"
         - type: object
           required:
             - id

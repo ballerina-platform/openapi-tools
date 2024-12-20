@@ -33,14 +33,14 @@ paths:
       description: "Access current weather data for any location. **Note**: All parameters are optional, but you must provide at least one parameter. Calling the API by city ID (using the `id` parameter) will provide the most precise location results."
       operationId: getCurretWeatherData
       parameters:
-        - $ref: '#/components/parameters/cityName'
-        - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/lat'
-        - $ref: '#/components/parameters/lon'
-        - $ref: '#/components/parameters/zip'
-        - $ref: '#/components/parameters/units'
-        - $ref: '#/components/parameters/lang'
-        - $ref: '#/components/parameters/mode'
+        - $ref: "#/components/parameters/cityName"
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/lat"
+        - $ref: "#/components/parameters/lon"
+        - $ref: "#/components/parameters/zip"
+        - $ref: "#/components/parameters/units"
+        - $ref: "#/components/parameters/lang"
+        - $ref: "#/components/parameters/mode"
       x-ballerina-display:
         label: "Current Weather"
       responses:
@@ -49,7 +49,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CurrentWeatherData'
+                $ref: "#/components/schemas/CurrentWeatherData"
         404:
           description: Not found response
           content:
@@ -120,7 +120,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WeatherForecast'
+                $ref: "#/components/schemas/WeatherForecast"
         404:
           description: Not found response
           content:
@@ -238,27 +238,27 @@ components:
           type: number
           description: Shift in seconds from UTC
         current:
-          $ref: '#/components/schemas/ForecastCurrent'
+          $ref: "#/components/schemas/ForecastCurrent"
           description: Current weather data
         minutely:
           type: array
           items:
-            $ref: '#/components/schemas/Minutely'
+            $ref: "#/components/schemas/Minutely"
           description: Minutely weather forecast
         hourly:
           type: array
           items:
-            $ref: '#/components/schemas/Hourly'
+            $ref: "#/components/schemas/Hourly"
           description: Hourly weather forecast
         daily:
           type: array
           items:
-            $ref: '#/components/schemas/Daily'
+            $ref: "#/components/schemas/Daily"
           description: Daily weather forecast
         alerts:
           type: array
           items:
-            $ref: '#/components/schemas/Alerts'
+            $ref: "#/components/schemas/Alerts"
           description: Government weather alerts
     Alerts:
       description: Government weather alerts
@@ -330,10 +330,10 @@ components:
           type: number
           description: Time of the forecasted data, Unix, UTC
         temp:
-          $ref: '#/components/schemas/Temp'
+          $ref: "#/components/schemas/Temp"
           description: Temperature data
         feels_like:
-          $ref: '#/components/schemas/FeelsLike'
+          $ref: "#/components/schemas/FeelsLike"
           description: "Temperature. This accounts for the human perception of weather."
         moonrise:
           type: number
@@ -374,7 +374,7 @@ components:
         weather:
           type: array
           items:
-            $ref: '#/components/schemas/Weather'
+            $ref: "#/components/schemas/Weather"
           description: More info Weather condition codes
         rain:
           type: number
@@ -422,10 +422,10 @@ components:
         weather:
           type: array
           items:
-            $ref: '#/components/schemas/Weather'
+            $ref: "#/components/schemas/Weather"
           description: More info Weather condition codes
         rain:
-          $ref: '#/components/schemas/Rain'
+          $ref: "#/components/schemas/Rain"
           description: Nature of the rain
     Minutely:
       type: object
@@ -483,13 +483,13 @@ components:
         weather:
           type: array
           items:
-            $ref: '#/components/schemas/Weather'
+            $ref: "#/components/schemas/Weather"
           description: More info Weather condition codes
         rain:
-          $ref: '#/components/schemas/Rain'
+          $ref: "#/components/schemas/Rain"
           description: Nature of the rain
         snow:
-          $ref: '#/components/schemas/Snow'
+          $ref: "#/components/schemas/Snow"
           description: Nature of the Snow
     CurrentWeatherData:
       title: Successful response
@@ -497,35 +497,35 @@ components:
       type: object
       properties:
         coord:
-          $ref: '#/components/schemas/Coord'
+          $ref: "#/components/schemas/Coord"
           description: City geo location
         weather:
           type: array
           items:
-            $ref: '#/components/schemas/Weather'
+            $ref: "#/components/schemas/Weather"
           description: More info Weather condition codes
         base:
           type: string
           description: Internal parameter
           example: cmc stations
         main:
-          $ref: '#/components/schemas/Main'
+          $ref: "#/components/schemas/Main"
           description: Basic weather data
         visibility:
           type: integer
           description: Visibility, meter
           example: 16093
         wind:
-          $ref: '#/components/schemas/Wind'
+          $ref: "#/components/schemas/Wind"
           description: Nature of the wind
         clouds:
-          $ref: '#/components/schemas/Clouds'
+          $ref: "#/components/schemas/Clouds"
           description: Nature of the clouds
         rain:
-          $ref: '#/components/schemas/Rain'
+          $ref: "#/components/schemas/Rain"
           description: Nature of the rain
         snow:
-          $ref: '#/components/schemas/Snow'
+          $ref: "#/components/schemas/Snow"
           description: Nature of the snow
         dt:
           type: integer
@@ -533,7 +533,7 @@ components:
           format: int32
           example: 1435658272
         sys:
-          $ref: '#/components/schemas/Sys'
+          $ref: "#/components/schemas/Sys"
           description: Internal data
         id:
           type: integer

@@ -73,10 +73,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrgNameArray'
+                $ref: "#/components/schemas/OrgNameArray"
             application/text:
               schema:
-                $ref: '#/components/schemas/OrgNameArray'
+                $ref: "#/components/schemas/OrgNameArray"
         400:
           description: 'Required parameters missing: organization name and owner''s
             email'
@@ -110,7 +110,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReservationUpdateRequest'
+              $ref: "#/components/schemas/ReservationUpdateRequest"
         required: true
       responses:
         200:
@@ -118,10 +118,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Reservation'
+                $ref: "#/components/schemas/Reservation"
             application/text:
               schema:
-                $ref: '#/components/schemas/Reservation'
+                $ref: "#/components/schemas/Reservation"
         403:
           description: Unauthorised user
           content: {}
@@ -144,7 +144,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReservationRequest'
+              $ref: "#/components/schemas/ReservationRequest"
         required: true
       responses:
         200:
@@ -152,10 +152,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Reservation'
+                $ref: "#/components/schemas/Reservation"
             application/text:
               schema:
-                $ref: '#/components/schemas/Reservation'
+                $ref: "#/components/schemas/Reservation"
         403:
           description: Unauthorised user
           content: {}
@@ -249,9 +249,9 @@ components:
         orgName:
           type: string
         owner:
-          $ref: '#/components/schemas/Owner'
+          $ref: "#/components/schemas/Owner"
         cloudMapping:
-          $ref: '#/components/schemas/CloudMapping'
+          $ref: "#/components/schemas/CloudMapping"
         createdAt:
           type: string
         updatedAt:

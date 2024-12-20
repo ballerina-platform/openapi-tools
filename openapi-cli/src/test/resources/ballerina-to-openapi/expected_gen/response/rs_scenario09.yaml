@@ -43,7 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: "#/components/schemas/Pet"
   /hi/{id}:
     get:
       operationId: getHiId
@@ -70,7 +70,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /v1:
     post:
       operationId: postV1
@@ -78,7 +78,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
       responses:
         "404":
           description: NotFound

@@ -42,15 +42,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
             application/xml:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
         description: Created user object
   '/user/{username}':
     put:
@@ -72,7 +72,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
   /pet/findByStatus:
     get:
       tags:
@@ -111,7 +111,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         default:
           description: successful operation
       requestBody:
@@ -120,7 +120,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
   /user/logout:
     get:
       tags:
@@ -134,13 +134,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         default:
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
 externalDocs:
   description: Find out more about Swagger
   url: 'http://swagger.io'
@@ -217,7 +217,7 @@ components:
           type: string
           example: doggie
         category:
-          $ref: '#/components/schemas/Category'
+          $ref: "#/components/schemas/Category"
         photoUrls:
           type: array
           xml:
@@ -231,7 +231,7 @@ components:
           xml:
             wrapped: true
           items:
-            $ref: '#/components/schemas/Tag'
+            $ref: "#/components/schemas/Tag"
         status:
           type: string
           description: pet status in the store

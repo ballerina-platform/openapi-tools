@@ -38,7 +38,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/body'
+              $ref: "#/components/schemas/body"
         required: true
       responses:
         "201":
@@ -46,7 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateSuccess'
+                $ref: "#/components/schemas/CreateSuccess"
         "400":
           description: The request couldn’t be understood, usually because the JSON or XML body contains an error.
           content:
@@ -54,7 +54,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -62,7 +62,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oauth_2_0: []
   /{version}/sobjects/Account/{id}:
@@ -99,7 +99,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Account'
+                  $ref: "#/components/schemas/Account"
         "400":
           description: The request couldn’t be understood, usually because the JSON or XML body contains an error.
           content:
@@ -107,7 +107,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -115,7 +115,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oauth_2_0: []
     patch:
@@ -147,7 +147,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/body_1'
+              $ref: "#/components/schemas/body_1"
         required: true
       responses:
         "204":
@@ -159,7 +159,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -167,7 +167,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oauth_2_0: []
   /{version}/sobjects/Individual/:
@@ -193,7 +193,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/changedIndividual'
+              $ref: "#/components/schemas/changedIndividual"
         required: true
       responses:
         "201":
@@ -201,7 +201,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateSuccess'
+                $ref: "#/components/schemas/CreateSuccess"
         "400":
           description: The request couldn’t be understood, usually because the JSON or XML body contains an error.
           content:
@@ -209,7 +209,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -217,7 +217,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oauth_2_0: []
   /{version}/sobjects/Individual/{id}:
@@ -254,7 +254,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Individual'
+                  $ref: "#/components/schemas/Individual"
         "400":
           description: The request couldn’t be understood, usually because the JSON or XML body contains an error.
           content:
@@ -262,7 +262,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -270,7 +270,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oauth_2_0: []
     patch:
@@ -302,7 +302,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/changedIndividual'
+              $ref: "#/components/schemas/changedIndividual"
         required: true
       responses:
         "204":
@@ -314,7 +314,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -322,7 +322,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oauth_2_0: []
   /{version}/sobjects/Contact/:
@@ -348,7 +348,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/changedContact'
+              $ref: "#/components/schemas/changedContact"
         required: true
       responses:
         "201":
@@ -356,7 +356,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateSuccess'
+                $ref: "#/components/schemas/CreateSuccess"
         "400":
           description: The request couldn’t be understood, usually because the JSON or XML body contains an error.
           content:
@@ -364,7 +364,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -372,7 +372,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oauth_2_0: []
   /{version}/sobjects/Contact/{id}:
@@ -409,7 +409,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Contact'
+                  $ref: "#/components/schemas/Contact"
         "400":
           description: The request couldn’t be understood, usually because the JSON or XML body contains an error.
           content:
@@ -417,7 +417,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -425,7 +425,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oauth_2_0: []
     patch:
@@ -457,7 +457,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/changedContact'
+              $ref: "#/components/schemas/changedContact"
         required: true
       responses:
         "204":
@@ -469,7 +469,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -477,7 +477,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oauth_2_0: []
 components:
@@ -527,19 +527,19 @@ components:
     Account:
       type: array
       items:
-        $ref: '#/components/schemas/Account_inner'
+        $ref: "#/components/schemas/Account_inner"
     PersonAccount:
       type: array
       items:
-        $ref: '#/components/schemas/PersonAccount_inner'
+        $ref: "#/components/schemas/PersonAccount_inner"
     BusinessAccount:
       type: array
       items:
-        $ref: '#/components/schemas/BusinessAccount_inner'
+        $ref: "#/components/schemas/BusinessAccount_inner"
     MessagewithErrorCode:
       type: array
       items:
-        $ref: '#/components/schemas/MessagewithErrorCode_inner'
+        $ref: "#/components/schemas/MessagewithErrorCode_inner"
     CreateSuccess:
       required:
         - errors
@@ -558,27 +558,27 @@ components:
     Individual:
       type: array
       items:
-        $ref: '#/components/schemas/Individual_inner'
+        $ref: "#/components/schemas/Individual_inner"
     changedIndividual:
       type: array
       items:
-        $ref: '#/components/schemas/changedIndividual_inner'
+        $ref: "#/components/schemas/changedIndividual_inner"
     Contact:
       type: array
       items:
-        $ref: '#/components/schemas/Contact_inner'
+        $ref: "#/components/schemas/Contact_inner"
     changedContact:
       type: array
       items:
-        $ref: '#/components/schemas/changedContact_inner'
+        $ref: "#/components/schemas/changedContact_inner"
     body:
       oneOf:
-        - $ref: '#/components/schemas/PersonAccount'
-        - $ref: '#/components/schemas/BusinessAccount'
+        - $ref: "#/components/schemas/PersonAccount"
+        - $ref: "#/components/schemas/BusinessAccount"
     body_1:
       oneOf:
-        - $ref: '#/components/schemas/PersonAccount'
-        - $ref: '#/components/schemas/BusinessAccount'
+        - $ref: "#/components/schemas/PersonAccount"
+        - $ref: "#/components/schemas/BusinessAccount"
     Account_inner:
       required:
         - Attributes
@@ -587,7 +587,7 @@ components:
       type: object
       properties:
         Attributes:
-          $ref: '#/components/schemas/attributes'
+          $ref: "#/components/schemas/attributes"
         Id:
           type: string
           description: The Salesforce ID of the account
@@ -668,7 +668,7 @@ components:
           type: string
           description: Accuracy level of the geocode for the billing address. See Compound Field Considerations and Limitations for details on geolocation compound fields.
         BillingAddress:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         ShippingStreet:
           type: string
           description: 'The street address of the shipping address for this account. '
@@ -705,7 +705,7 @@ components:
           type: string
           description: Accuracy level of the geocode for the shipping address. See Compound Field Considerations and Limitations for details on geolocation compound fields.
         ShippingAddress:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         Phone:
           type: string
           description: 'Phone number of the account. '
@@ -814,7 +814,7 @@ components:
           type: string
           description: Accuracy level of the geocode for the person’s mailing address. See Compound Field Considerations and Limitations for details on geolocation compound fields.
         PersonMailingAddress:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         PersonMobilePhone:
           type: string
           description: 'The mobile phone number for this person account. '
@@ -1183,7 +1183,7 @@ components:
       type: object
       properties:
         Attributes:
-          $ref: '#/components/schemas/attributes'
+          $ref: "#/components/schemas/attributes"
         Id:
           type: string
           description: The Salesforce ID of the individual record
@@ -1417,7 +1417,7 @@ components:
       type: object
       properties:
         Attributes:
-          $ref: '#/components/schemas/attributes'
+          $ref: "#/components/schemas/attributes"
         Id:
           type: string
           description: The Salesforce ID of the contact record
@@ -1491,7 +1491,7 @@ components:
           type: string
           description: Accuracy level of the geocode for the contact’s mailing address. See Compound Field Considerations and Limitations for details on geolocation compound fields.
         MailingAddress:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         Phone:
           type: string
           description: 'Phone number of the contact. '

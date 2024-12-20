@@ -36,7 +36,7 @@ components:
         - id
       properties:
         hobby:
-          $ref: '#/components/schemas/Hobby' # scenario 03: Reference array
+          $ref: "#/components/schemas/Hobby" # scenario 03: Reference array
         Details:
           type: array
           items:

@@ -49,7 +49,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pet'
+                  $ref: "#/components/schemas/Pet"
   /hello:
     get:
       operationId: operation_get_/hello

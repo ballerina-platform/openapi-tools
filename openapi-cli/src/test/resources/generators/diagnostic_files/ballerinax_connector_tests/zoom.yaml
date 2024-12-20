@@ -150,7 +150,7 @@ paths:
                     page_size: 30
                     total_records: 4
               schema:
-                $ref: '#/components/schemas/ListMeetingsResponse'
+                $ref: "#/components/schemas/ListMeetingsResponse"
           description: "HTTP Status Code:200. List of meetings returned."
         "404":
           description: "HTTP Status Code:404 User ID not found. Error Code:1001, User not exist or not belong to this account."
@@ -192,7 +192,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MeetingDetails'
+              $ref: "#/components/schemas/MeetingDetails"
         description: Meeting detailed.
         x-ballerina-display:
           label: Meeting Details
@@ -302,7 +302,7 @@ paths:
                       type: 2
                       uuid: ng1MzyWNQaObxcf3+Gfm6A==
               schema:
-                $ref: '#/components/schemas/CreateMeetingResponse'
+                $ref: "#/components/schemas/CreateMeetingResponse"
           description: "HTTP Status Code:201 - Meeting created."
           headers:
             Content-Location:
@@ -430,7 +430,7 @@ paths:
                         zip: "11000"
                     total_records: 1
               schema:
-                $ref: '#/components/schemas/ListMeetingRegistrantsResponse'
+                $ref: "#/components/schemas/ListMeetingRegistrantsResponse"
           description: "HTTP Status Code:200. Successfully listed meeting registrants."
       security:
         - OAuth: []
@@ -477,7 +477,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddMeetingRegistrantRequest'
+              $ref: "#/components/schemas/AddMeetingRegistrantRequest"
         required: true
         description: Meeting Registrant Details
         x-examples:
@@ -514,7 +514,7 @@ paths:
                     start_time: culpa mollit
                     topic: reprehenderit ea ut ex Excepteur
               schema:
-                $ref: '#/components/schemas/AddMeetingRegistrantResponse'
+                $ref: "#/components/schemas/AddMeetingRegistrantResponse"
           description: Meeting registrant's details
       security:
         - OAuth: []
@@ -566,7 +566,7 @@ paths:
                       - field_name: address
                         required: true
               schema:
-                $ref: '#/components/schemas/RegistrantQuestions'
+                $ref: "#/components/schemas/RegistrantQuestions"
           description: |-
             **HTTP Status Code:** `200`. Meeting Registrant Question object returned
         "404":
@@ -609,7 +609,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegistrantQuestions'
+              $ref: "#/components/schemas/RegistrantQuestions"
         description: Meeting Registrant Questions
         required: true
         x-examples:
@@ -671,7 +671,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateMeetingRegistrantstatusRequest'
+              $ref: "#/components/schemas/UpdateMeetingRegistrantstatusRequest"
         description: Request payload for meeting registrant status update
         required: true
         x-examples:
@@ -986,7 +986,7 @@ paths:
                     type: 2
                     uuid: iAABBBcccdddd7A==
               schema:
-                $ref: '#/components/schemas/GetMeetingDetailsResponse'
+                $ref: "#/components/schemas/GetMeetingDetailsResponse"
           description: "**HTTP Status Code:** `200` Meeting object returned."
         "400":
           description: >-
@@ -1051,7 +1051,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateMeetingRequest'
+              $ref: "#/components/schemas/UpdateMeetingRequest"
         description: Meeting
         required: true
         x-examples:
@@ -1143,7 +1143,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateMeetingstatusRequest'
+              $ref: "#/components/schemas/UpdateMeetingstatusRequest"
         required: true
         x-examples:
           application/json:
@@ -1206,7 +1206,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListPastMeetingsResponse'
+                $ref: "#/components/schemas/ListPastMeetingsResponse"
           description: |-
             **HTTP Status Code:** `200`. List of ended meeting instances returned.
         "404":
@@ -1269,7 +1269,7 @@ paths:
                     title: Learn something new
                     uuid: gsdjfhsdfkhjdsf
               schema:
-                $ref: '#/components/schemas/ListPastMeetingPollsResponse'
+                $ref: "#/components/schemas/ListPastMeetingPollsResponse"
           description: |-
             **HTTP Status Code:** `200` **OK**. Polls returned successfully.
       security:
@@ -1328,7 +1328,7 @@ paths:
                     user_name: string
                     uuid: string [uuid]
               schema:
-                $ref: '#/components/schemas/PastMeetingDetailsResponse'
+                $ref: "#/components/schemas/PastMeetingDetailsResponse"
           description: |-
             **HTTP Status Code:** `200`. Meeting details returned.
         "400":
@@ -1419,7 +1419,7 @@ paths:
                         user_email: ram.shekhar.123@fkdngfjg.fdghdfgj
                     total_records: 1
               schema:
-                $ref: '#/components/schemas/ListPastMeetingParticipantsResponse'
+                $ref: "#/components/schemas/ListPastMeetingParticipantsResponse"
           description: |-
             **HTTP Status Code:** `200`. Meeting participants' report returned.
         "400":
@@ -1501,7 +1501,7 @@ paths:
                         title: Meeting Usefulness
                     total_records: 1
               schema:
-                $ref: '#/components/schemas/MeetingPollsResponse'
+                $ref: "#/components/schemas/MeetingPollsResponse"
           description: |-
             **HTTP Status Code:**. List polls of a Meeting  returned
         "404":
@@ -1552,7 +1552,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMeetingPollRequest'
+              $ref: "#/components/schemas/CreateMeetingPollRequest"
         description: Meeting poll object
         required: true
         x-examples:
@@ -1583,7 +1583,7 @@ paths:
                     status: notstart
                     title: Meeting Usefulness
               schema:
-                $ref: '#/components/schemas/CreateMeetingPollResponse'
+                $ref: "#/components/schemas/CreateMeetingPollResponse"
           description: |-
             **HTTP Status Code:** `201`. Meeting Poll Created
           headers:
@@ -1710,7 +1710,7 @@ paths:
                     status: notstart
                     title: Meeting Usefulness
               schema:
-                $ref: '#/components/schemas/GetMeetingPollResponse'
+                $ref: "#/components/schemas/GetMeetingPollResponse"
           description: |-
             **HTTP Status Code:** `200`. Meeting Poll object returned
         "404":
@@ -1762,7 +1762,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateMeetingPollRequest'
+              $ref: "#/components/schemas/UpdateMeetingPollRequest"
         description: Meeting Poll
         required: true
         x-examples:
@@ -1822,7 +1822,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateBatchPollsRequest'
+              $ref: "#/components/schemas/CreateBatchPollsRequest"
         description: Batch Meeting poll object
         x-examples:
           application/json:
@@ -1922,7 +1922,7 @@ paths:
                         status: ut Ut esse
                         title: ullamco dolore
               schema:
-                $ref: '#/components/schemas/CreateBatchPollsResponse'
+                $ref: "#/components/schemas/CreateBatchPollsResponse"
           description:  "**HTTP Status Code:** `201`. Meeting Poll Created"
         "400":
           description: |-
@@ -1998,7 +1998,7 @@ paths:
 
                       +000000"
               schema:
-                $ref: '#/components/schemas/GetMeetingInvitationResponse'
+                $ref: "#/components/schemas/GetMeetingInvitationResponse"
           description: |-
             **HTTP Status Code:** `200`<br>
             Meeting invitation returned.
@@ -2050,7 +2050,7 @@ paths:
                     stream_key: Contact It@somecompany.com
                     stream_url: https://somecompany.com/livestream
               schema:
-                $ref: '#/components/schemas/GetLiveStreamDetailsResponse'
+                $ref: "#/components/schemas/GetLiveStreamDetailsResponse"
           description: |+
             **HTTP Status Code:** `200` **OK**.  Live Stream details returned.
 
@@ -2110,7 +2110,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateMeetingLiveStreamDetailsRequest'
+              $ref: "#/components/schemas/UpdateMeetingLiveStreamDetailsRequest"
         description: Meeting
         required: true
         x-examples:
@@ -2270,7 +2270,7 @@ paths:
                         zip: "11371"
                     total_records: "1"
               schema:
-                $ref: '#/components/schemas/ListWebinarRegistrantsResponse'
+                $ref: "#/components/schemas/ListWebinarRegistrantsResponse"
           description: "HTTP Status Code: `200` Webinar plan subscription is missing. Enable webinar for this user once the subscription is added."
         "300":
           description: "**HTTP Status Code:** `300` Invalid webinar ID."
@@ -2370,7 +2370,7 @@ paths:
                         user_email: matt@123.jhdyuerys
                     total_records: 1
               schema:
-                $ref: '#/components/schemas/ListWebinarParticipantsResponse'
+                $ref: "#/components/schemas/ListWebinarParticipantsResponse"
           description: "Webinar participants' details"
         "400":
           description: |
@@ -2483,7 +2483,7 @@ paths:
                         zip: "11371"
                     total_records: 1
               schema:
-                $ref: '#/components/schemas/ListWebinarAbsentees'
+                $ref: "#/components/schemas/ListWebinarAbsentees"
           description: >-
             **HTTP Status Code:** `200` 
 
@@ -2561,7 +2561,7 @@ paths:
                         type: 2
                     total_records: 2
               schema:
-                $ref: '#/components/schemas/ListMeetingTemplatesResponse'
+                $ref: "#/components/schemas/ListMeetingTemplatesResponse"
           description: "**HTTP Status Code:** `200` **OK**"
         "404":
           description: |-
@@ -2581,50 +2581,50 @@ components:
   schemas:
     ListWebinarAbsentees:
       allOf:
-        - $ref: '#/components/schemas/PaginationObject'
-        - $ref: '#/components/schemas/RegistrantsList'
+        - $ref: "#/components/schemas/PaginationObject"
+        - $ref: "#/components/schemas/RegistrantsList"
       description: List of users.
       title: Registration List
       type: object
     ListWebinarRegistrantsResponse:
       allOf:
-        - $ref: '#/components/schemas/PaginationObject'
-        - $ref: '#/components/schemas/RegistrantsList'
+        - $ref: "#/components/schemas/PaginationObject"
+        - $ref: "#/components/schemas/RegistrantsList"
       description: List of users.
       title: Registration List
       type: object
     ListPastMeetingParticipantsResponse:
       allOf:
-        - $ref: '#/components/schemas/PaginationObject'
-        - $ref: '#/components/schemas/MeetingPartcipantsList'
+        - $ref: "#/components/schemas/PaginationObject"
+        - $ref: "#/components/schemas/MeetingPartcipantsList"
       description: List of participants
     GetMeetingDetailsResponse:
       allOf:
-        - $ref: '#/components/schemas/MeetingFullMetadata'
-        - $ref: '#/components/schemas/RequestedMeetingDetails'
+        - $ref: "#/components/schemas/MeetingFullMetadata"
+        - $ref: "#/components/schemas/RequestedMeetingDetails"
       description: Details of the meeting.
     ListMeetingRegistrantsResponse:
       allOf:
-        - $ref: '#/components/schemas/PaginationObject'
-        - $ref: '#/components/schemas/RegistrantsList'
+        - $ref: "#/components/schemas/PaginationObject"
+        - $ref: "#/components/schemas/RegistrantsList"
       description: List of users.
       title: Registration List
     CreateMeetingResponse:
       allOf:
-        - $ref: '#/components/schemas/MeetingMetadata'
-        - $ref: '#/components/schemas/RequestedMeetingDetails'
+        - $ref: "#/components/schemas/MeetingMetadata"
+        - $ref: "#/components/schemas/RequestedMeetingDetails"
       description: Details of the created meeting.
     ListMeetingsResponse:
       allOf:
-        - $ref: '#/components/schemas/PaginationObject'
-        - $ref: '#/components/schemas/MeetingList'
+        - $ref: "#/components/schemas/PaginationObject"
+        - $ref: "#/components/schemas/MeetingList"
       description: List of meetings
       title: Group List
     ListMeetingTemplatesResponse:
       properties:
         templates:
           items:
-            $ref: '#/components/schemas/TemplateDetails'
+            $ref: "#/components/schemas/TemplateDetails"
           type: array
         total_records:
           description: Total records found for this request.
@@ -2649,7 +2649,7 @@ components:
         participants:
           description: ParticipantsDetails
           items:
-            $ref: '#/components/schemas/PartcipantDetails'
+            $ref: "#/components/schemas/PartcipantDetails"
           type: array
         total_records:
           description: The total number of records available across all pages.
@@ -2700,14 +2700,14 @@ components:
       properties:
         polls:
           items:
-            $ref: '#/components/schemas/AddPollQuestionsResponse'
+            $ref: "#/components/schemas/AddPollQuestionsResponse"
           type: array
       type: object
     CreateBatchPollsRequest:
       properties:
         questions:
           items:
-            $ref: '#/components/schemas/PollQuestions'
+            $ref: "#/components/schemas/PollQuestions"
           type: array
         title:
           description: Meeting Poll Title.
@@ -2719,7 +2719,7 @@ components:
         questions:
           description: Array of Polls
           items:
-            $ref: '#/components/schemas/PollQuestions'
+            $ref: "#/components/schemas/PollQuestions"
           type: array
         title:
           description: Title for the poll.
@@ -2749,7 +2749,7 @@ components:
         questions:
           description: Array of Polls
           items:
-            $ref: '#/components/schemas/PollQuestions'
+            $ref: "#/components/schemas/PollQuestions"
           type: array
         title:
           description: Title for the poll.
@@ -2779,7 +2779,7 @@ components:
         questions:
           description: Array of Polls
           items:
-            $ref: '#/components/schemas/PollQuestions'
+            $ref: "#/components/schemas/PollQuestions"
           type: array
         title:
           description: Title for the poll.
@@ -2792,7 +2792,7 @@ components:
         questions:
           description: Array of Polls
           items:
-            $ref: '#/components/schemas/PollQuestions'
+            $ref: "#/components/schemas/PollQuestions"
           type: array
         title:
           description: Title for the poll.
@@ -2804,7 +2804,7 @@ components:
         polls:
           description: Array of Polls
           items:
-            $ref: '#/components/schemas/PollDetails'
+            $ref: "#/components/schemas/PollDetails"
           type: array
         total_records:
           description: The number of all records available across pages
@@ -2871,7 +2871,7 @@ components:
           type: integer
         questions:
           items:
-            $ref: '#/components/schemas/UserSubmittedAnswers'
+            $ref: "#/components/schemas/UserSubmittedAnswers"
           type: array
         start_time:
           description: The start time of the meeting.
@@ -2886,7 +2886,7 @@ components:
         meetings:
           description: List of ended meeting instances.
           items:
-            $ref: '#/components/schemas/EndedMeetingDetails'
+            $ref: "#/components/schemas/EndedMeetingDetails"
           type: array
       description: List of Meetings
       title: Meeting instances
@@ -2926,9 +2926,9 @@ components:
           maxLength: 10
           type: string
         recurrence:
-          $ref: '#/components/schemas/ReccurenceDetails'
+          $ref: "#/components/schemas/ReccurenceDetails"
         settings:
-          $ref: '#/components/schemas/MeetingSettings'
+          $ref: "#/components/schemas/MeetingSettings"
         start_time:
           description: Meeting start time. When using a format like
             "yyyy-MM-dd'T'HH:mm:ss'Z'", always use GMT time.
@@ -2957,7 +2957,7 @@ components:
         tracking_fields:
           description: Tracking fields
           items:
-            $ref: '#/components/schemas/TrackingFields'
+            $ref: "#/components/schemas/TrackingFields"
           type: array
         type:
           default: 2
@@ -3073,7 +3073,7 @@ components:
           x-ballerina-display:
             label: Custom Questions
           items:
-            $ref: '#/components/schemas/RegistrantCustomQuestion'
+            $ref: "#/components/schemas/RegistrantCustomQuestion"
           type: array
         email:
           description: A valid email address of the registrant.
@@ -3192,7 +3192,7 @@ components:
             questions:
               description: Array of Polls
               items:
-                $ref: '#/components/schemas/PollQuestions'
+                $ref: "#/components/schemas/PollQuestions"
               type: array
             title:
               description: Title for the poll.
@@ -3213,7 +3213,7 @@ components:
           type: string
         question_details:
           items:
-            $ref: '#/components/schemas/PollQuestionAnswer'
+            $ref: "#/components/schemas/PollQuestionAnswer"
           type: array
       type: object
     PollQuestionAnswer:
@@ -3331,12 +3331,12 @@ components:
         custom_questions:
           description: Array of Registrant Custom Questions
           items:
-            $ref: '#/components/schemas/CustomQuestions'
+            $ref: "#/components/schemas/CustomQuestions"
           type: array
         questions:
           description: Array of Registrant Questions
           items:
-            $ref: '#/components/schemas/CustomRegistrantQuestions'
+            $ref: "#/components/schemas/CustomRegistrantQuestions"
           type: array
       title: Meeting Registrant Questions
       type: object
@@ -3348,7 +3348,7 @@ components:
           type: string
         questions:
           items:
-            $ref: '#/components/schemas/PollQuestions'
+            $ref: "#/components/schemas/PollQuestions"
           type: array
         status:
           description: Status of the Meeting Poll:<br>`notstart` - Poll not
@@ -3435,14 +3435,14 @@ components:
           x-ballerina-display:
             label: Password
         recurrence:
-          $ref: '#/components/schemas/ReccurenceDetails'
+          $ref: "#/components/schemas/ReccurenceDetails"
         schedule_for:
           description: "If you would like to schedule this meeting for someone else in your account, provide the Zoom user id or email address of the user here."
           type: string
           x-ballerina-display:
             label: Scheduled For
         settings:
-          $ref: '#/components/schemas/MeetingSettingsInRequest'
+          $ref: "#/components/schemas/MeetingSettingsInRequest"
         start_time:
           description: "Meeting start time. We support two formats for `start_time` - local time and GMT.To set time as GMT the format should be `yyyy-MM-dd`T`HH:mm:ssZ`. To set time using a specific timezone, use `yyyy-MM-dd`T`HH:mm:ss` format and specify the timezone id in the `timezone` field OR leave it blank and the timezone set on your Zoom account will be used. You can also set the time as UTC as the timezone field"
           type: string
@@ -3472,7 +3472,7 @@ components:
           x-ballerina-display:
             label: Tracking Fields
           items:
-            $ref: '#/components/schemas/MeetingTrackingDetails'
+            $ref: "#/components/schemas/MeetingTrackingDetails"
           type: array
         type:
           default: 2
@@ -3577,7 +3577,7 @@ components:
           x-ballerina-display:
             label: Breakout Room Details
           items:
-            $ref: '#/components/schemas/BreakoutRoomsDetails'
+            $ref: "#/components/schemas/BreakoutRoomsDetails"
           type: array
       type: object
     BreakoutRoomsDetails:
@@ -3610,7 +3610,7 @@ components:
           x-ballerina-display:
             label: interpreter Information
           items:
-            $ref: '#/components/schemas/InterpreterDetails'
+            $ref: "#/components/schemas/InterpreterDetails"
           type: array
       type: object
     InterpreterDetails:
@@ -3670,7 +3670,7 @@ components:
             - Manually Approve
             - No Registration Required
         approved_or_denied_countries_or_regions:
-          $ref: '#/components/schemas/ApprovalAndDenialInfo'
+          $ref: "#/components/schemas/ApprovalAndDenialInfo"
         audio:
           default: both
           description: "Determine how participants can join the audio portion of the  meeting. both : Both Telephony and VoIP, telephony :Telephony only, voip:VoIP only."
@@ -3710,7 +3710,7 @@ components:
           x-ballerina-display:
             label: Auto Recording
         breakout_room:
-          $ref: '#/components/schemas/BreakoutRoomSettings'
+          $ref: "#/components/schemas/BreakoutRoomSettings"
         close_registration:
           default: false
           description: Close registration after event date
@@ -3775,7 +3775,7 @@ components:
           x-ballerina-display:
             label: Enable Join Before Host
         language_interpretation:
-          $ref: '#/components/schemas/LanguageInterpretationDetails'
+          $ref: "#/components/schemas/LanguageInterpretationDetails"
         meeting_authentication:
           description: "Only authenticated users can join meeting if the value of this field is set to `true`."
           type: boolean
@@ -3849,7 +3849,7 @@ components:
         registrants:
           description: List of registrant objects.
           items:
-            $ref: '#/components/schemas/RegistrantDetails'
+            $ref: "#/components/schemas/RegistrantDetails"
           type: array
     RegistrantCustomQuestion:
       description: Custom Question.
@@ -3886,7 +3886,7 @@ components:
             custom_questions:
               description: Custom questions.
               items:
-                $ref: '#/components/schemas/RegistrantCustomQuestion'
+                $ref: "#/components/schemas/RegistrantCustomQuestion"
               type: array
             email:
               description: A valid email address of the registrant.
@@ -4088,7 +4088,7 @@ components:
             - Manually Approve
             - No Registration Required
         approved_or_denied_countries_or_regions:
-          $ref: '#/components/schemas/ApprovedOrDeniedCountriesDetails'
+          $ref: "#/components/schemas/ApprovedOrDeniedCountriesDetails"
         audio:
           default: both
           description: "Determine how participants can join the audio portion of the  meeting. both : Both Telephony and VoIP, telephony :Telephony only, voip:VoIP only."
@@ -4111,7 +4111,7 @@ components:
           description: The participants added here will receive unique meeting invite
             links and bypass authentication.
           items:
-            $ref: '#/components/schemas/ParticipantDetails'
+            $ref: "#/components/schemas/ParticipantDetails"
           type: array
         authentication_name:
           description: Authentication name set in the [authentication
@@ -4133,7 +4133,7 @@ components:
             - Record to cloud
             - No Recording
         breakout_room:
-          $ref: '#/components/schemas/BreakoutRoomSettings'
+          $ref: "#/components/schemas/BreakoutRoomSettings"
         close_registration:
           default: false
           description: Close registration after event date
@@ -4151,7 +4151,7 @@ components:
         custom_keys:
           description: Custom keys and values assigned to the meeting.
           items:
-            $ref: '#/components/schemas/CustomKeys'
+            $ref: "#/components/schemas/CustomKeys"
           maxItems: 10
           type: array
         encryption_type:
@@ -4194,7 +4194,7 @@ components:
         global_dial_in_numbers:
           description: Global Dial-in Countries/Regions
           items:
-            $ref: '#/components/schemas/GlobalDialInNumbersDetails'
+            $ref: "#/components/schemas/GlobalDialInNumbersDetails"
           type: array
         host_video:
           description: Start video when the host joins the meeting.
@@ -4227,7 +4227,7 @@ components:
             meetings.
           type: boolean
         language_interpretation:
-          $ref: '#/components/schemas/LanguageInterpretationDetails'
+          $ref: "#/components/schemas/LanguageInterpretationDetails"
         meeting_authentication:
           description: "`true` - Only authenticated users can join meetings."
           type: boolean
@@ -4480,7 +4480,7 @@ components:
         occurrences:
           description: Array of occurrence objects.
           items:
-            $ref: '#/components/schemas/MeetingOccurenceDetails'
+            $ref: "#/components/schemas/MeetingOccurenceDetails"
           type: array
         password:
           description: >+
@@ -4498,9 +4498,9 @@ components:
           format: int64
           type: integer
         recurrence:
-          $ref: '#/components/schemas/ReccurenceDetails'
+          $ref: "#/components/schemas/ReccurenceDetails"
         settings:
-          $ref: '#/components/schemas/MeetingSettings'
+          $ref: "#/components/schemas/MeetingSettings"
         start_time:
           description: 'Meeting start date-time in UTC/GMT. Example:
             "2020-03-31T12:02:00Z"'
@@ -4523,7 +4523,7 @@ components:
         tracking_fields:
           description: Tracking fields
           items:
-            $ref: '#/components/schemas/RequestedMeetingTrackingDetails'
+            $ref: "#/components/schemas/RequestedMeetingTrackingDetails"
           type: array
         type:
           default: 2
@@ -4633,7 +4633,7 @@ components:
         meetings:
           description: List of Meeting objects.
           items:
-            $ref: '#/components/schemas/MeetingObject'
+            $ref: "#/components/schemas/MeetingObject"
           type: array
     MeetingPartcipantsList:
       description: List of meeting participants
