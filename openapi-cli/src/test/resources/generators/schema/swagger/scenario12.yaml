@@ -51,5 +51,5 @@ components:
             $ref: "#/components/schemas/Activity"
     Error:
       oneOf:
-        - $ref: '#/components/schemas/Activity'
-        - $ref: '#/components/schemas/Profile'
+        - $ref: "#/components/schemas/Activity"
+        - $ref: "#/components/schemas/Profile"

@@ -21,4 +21,4 @@ components:
         pet:
           oneOf:
             - type: string
-            - $ref: '#/components/schemas/Cat'
+            - $ref: "#/components/schemas/Cat"

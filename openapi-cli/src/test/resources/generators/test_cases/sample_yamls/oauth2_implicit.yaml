@@ -46,7 +46,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Account_inner'
+                  $ref: "#/components/schemas/Account_inner"
         "400":
           description: The request couldn’t be understood, usually because the JSON or XML body contains an error.
           content:
@@ -54,7 +54,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
         "401":
           description: The session ID or OAuth token used has expired or is invalid. The response body contains the message and errorCode.
           content:
@@ -62,7 +62,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MessagewithErrorCode'
+                  $ref: "#/components/schemas/MessagewithErrorCode"
       security:
         - oAuth2Implicit: []
 components:
@@ -112,7 +112,7 @@ components:
     MessagewithErrorCode:
       type: array
       items:
-        $ref: '#/components/schemas/MessagewithErrorCode_inner'
+        $ref: "#/components/schemas/MessagewithErrorCode_inner"
     Account_inner:
       required:
         - Attributes
@@ -121,7 +121,7 @@ components:
       type: object
       properties:
         Attributes:
-          $ref: '#/components/schemas/attributes'
+          $ref: "#/components/schemas/attributes"
         Id:
           type: string
           description: The Salesforce ID of the account
@@ -202,7 +202,7 @@ components:
           type: string
           description: Accuracy level of the geocode for the billing address. See Compound Field Considerations and Limitations for details on geolocation compound fields.
         BillingAddress:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         ShippingStreet:
           type: string
           description: 'The street address of the shipping address for this account. '
@@ -239,7 +239,7 @@ components:
           type: string
           description: Accuracy level of the geocode for the shipping address. See Compound Field Considerations and Limitations for details on geolocation compound fields.
         ShippingAddress:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         Phone:
           type: string
           description: 'Phone number of the account. '
@@ -348,7 +348,7 @@ components:
           type: string
           description: Accuracy level of the geocode for the person’s mailing address. See Compound Field Considerations and Limitations for details on geolocation compound fields.
         PersonMailingAddress:
-          $ref: '#/components/schemas/address'
+          $ref: "#/components/schemas/address"
         PersonMobilePhone:
           type: string
           description: 'The mobile phone number for this person account. '

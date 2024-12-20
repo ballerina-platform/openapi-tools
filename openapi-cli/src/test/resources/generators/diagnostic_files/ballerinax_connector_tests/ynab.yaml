@@ -54,13 +54,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: "#/components/schemas/UserResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets:
     get:
       tags:
@@ -80,19 +80,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BudgetSummaryResponse'
+                $ref: "#/components/schemas/BudgetSummaryResponse"
         404:
           description: No budgets were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}:
     get:
       tags:
@@ -123,19 +123,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BudgetDetailResponse'
+                $ref: "#/components/schemas/BudgetDetailResponse"
         404:
           description: The specified budget was not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/settings:
     get:
       tags:
@@ -158,19 +158,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BudgetSettingsResponse'
+                $ref: "#/components/schemas/BudgetSettingsResponse"
         404:
           description: The specified Budget was not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/accounts:
     get:
       tags:
@@ -200,19 +200,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountsResponse'
+                $ref: "#/components/schemas/AccountsResponse"
         404:
           description: No accounts were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
     post:
       tags:
         - Accounts
@@ -233,7 +233,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/SaveAccountWrapper'
+              $ref: "#/components/schemas/SaveAccountWrapper"
         required: true
       responses:
         201:
@@ -241,14 +241,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountResponse'
+                $ref: "#/components/schemas/AccountResponse"
         400:
           description: The request could not be understood due to malformed syntax
             or validation error(s).
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
       x-codegen-request-body-name: data
   /budgets/{budget_id}/accounts/{account_id}:
     get:
@@ -279,19 +279,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccountResponse'
+                $ref: "#/components/schemas/AccountResponse"
         404:
           description: The requested account was not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/categories:
     get:
       tags:
@@ -322,19 +322,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CategoriesResponse'
+                $ref: "#/components/schemas/CategoriesResponse"
         404:
           description: No categories were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/categories/{category_id}:
     get:
       tags:
@@ -364,19 +364,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CategoryResponse'
+                $ref: "#/components/schemas/CategoryResponse"
         404:
           description: The category not was found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/months/{month}/categories/{category_id}:
     get:
       tags:
@@ -415,19 +415,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CategoryResponse'
+                $ref: "#/components/schemas/CategoryResponse"
         404:
           description: The month category was not was found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
     patch:
       tags:
         - Categories
@@ -464,7 +464,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/SaveMonthCategoryWrapper'
+              $ref: "#/components/schemas/SaveMonthCategoryWrapper"
         required: true
       responses:
         200:
@@ -472,14 +472,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SaveCategoryResponse'
+                $ref: "#/components/schemas/SaveCategoryResponse"
         400:
           description: The request could not be understood due to malformed syntax
             or validation error(s)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
       x-codegen-request-body-name: data
   /budgets/{budget_id}/payees:
     get:
@@ -510,19 +510,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PayeesResponse'
+                $ref: "#/components/schemas/PayeesResponse"
         404:
           description: No payees were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/payees/{payee_id}:
     get:
       tags:
@@ -551,19 +551,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PayeeResponse'
+                $ref: "#/components/schemas/PayeeResponse"
         404:
           description: The payee was not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/payee_locations:
     get:
       tags:
@@ -586,19 +586,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PayeeLocationsResponse'
+                $ref: "#/components/schemas/PayeeLocationsResponse"
         404:
           description: No payees locations were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/payee_locations/{payee_location_id}:
     get:
       tags:
@@ -627,19 +627,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PayeeLocationResponse'
+                $ref: "#/components/schemas/PayeeLocationResponse"
         404:
           description: The payee location was not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/payees/{payee_id}/payee_locations:
     get:
       tags:
@@ -668,19 +668,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PayeeLocationsResponse'
+                $ref: "#/components/schemas/PayeeLocationsResponse"
         404:
           description: No payees locations were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/months:
     get:
       tags:
@@ -710,19 +710,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MonthSummariesResponse'
+                $ref: "#/components/schemas/MonthSummariesResponse"
         404:
           description: No budget months were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/months/{month}:
     get:
       tags:
@@ -753,19 +753,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MonthDetailResponse'
+                $ref: "#/components/schemas/MonthDetailResponse"
         404:
           description: The budget month was not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/transactions:
     get:
       tags:
@@ -811,19 +811,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionsResponse'
+                $ref: "#/components/schemas/TransactionsResponse"
         400:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         404:
           description: No transactions were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
     post:
       tags:
         - Transactions
@@ -851,7 +851,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/SaveTransactionsWrapper'
+              $ref: "#/components/schemas/SaveTransactionsWrapper"
         required: true
       responses:
         201:
@@ -859,21 +859,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SaveTransactionsResponse'
+                $ref: "#/components/schemas/SaveTransactionsResponse"
         400:
           description: The request could not be understood due to malformed syntax
             or validation error(s).
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         409:
           description: A transaction on the same account with the same `import_id`
             already exists.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
       x-codegen-request-body-name: data
     patch:
       tags:
@@ -898,7 +898,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/UpdateTransactionsWrapper'
+              $ref: "#/components/schemas/UpdateTransactionsWrapper"
         required: true
       responses:
         209:
@@ -906,14 +906,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SaveTransactionsResponse'
+                $ref: "#/components/schemas/SaveTransactionsResponse"
         400:
           description: The request could not be understood due to malformed syntax
             or validation error(s).
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
       x-codegen-request-body-name: data
   /budgets/{budget_id}/transactions/import:
     post:
@@ -944,20 +944,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionsImportResponse'
+                $ref: "#/components/schemas/TransactionsImportResponse"
         201:
           description: One or more transactions were imported successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionsImportResponse'
+                $ref: "#/components/schemas/TransactionsImportResponse"
         400:
           description: The request could not be understood due to malformed syntax
             or validation error(s)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/transactions/{transaction_id}:
     get:
       tags:
@@ -986,19 +986,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionResponse'
+                $ref: "#/components/schemas/TransactionResponse"
         404:
           description: The transaction was not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
     put:
       tags:
         - Transactions
@@ -1025,7 +1025,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/SaveTransactionWrapper'
+              $ref: "#/components/schemas/SaveTransactionWrapper"
         required: true
       responses:
         200:
@@ -1033,14 +1033,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionResponse'
+                $ref: "#/components/schemas/TransactionResponse"
         400:
           description: The request could not be understood due to malformed syntax
             or validation error(s)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
       x-codegen-request-body-name: data
   /budgets/{budget_id}/transactions/bulk:
     post:
@@ -1065,7 +1065,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/BulkTransactions'
+              $ref: "#/components/schemas/BulkTransactions"
         required: true
       responses:
         201:
@@ -1073,14 +1073,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BulkResponse'
+                $ref: "#/components/schemas/BulkResponse"
         400:
           description: The request could not be understood due to malformed syntax
             or validation error(s)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
       x-codegen-request-body-name: transactions
   /budgets/{budget_id}/accounts/{account_id}/transactions:
     get:
@@ -1133,19 +1133,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionsResponse'
+                $ref: "#/components/schemas/TransactionsResponse"
         404:
           description: No transactions were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/categories/{category_id}/transactions:
     get:
       tags:
@@ -1197,19 +1197,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HybridTransactionsResponse'
+                $ref: "#/components/schemas/HybridTransactionsResponse"
         404:
           description: No transactions were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/payees/{payee_id}/transactions:
     get:
       tags:
@@ -1261,19 +1261,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HybridTransactionsResponse'
+                $ref: "#/components/schemas/HybridTransactionsResponse"
         404:
           description: No transactions were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/scheduled_transactions:
     get:
       tags:
@@ -1303,19 +1303,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScheduledTransactionsResponse'
+                $ref: "#/components/schemas/ScheduledTransactionsResponse"
         404:
           description: No scheduled transactions were found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /budgets/{budget_id}/scheduled_transactions/{scheduled_transaction_id}:
     get:
       tags:
@@ -1344,19 +1344,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScheduledTransactionResponse'
+                $ref: "#/components/schemas/ScheduledTransactionResponse"
         404:
           description: The scheduled transaction was not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
         default:
           description: An error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     ErrorResponse:
@@ -1365,7 +1365,7 @@ components:
       type: object
       properties:
         error:
-          $ref: '#/components/schemas/ErrorDetail'
+          $ref: "#/components/schemas/ErrorDetail"
     ErrorDetail:
       required:
         - detail
@@ -1390,7 +1390,7 @@ components:
           type: object
           properties:
             user:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
     User:
       required:
         - id
@@ -1461,9 +1461,9 @@ components:
             budgets:
               type: array
               items:
-                $ref: '#/components/schemas/BudgetSummary'
+                $ref: "#/components/schemas/BudgetSummary"
             default_budget:
-              $ref: '#/components/schemas/BudgetSummary'
+              $ref: "#/components/schemas/BudgetSummary"
     BudgetSummary:
       required:
         - id
@@ -1490,15 +1490,15 @@ components:
           description: The latest budget month
           format: date
         date_format:
-          $ref: '#/components/schemas/DateFormat'
+          $ref: "#/components/schemas/DateFormat"
         currency_format:
-          $ref: '#/components/schemas/CurrencyFormat'
+          $ref: "#/components/schemas/CurrencyFormat"
         accounts:
           type: array
           description: The budget accounts (only included if `include_accounts=true`
             specified as query parameter)
           items:
-            $ref: '#/components/schemas/Account'
+            $ref: "#/components/schemas/Account"
     BudgetDetailResponse:
       required:
         - data
@@ -1511,56 +1511,56 @@ components:
           type: object
           properties:
             budget:
-              $ref: '#/components/schemas/BudgetDetail'
+              $ref: "#/components/schemas/BudgetDetail"
             server_knowledge:
               type: integer
               description: The knowledge of the server
               format: int64
     BudgetDetail:
       allOf:
-        - $ref: '#/components/schemas/BudgetSummary'
+        - $ref: "#/components/schemas/BudgetSummary"
         - type: object
           properties:
             accounts:
               type: array
               items:
-                $ref: '#/components/schemas/Account'
+                $ref: "#/components/schemas/Account"
             payees:
               type: array
               items:
-                $ref: '#/components/schemas/Payee'
+                $ref: "#/components/schemas/Payee"
             payee_locations:
               type: array
               items:
-                $ref: '#/components/schemas/PayeeLocation'
+                $ref: "#/components/schemas/PayeeLocation"
             category_groups:
               type: array
               items:
-                $ref: '#/components/schemas/CategoryGroup'
+                $ref: "#/components/schemas/CategoryGroup"
             categories:
               type: array
               items:
-                $ref: '#/components/schemas/Category'
+                $ref: "#/components/schemas/Category"
             months:
               type: array
               items:
-                $ref: '#/components/schemas/MonthDetail'
+                $ref: "#/components/schemas/MonthDetail"
             transactions:
               type: array
               items:
-                $ref: '#/components/schemas/TransactionSummary'
+                $ref: "#/components/schemas/TransactionSummary"
             subtransactions:
               type: array
               items:
-                $ref: '#/components/schemas/SubTransaction'
+                $ref: "#/components/schemas/SubTransaction"
             scheduled_transactions:
               type: array
               items:
-                $ref: '#/components/schemas/ScheduledTransactionSummary'
+                $ref: "#/components/schemas/ScheduledTransactionSummary"
             scheduled_subtransactions:
               type: array
               items:
-                $ref: '#/components/schemas/ScheduledSubTransaction'
+                $ref: "#/components/schemas/ScheduledSubTransaction"
     BudgetSettingsResponse:
       required:
         - data
@@ -1572,7 +1572,7 @@ components:
           type: object
           properties:
             settings:
-              $ref: '#/components/schemas/BudgetSettings'
+              $ref: "#/components/schemas/BudgetSettings"
     BudgetSettings:
       required:
         - currency_format
@@ -1580,9 +1580,9 @@ components:
       type: object
       properties:
         date_format:
-          $ref: '#/components/schemas/DateFormat'
+          $ref: "#/components/schemas/DateFormat"
         currency_format:
-          $ref: '#/components/schemas/CurrencyFormat'
+          $ref: "#/components/schemas/CurrencyFormat"
     AccountsResponse:
       required:
         - data
@@ -1597,7 +1597,7 @@ components:
             accounts:
               type: array
               items:
-                $ref: '#/components/schemas/Account'
+                $ref: "#/components/schemas/Account"
             server_knowledge:
               type: integer
               description: The knowledge of the server
@@ -1613,7 +1613,7 @@ components:
           type: object
           properties:
             account:
-              $ref: '#/components/schemas/Account'
+              $ref: "#/components/schemas/Account"
     Account:
       required:
         - balance
@@ -1693,7 +1693,7 @@ components:
       type: object
       properties:
         account:
-          $ref: '#/components/schemas/SaveAccount'
+          $ref: "#/components/schemas/SaveAccount"
     SaveAccount:
       required:
         - balance
@@ -1733,7 +1733,7 @@ components:
             category_groups:
               type: array
               items:
-                $ref: '#/components/schemas/CategoryGroupWithCategories'
+                $ref: "#/components/schemas/CategoryGroupWithCategories"
             server_knowledge:
               type: integer
               description: The knowledge of the server
@@ -1749,10 +1749,10 @@ components:
           type: object
           properties:
             category:
-              $ref: '#/components/schemas/Category'
+              $ref: "#/components/schemas/Category"
     CategoryGroupWithCategories:
       allOf:
-        - $ref: '#/components/schemas/CategoryGroup'
+        - $ref: "#/components/schemas/CategoryGroup"
         - required:
             - categories
           type: object
@@ -1762,7 +1762,7 @@ components:
               description: Category group categories.  Amounts (budgeted, activity,
                 balance, etc.) are specific to the current budget month (UTC).
               items:
-                $ref: '#/components/schemas/Category'
+                $ref: "#/components/schemas/Category"
     CategoryGroup:
       required:
         - deleted
@@ -1893,7 +1893,7 @@ components:
           type: object
           properties:
             category:
-              $ref: '#/components/schemas/Category'
+              $ref: "#/components/schemas/Category"
             server_knowledge:
               type: integer
               description: The knowledge of the server
@@ -1912,7 +1912,7 @@ components:
             payees:
               type: array
               items:
-                $ref: '#/components/schemas/Payee'
+                $ref: "#/components/schemas/Payee"
             server_knowledge:
               type: integer
               description: The knowledge of the server
@@ -1928,7 +1928,7 @@ components:
           type: object
           properties:
             payee:
-              $ref: '#/components/schemas/Payee'
+              $ref: "#/components/schemas/Payee"
     Payee:
       required:
         - deleted
@@ -1962,7 +1962,7 @@ components:
             payee_locations:
               type: array
               items:
-                $ref: '#/components/schemas/PayeeLocation'
+                $ref: "#/components/schemas/PayeeLocation"
     PayeeLocationResponse:
       required:
         - data
@@ -1974,7 +1974,7 @@ components:
           type: object
           properties:
             payee_location:
-              $ref: '#/components/schemas/PayeeLocation'
+              $ref: "#/components/schemas/PayeeLocation"
     PayeeLocation:
       required:
         - deleted
@@ -2012,7 +2012,7 @@ components:
             transactions:
               type: array
               items:
-                $ref: '#/components/schemas/TransactionDetail'
+                $ref: "#/components/schemas/TransactionDetail"
             server_knowledge:
               type: integer
               description: The knowledge of the server
@@ -2030,23 +2030,23 @@ components:
             transactions:
               type: array
               items:
-                $ref: '#/components/schemas/HybridTransaction'
+                $ref: "#/components/schemas/HybridTransaction"
     SaveTransactionWrapper:
       required:
         - transaction
       type: object
       properties:
         transaction:
-          $ref: '#/components/schemas/SaveTransaction'
+          $ref: "#/components/schemas/SaveTransaction"
     SaveTransactionsWrapper:
       type: object
       properties:
         transaction:
-          $ref: '#/components/schemas/SaveTransaction'
+          $ref: "#/components/schemas/SaveTransaction"
         transactions:
           type: array
           items:
-            $ref: '#/components/schemas/SaveTransaction'
+            $ref: "#/components/schemas/SaveTransaction"
     UpdateTransactionsWrapper:
       required:
         - transactions
@@ -2055,7 +2055,7 @@ components:
         transactions:
           type: array
           items:
-            $ref: '#/components/schemas/UpdateTransaction'
+            $ref: "#/components/schemas/UpdateTransaction"
     UpdateTransaction:
       allOf:
         - required:
@@ -2064,7 +2064,7 @@ components:
           properties:
             id:
               type: string
-        - $ref: '#/components/schemas/SaveTransaction'
+        - $ref: "#/components/schemas/SaveTransaction"
     SaveTransaction:
       required:
         - account_id
@@ -2157,7 +2157,7 @@ components:
             split.  Updating `subtransactions` on an existing split transaction is
             not supported.
           items:
-            $ref: '#/components/schemas/SaveSubTransaction'
+            $ref: "#/components/schemas/SaveSubTransaction"
     SaveSubTransaction:
       required:
         - amount
@@ -2204,13 +2204,13 @@ components:
               items:
                 type: string
             transaction:
-              $ref: '#/components/schemas/TransactionDetail'
+              $ref: "#/components/schemas/TransactionDetail"
             transactions:
               type: array
               description: If multiple transactions were specified, the transactions
                 that were saved
               items:
-                $ref: '#/components/schemas/TransactionDetail'
+                $ref: "#/components/schemas/TransactionDetail"
             duplicate_import_ids:
               type: array
               description: If multiple transactions were specified, a list of import_ids
@@ -2233,7 +2233,7 @@ components:
           type: object
           properties:
             transaction:
-              $ref: '#/components/schemas/TransactionDetail'
+              $ref: "#/components/schemas/TransactionDetail"
     TransactionSummary:
       required:
         - account_id
@@ -2313,7 +2313,7 @@ components:
             will only be included in delta requests.
     TransactionDetail:
       allOf:
-        - $ref: '#/components/schemas/TransactionSummary'
+        - $ref: "#/components/schemas/TransactionSummary"
         - required:
             - account_name
             - subtransactions
@@ -2329,10 +2329,10 @@ components:
               type: array
               description: If a split transaction, the subtransactions.
               items:
-                $ref: '#/components/schemas/SubTransaction'
+                $ref: "#/components/schemas/SubTransaction"
     HybridTransaction:
       allOf:
-        - $ref: '#/components/schemas/TransactionSummary'
+        - $ref: "#/components/schemas/TransactionSummary"
         - required:
             - account_name
             - type
@@ -2361,7 +2361,7 @@ components:
       type: object
       properties:
         category:
-          $ref: '#/components/schemas/SaveMonthCategory'
+          $ref: "#/components/schemas/SaveMonthCategory"
     SaveMonthCategory:
       required:
         - budgeted
@@ -2422,7 +2422,7 @@ components:
         transactions:
           type: array
           items:
-            $ref: '#/components/schemas/SaveTransaction'
+            $ref: "#/components/schemas/SaveTransaction"
     SubTransaction:
       required:
         - amount
@@ -2478,7 +2478,7 @@ components:
             scheduled_transactions:
               type: array
               items:
-                $ref: '#/components/schemas/ScheduledTransactionDetail'
+                $ref: "#/components/schemas/ScheduledTransactionDetail"
             server_knowledge:
               type: integer
               description: The knowledge of the server
@@ -2494,7 +2494,7 @@ components:
           type: object
           properties:
             scheduled_transaction:
-              $ref: '#/components/schemas/ScheduledTransactionDetail'
+              $ref: "#/components/schemas/ScheduledTransactionDetail"
     ScheduledTransactionSummary:
       required:
         - account_id
@@ -2569,7 +2569,7 @@ components:
             scheduled transactions will only be included in delta requests.
     ScheduledTransactionDetail:
       allOf:
-        - $ref: '#/components/schemas/ScheduledTransactionSummary'
+        - $ref: "#/components/schemas/ScheduledTransactionSummary"
         - required:
             - account_name
             - subtransactions
@@ -2585,7 +2585,7 @@ components:
               type: array
               description: If a split scheduled transaction, the subtransactions.
               items:
-                $ref: '#/components/schemas/ScheduledSubTransaction'
+                $ref: "#/components/schemas/ScheduledSubTransaction"
     ScheduledSubTransaction:
       required:
         - amount
@@ -2635,7 +2635,7 @@ components:
             months:
               type: array
               items:
-                $ref: '#/components/schemas/MonthSummary'
+                $ref: "#/components/schemas/MonthSummary"
             server_knowledge:
               type: integer
               description: The knowledge of the server
@@ -2651,7 +2651,7 @@ components:
           type: object
           properties:
             month:
-              $ref: '#/components/schemas/MonthDetail'
+              $ref: "#/components/schemas/MonthDetail"
     MonthSummary:
       required:
         - activity
@@ -2695,7 +2695,7 @@ components:
             will only be included in delta requests.
     MonthDetail:
       allOf:
-        - $ref: '#/components/schemas/MonthSummary'
+        - $ref: "#/components/schemas/MonthSummary"
         - required:
             - categories
           type: object
@@ -2705,7 +2705,7 @@ components:
               description: The budget month categories.  Amounts (budgeted, activity,
                 balance, etc.) are specific to the {month} parameter specified.
               items:
-                $ref: '#/components/schemas/Category'
+                $ref: "#/components/schemas/Category"
   securitySchemes:
     bearerAuth:
       scheme: bearer

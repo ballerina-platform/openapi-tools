@@ -37,8 +37,8 @@ paths:
           application/json:
             schema:
               oneOf:
-                - $ref: '#/components/schemas/Cat'
-                - $ref: '#/components/schemas/Dog'
+                - $ref: "#/components/schemas/Cat"
+                - $ref: "#/components/schemas/Dog"
 
 components:
   requestBodies:
@@ -48,7 +48,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Cat'
+            $ref: "#/components/schemas/Cat"
   schemas:
     Cat:
       type: object

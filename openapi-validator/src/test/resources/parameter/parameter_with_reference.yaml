@@ -11,9 +11,9 @@ paths:
       summary: Returns a list of users.
       description: Optional extended description in Markdown.
       parameters:
-        - $ref: '#/components/parameters/cityName'
-        - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/lat'
+        - $ref: "#/components/parameters/cityName"
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/lat"
       responses:
         '200':
           description: OK

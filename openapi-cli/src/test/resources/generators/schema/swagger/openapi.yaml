@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SimpleVaccineTimeline'
+                $ref: "#/components/schemas/SimpleVaccineTimeline"
 components:
   schemas:
     VaccineCountryCoverage:
@@ -69,8 +69,8 @@ components:
         timeline:
           description: "One of"
           oneOf:
-            - $ref: '#/components/schemas/SimpleVaccineTimeline'
-            - $ref: '#/components/schemas/FullVaccineTimeline'
+            - $ref: "#/components/schemas/SimpleVaccineTimeline"
+            - $ref: "#/components/schemas/FullVaccineTimeline"
     SimpleVaccineTimeline:
       type: object
       properties:

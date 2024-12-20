@@ -20,7 +20,7 @@ paths:
             schema:
               type: object
               additionalProperties:  #addtionalProperties with reference
-                $ref: '#/components/schemas/HistoricoSimulacaoViewModel'
+                $ref: "#/components/schemas/HistoricoSimulacaoViewModel"
           application/path+json:
             schema:
               type: object
@@ -54,7 +54,7 @@ paths:
                 name:
                   type: string
               additionalProperties:  #Object schema with properties and additionalProperties with reference fields
-                $ref: '#/components/schemas/MailingViewModel'
+                $ref: "#/components/schemas/MailingViewModel"
       responses:
         '200':
           description: Success
@@ -83,7 +83,7 @@ paths:
               additionalProperties:  #Object schema with properties and additionalProperties with reference fields
                 oneOf:
                   - type: integer
-                  - $ref: '#/components/schemas/MailingViewModel'
+                  - $ref: "#/components/schemas/MailingViewModel"
       responses:
         '200':
           description: Success

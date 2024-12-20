@@ -49,10 +49,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventList'
+                $ref: "#/components/schemas/EventList"
             text/event-stream:
               schema:
-                $ref: '#/components/schemas/EventList'
+                $ref: "#/components/schemas/EventList"
 components:
   schemas:
     Event:
@@ -64,13 +64,13 @@ components:
       type: object
       properties:
         object:
-          $ref: '#/components/schemas/TypeDiscriminator'
+          $ref: "#/components/schemas/TypeDiscriminator"
         created_at:
           type: integer
           description: A timestamp when this event was created (in unix epochs).
           format: unixtime
         level:
-          $ref: '#/components/schemas/LogLevel'
+          $ref: "#/components/schemas/LogLevel"
         message:
           minLength: 1
           type: string
@@ -82,21 +82,21 @@ components:
       type: object
       properties:
         object:
-          $ref: '#/components/schemas/TypeDiscriminator'
+          $ref: "#/components/schemas/TypeDiscriminator"
         data:
           type: array
           description: The list of items.
           items:
-            $ref: '#/components/schemas/Event'
+            $ref: "#/components/schemas/Event"
       description: Represents a list of events.
     InnerError:
       title: InnerError
       type: object
       properties:
         code:
-          $ref: '#/components/schemas/InnerErrorCode'
+          $ref: "#/components/schemas/InnerErrorCode"
         innererror:
-          $ref: '#/components/schemas/InnerError'
+          $ref: "#/components/schemas/InnerError"
       description: "Inner error as defined in the Microsoft REST guidelines\r\n(https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses)."
     InnerErrorCode:
       title: InnerErrorCode

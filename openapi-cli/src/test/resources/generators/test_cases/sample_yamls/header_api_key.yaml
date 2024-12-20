@@ -25,14 +25,14 @@ paths:
       description: "Access current weather data for any location on Earth including over 200,000 cities! Current weather is frequently updated based on global models and data from more than 40,000 weather stations."
       operationId: CurrentWeatherData
       parameters:
-        - $ref: '#/components/parameters/q'
-        - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/lat'
-        - $ref: '#/components/parameters/lon'
-        - $ref: '#/components/parameters/zip'
-        - $ref: '#/components/parameters/units'
-        - $ref: '#/components/parameters/lang'
-        - $ref: '#/components/parameters/mode'
+        - $ref: "#/components/parameters/q"
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/lat"
+        - $ref: "#/components/parameters/lon"
+        - $ref: "#/components/parameters/zip"
+        - $ref: "#/components/parameters/units"
+        - $ref: "#/components/parameters/lang"
+        - $ref: "#/components/parameters/mode"
 
       responses:
         200:
@@ -40,7 +40,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/200'
+                $ref: "#/components/schemas/200"
         404:
           description: Not found response
           content:
@@ -130,37 +130,37 @@ components:
       type: object
       properties:
         coord:
-          $ref: '#/components/schemas/Coord'
+          $ref: "#/components/schemas/Coord"
         weather:
           type: array
           items:
-            $ref: '#/components/schemas/Weather'
+            $ref: "#/components/schemas/Weather"
           description: (more info Weather condition codes)
         base:
           type: string
           description: Internal parameter
           example: cmc stations
         main:
-          $ref: '#/components/schemas/Main'
+          $ref: "#/components/schemas/Main"
         visibility:
           type: integer
           description: Visibility, meter
           example: 16093
         wind:
-          $ref: '#/components/schemas/Wind'
+          $ref: "#/components/schemas/Wind"
         clouds:
-          $ref: '#/components/schemas/Clouds'
+          $ref: "#/components/schemas/Clouds"
         rain:
-          $ref: '#/components/schemas/Rain'
+          $ref: "#/components/schemas/Rain"
         snow:
-          $ref: '#/components/schemas/Snow'
+          $ref: "#/components/schemas/Snow"
         dt:
           type: integer
           description: Time of data calculation, unix, UTC
           format: int32
           example: 1435658272
         sys:
-          $ref: '#/components/schemas/Sys'
+          $ref: "#/components/schemas/Sys"
         id:
           type: integer
           description: City ID

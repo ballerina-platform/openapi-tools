@@ -25,7 +25,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReadOnlyPet'
+                $ref: "#/components/schemas/ReadOnlyPet"
   /res2:
     get:
       operationId: getRes2
@@ -41,7 +41,7 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/ReadOnlyStr'
+                $ref: "#/components/schemas/ReadOnlyStr"
   /res3:
     get:
       operationId: getRes3
@@ -57,7 +57,7 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/ReadOnlyStrNil'
+                $ref: "#/components/schemas/ReadOnlyStrNil"
   /res4:
     get:
       operationId: getRes4
@@ -73,7 +73,7 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/ReadOnlyStrArray'
+                $ref: "#/components/schemas/ReadOnlyStrArray"
   /res5:
     get:
       operationId: getRes5
@@ -89,7 +89,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReadOnlyMapJson'
+                $ref: "#/components/schemas/ReadOnlyMapJson"
   /res6:
     get:
       operationId: getRes6
@@ -105,7 +105,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReadOnlyJson'
+                $ref: "#/components/schemas/ReadOnlyJson"
   /res7:
     get:
       operationId: getRes7
@@ -121,7 +121,7 @@ paths:
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/ReadOnlyXML'
+                $ref: "#/components/schemas/ReadOnlyXML"
   /res8:
     get:
       operationId: getRes8
@@ -153,7 +153,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReadOnlyPrimitiveUnion'
+                $ref: "#/components/schemas/ReadOnlyPrimitiveUnion"
   /res10:
     get:
       operationId: getRes10
@@ -169,7 +169,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReadOnlyBracedUnion'
+                $ref: "#/components/schemas/ReadOnlyBracedUnion"
   /res11:
     get:
       operationId: getRes11
@@ -185,11 +185,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReadOnlyRec'
+                $ref: "#/components/schemas/ReadOnlyRec"
 components:
   schemas:
     ReadOnlyPet:
-      $ref: '#/components/schemas/Pet'
+      $ref: "#/components/schemas/Pet"
     ReadOnlyRec:
       required:
         - id

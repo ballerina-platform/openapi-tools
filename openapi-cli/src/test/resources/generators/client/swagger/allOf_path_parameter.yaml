@@ -15,7 +15,7 @@ paths:
           required: true
           schema:
             allOf:
-             - $ref: '#/components/schemas/User'
+             - $ref: "#/components/schemas/User"
              - type: object
                properties:
                  id:

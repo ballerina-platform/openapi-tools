@@ -14,16 +14,16 @@ paths:
     get:
       operationId: getCoupon
       parameters:
-        - $ref: '#/components/parameters/ngwCouponCodePathParam'
-        - $ref: '#/components/parameters/ngwCouponCodePathParam02'
-        - $ref: '#/components/parameters/ngwCouponCodePathParam03'
+        - $ref: "#/components/parameters/ngwCouponCodePathParam"
+        - $ref: "#/components/parameters/ngwCouponCodePathParam02"
+        - $ref: "#/components/parameters/ngwCouponCodePathParam03"
       responses:
         '200':
           description: Successful operation, coupon was found by requested code
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cat'
+                $ref: "#/components/schemas/Cat"
 components:
   parameters:
     ngwCouponCodePathParam:
@@ -31,13 +31,13 @@ components:
       name: couponCode
       required: true
       schema:
-        $ref: '#/components/schemas/Coupon'
+        $ref: "#/components/schemas/Coupon"
     ngwCouponCodePathParam02:
       in: path
       name: id
       required: true
       schema:
-        $ref: '#/components/schemas/Id'
+        $ref: "#/components/schemas/Id"
     ngwCouponCodePathParam03:
       in: path
       name: limits
@@ -50,7 +50,7 @@ components:
     Coupon:
       type: string
     Id:
-      $ref: '#/components/schemas/AddressNo'
+      $ref: "#/components/schemas/AddressNo"
     AddressNo:
       type: integer
     Pet:
@@ -69,8 +69,8 @@ components:
         name:
           type: string
         parent:
-          $ref: '#/components/schemas/Pet'
+          $ref: "#/components/schemas/Pet"
         petType:
-          $ref: '#/components/schemas/Cat'
+          $ref: "#/components/schemas/Cat"
       required:
         - name

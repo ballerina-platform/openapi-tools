@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReservationReceipt'
+              $ref: "#/components/schemas/ReservationReceipt"
       responses:
         "202":
           description: Accepted
@@ -42,13 +42,13 @@ components:
         links:
           type: array
           items:
-            $ref: '#/components/schemas/Link'
+            $ref: "#/components/schemas/Link"
         linkid:
           type: integer
           format: int64
     ReservationReceipt:
       allOf:
-        - $ref: '#/components/schemas/Links'
+        - $ref: "#/components/schemas/Links"
         - type: object
           properties:
             id:

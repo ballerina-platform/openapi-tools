@@ -16,26 +16,26 @@ paths:
         - name: x-client
           in: header
           schema:
-            $ref: '#/components/schemas/XClient'
+            $ref: "#/components/schemas/XClient"
           required: true
         - name: x-content
           in: header
           schema:
-            $ref: '#/components/schemas/XContent'
-        - $ref: '#/components/parameters/XAPIName'
+            $ref: "#/components/schemas/XContent"
+        - $ref: "#/components/parameters/XAPIName"
         - name: x-count
           in: header
           required: true
           schema:
-            $ref: '#/components/schemas/XCount'
+            $ref: "#/components/schemas/XCount"
         - name: x-valid
           in: header
           schema:
-            $ref: '#/components/schemas/XValid'
+            $ref: "#/components/schemas/XValid"
         - name: x-sequence
           in: header
           schema:
-            $ref: '#/components/schemas/XSequence'
+            $ref: "#/components/schemas/XSequence"
         - name: X-Rate
           in: header
           schema:
@@ -51,7 +51,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/XClient'
+              $ref: "#/components/schemas/XClient"
       responses:
         "200":
           description: Ok

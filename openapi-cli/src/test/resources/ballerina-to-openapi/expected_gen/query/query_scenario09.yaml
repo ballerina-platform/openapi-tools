@@ -91,7 +91,7 @@ paths:
           in: query
           schema:
             allOf:
-              - $ref: '#/components/schemas/Record'
+              - $ref: "#/components/schemas/Record"
             default:
               name: John
               address:

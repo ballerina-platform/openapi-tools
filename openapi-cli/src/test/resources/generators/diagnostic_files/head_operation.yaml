@@ -130,7 +130,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DataLakeStorageError'
+                $ref: "#/components/schemas/DataLakeStorageError"
 components:
   schemas:
     DataLakeStorageError:
@@ -184,7 +184,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/DataLakeStorageError'
+            $ref: "#/components/schemas/DataLakeStorageError"
   parameters:
     Version:
       name: x-ms-version

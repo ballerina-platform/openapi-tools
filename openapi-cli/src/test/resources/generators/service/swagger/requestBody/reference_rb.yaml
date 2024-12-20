@@ -10,7 +10,7 @@ paths:
       description: Create a new Order
       operationId: "test"
       requestBody:
-        $ref: '#/components/requestBodies/Order'
+        $ref: "#/components/requestBodies/Order"
       responses:
         '201':
           description: >-
@@ -32,13 +32,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: "#/components/schemas/Order"
         '400':
           description: Bad Request. Invalid request or validation error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         '415':
           description: >-
             Unsupported Media Type. The entity of the request was in a not
@@ -46,7 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     ErrorListItem:
@@ -97,7 +97,7 @@ components:
             If there are more than one error list them out. Ex. list out
             validation errors by each field.
           items:
-            $ref: '#/components/schemas/ErrorListItem'
+            $ref: "#/components/schemas/ErrorListItem"
         description:
           type: string
           description: A detail description about the error message.
@@ -109,12 +109,12 @@ components:
           description: Preferably an url with more details about the error.
   requestBodies:
     Order:
-      $ref: '#/components/requestBodies/Order1'
+      $ref: "#/components/requestBodies/Order1"
     Order1:
       description: Order object that needs to be added
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Order'
+            $ref: "#/components/schemas/Order"
       required: true
 

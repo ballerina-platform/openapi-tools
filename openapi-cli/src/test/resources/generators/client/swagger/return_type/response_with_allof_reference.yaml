@@ -38,8 +38,8 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Product'
-                  - $ref: '#/components/schemas/Activity'
+                  - $ref: "#/components/schemas/Product"
+                  - $ref: "#/components/schemas/Activity"
                   - type: object
                     properties:
                       bark:

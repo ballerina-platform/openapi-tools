@@ -31,7 +31,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Locations'
+                $ref: "#/components/schemas/Locations"
   /locations/{id}/rooms:
     get:
       summary: Reperesents Snowpeak room collection resource
@@ -61,7 +61,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Rooms'
+                $ref: "#/components/schemas/Rooms"
   /reservation:
     put:
       summary: Represents Snowpeak reservation resource
@@ -71,14 +71,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Reservation'
+              $ref: "#/components/schemas/Reservation"
       responses:
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReservationReceipt'
+                $ref: "#/components/schemas/ReservationReceipt"
         "409":
           description: Conflict
           content:
@@ -93,7 +93,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Reservation'
+              $ref: "#/components/schemas/Reservation"
       responses:
         "201":
           description: Created
@@ -111,7 +111,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReservationReceipt'
+                $ref: "#/components/schemas/ReservationReceipt"
         "409":
           description: Conflict
           content:
@@ -134,14 +134,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Payment'
+              $ref: "#/components/schemas/Payment"
       responses:
         "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentReceipt'
+                $ref: "#/components/schemas/PaymentReceipt"
         "409":
           description: Conflict
           content:
@@ -189,10 +189,10 @@ components:
         _links:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/Link'
+            $ref: "#/components/schemas/Link"
     Location:
       allOf:
-        - $ref: '#/components/schemas/Links'
+        - $ref: "#/components/schemas/Links"
         - required:
             - address
             - id
@@ -217,7 +217,7 @@ components:
           type: array
           description: collection of locations
           items:
-            $ref: '#/components/schemas/Location'
+            $ref: "#/components/schemas/Location"
       description: Represents a collection of locations
     Room:
       required:
@@ -269,7 +269,7 @@ components:
       description: Represents resort room
     Rooms:
       allOf:
-        - $ref: '#/components/schemas/Links'
+        - $ref: "#/components/schemas/Links"
         - required:
             - rooms
           type: object
@@ -278,7 +278,7 @@ components:
               type: array
               description: Array of rooms
               items:
-                $ref: '#/components/schemas/Room'
+                $ref: "#/components/schemas/Room"
     ReserveRoom:
       required:
         - count
@@ -304,7 +304,7 @@ components:
           type: array
           description: Rooms to be reserved
           items:
-            $ref: '#/components/schemas/ReserveRoom'
+            $ref: "#/components/schemas/ReserveRoom"
         startDate:
           type: string
           description: Start date in yyyy-mm-dd
@@ -314,7 +314,7 @@ components:
       description: Represents a reservation of rooms
     ReservationReceipt:
       allOf:
-        - $ref: '#/components/schemas/Links'
+        - $ref: "#/components/schemas/Links"
         - required:
             - currency
             - expiryDate
@@ -341,7 +341,7 @@ components:
               description: Total payable
               format: double
             reservation:
-              $ref: '#/components/schemas/Reservation'
+              $ref: "#/components/schemas/Reservation"
     Payment:
       required:
         - cardNumber
@@ -390,5 +390,5 @@ components:
           type: array
           description: Booked rooms
           items:
-            $ref: '#/components/schemas/Room'
+            $ref: "#/components/schemas/Room"
       description: Reperesents receipt for the payment

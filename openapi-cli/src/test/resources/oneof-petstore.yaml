@@ -55,8 +55,8 @@ paths:
           application/json:
             schema:
               oneOf:
-                - $ref: '#/components/schemas/Dog'
-                - $ref: '#/components/schemas/Cat'
+                - $ref: "#/components/schemas/Dog"
+                - $ref: "#/components/schemas/Cat"
         description: ''
         required: true
       responses:

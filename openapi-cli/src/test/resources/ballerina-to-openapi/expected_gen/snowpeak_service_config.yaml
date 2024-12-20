@@ -15,7 +15,7 @@ paths:
         content:
           application/vnd.snowpeak.reservation+json:
             schema:
-              $ref: '#/components/schemas/Payment'
+              $ref: "#/components/schemas/Payment"
       responses:
         "200":
           description: Ok

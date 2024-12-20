@@ -37,13 +37,13 @@ paths:
         - description: "Meeting location"
           in: query
           name: location
-          $ref: '#/components/parameters/responseFormat'
+          $ref: "#/components/parameters/responseFormat"
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MeetingList'
+                $ref: "#/components/schemas/MeetingList"
           description: "HTTP Status Code:200. List of meetings returned."
 components:
   parameters:
@@ -54,7 +54,7 @@ components:
       content:
         application/xml:
           schema:
-            $ref: '#/components/schemas/MeetingList'
+            $ref: "#/components/schemas/MeetingList"
   schemas:
     Room:
       type: object
@@ -71,7 +71,7 @@ components:
         meetings:
           description: List of Meeting objects.
           items:
-            $ref: '#/components/schemas/MeetingObject'
+            $ref: "#/components/schemas/MeetingObject"
           type: array
     MeetingObject:
       properties:

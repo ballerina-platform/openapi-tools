@@ -19,7 +19,7 @@ paths:
           content:
             text/html:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
 components:
   schemas:
     User:

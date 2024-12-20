@@ -187,7 +187,7 @@ components:
       type: object
     CreatedDetails:
       anyOf:
-        - $ref: '#/components/schemas/CreatedFilterOptions'
+        - $ref: "#/components/schemas/CreatedFilterOptions"
         - type: integer
     CreatedFilterOptions:
       properties:
@@ -24509,7 +24509,7 @@ paths:
           name: created
           required: false
           schema:
-            $ref: '#/components/schemas/CreatedDetails'
+            $ref: "#/components/schemas/CreatedDetails"
           style: deepObject
         - description: A cursor for use in pagination. `ending_before` is an object
             ID that defines your place in the list. For instance, if you make a list
@@ -25462,7 +25462,7 @@ paths:
                   type: string
                 discounts:
                   anyOf:
-                    - $ref: '#/components/schemas/discounts_data_param'
+                    - $ref: "#/components/schemas/discounts_data_param"
                     - enum:
                         - ''
                       type: string
@@ -26458,7 +26458,7 @@ paths:
           required: false
           schema:
             items:
-              $ref: '#/components/schemas/invoice_item_preview_params'
+              $ref: "#/components/schemas/invoice_item_preview_params"
             type: array
           style: deepObject
         - description: The identifier of the unstarted schedule whose upcoming invoice
@@ -26815,7 +26815,7 @@ paths:
           required: false
           schema:
             items:
-              $ref: '#/components/schemas/invoice_item_preview_params'
+              $ref: "#/components/schemas/invoice_item_preview_params"
             type: array
           style: deepObject
         - description: A limit on the number of objects to be returned. Limit can range
@@ -28784,7 +28784,7 @@ paths:
                 properties:
                   data:
                     items:
-                      $ref: '#/components/schemas/usage_record_summary'
+                      $ref: "#/components/schemas/usage_record_summary"
                     type: array
                   has_more:
                     description: >-
@@ -28816,7 +28816,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: "#/components/schemas/error"
           description: Error response.
   "/v1/subscriptions":
     get:
@@ -30032,7 +30032,7 @@ paths:
           name: canceled_at
           required: false
           schema:
-            $ref: '#/components/schemas/CreatedDetails'
+            $ref: "#/components/schemas/CreatedDetails"
           style: deepObject
         - description: Only return subscription schedules that completed during the
             given date interval.
@@ -30041,7 +30041,7 @@ paths:
           name: completed_at
           required: false
           schema:
-            $ref: '#/components/schemas/CreatedDetails'
+            $ref: "#/components/schemas/CreatedDetails"
           style: deepObject
         - description: Only return subscription schedules that were created during the
             given date interval.
@@ -30050,7 +30050,7 @@ paths:
           name: created
           required: false
           schema:
-            $ref: '#/components/schemas/CreatedDetails'
+            $ref: "#/components/schemas/CreatedDetails"
           style: deepObject
         - description: Only return subscription schedules for the given customer.
           in: query
@@ -30087,7 +30087,7 @@ paths:
           name: released_at
           required: false
           schema:
-            $ref: '#/components/schemas/CreatedDetails'
+            $ref: "#/components/schemas/CreatedDetails"
           style: deepObject
         - description: Only return subscription schedules that have not started yet.
           in: query

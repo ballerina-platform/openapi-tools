@@ -68,7 +68,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Location'
+              $ref: "#/components/schemas/Location"
           x-ballerina-display:
             label: Location List
       x-ballerina-display:
@@ -79,7 +79,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WeatherForecast'
+                $ref: "#/components/schemas/WeatherForecast"
         404:
           description: Not found response
           content:

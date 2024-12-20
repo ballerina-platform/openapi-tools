@@ -74,7 +74,7 @@ components:
               description: Zipcode
         - type: object
           description: Additional fields
-        - $ref: '#/components/schemas/CountryDetails'
+        - $ref: "#/components/schemas/CountryDetails"
     CountryDetails:
       properties:
         iso_code:

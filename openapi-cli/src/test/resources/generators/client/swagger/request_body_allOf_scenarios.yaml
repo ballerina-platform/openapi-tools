@@ -107,7 +107,7 @@ paths:
           application/xml:
             schema:
               allOf: # Combines the main `User` schema with `RequestBody`-specific properties
-                - $ref: '#/components/schemas/User'
+                - $ref: "#/components/schemas/User"
                 - type: object
                   properties:
                     hunts:
@@ -129,7 +129,7 @@ paths:
               type: array
               items:
                 allOf: # Combines the main `User` schema with `RequestBody`-specific properties
-                  - $ref: '#/components/schemas/User'
+                  - $ref: "#/components/schemas/User"
                   - type: object
                     properties:
                       hunts:
@@ -144,7 +144,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/User'
+            $ref: "#/components/schemas/User"
   schemas:
     User:
       type: object

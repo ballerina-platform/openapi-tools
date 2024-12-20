@@ -7,7 +7,7 @@ paths:
     post:
       operationId: operation01
       requestBody:
-        $ref: '#/components/requestBodies/deleteFeatureFlagApproval'
+        $ref: "#/components/requestBodies/deleteFeatureFlagApproval"
       responses:
         '200':
           description: Feature flag approval request response
@@ -15,7 +15,7 @@ paths:
     post:
       operationId: operation02
       requestBody:
-        $ref: '#/components/requestBodies/deleteFeatureFlag'
+        $ref: "#/components/requestBodies/deleteFeatureFlag"
       responses:
         '200':
           description: Feature flag approval request response

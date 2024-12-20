@@ -24,7 +24,7 @@ paths:
           name: lat
           required: true
           schema:
-            $ref: '#/components/schemas/Latitude'
+            $ref: "#/components/schemas/Latitude"
           x-ballerina-display:
             label: Latitude
         - description: "Longtitude"

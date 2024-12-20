@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /path_get:
     get:
       summary: for `get` method with nil return type and success status code
@@ -68,7 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Links'
+                $ref: "#/components/schemas/Links"
         "202":
           description: Accepted
         "404":

@@ -57,10 +57,10 @@ components:
           type: string
         subject_type:
           oneOf:
-           - $ref: '#/components/schemas/Activity'
-           - $ref: '#/components/schemas/Profile01'
+           - $ref: "#/components/schemas/Activity"
+           - $ref: "#/components/schemas/Profile01"
     Error:
       type: object
       oneOf:
-        - $ref: '#/components/schemas/Activity'
-        - $ref: '#/components/schemas/Profile01'
+        - $ref: "#/components/schemas/Activity"
+        - $ref: "#/components/schemas/Profile01"

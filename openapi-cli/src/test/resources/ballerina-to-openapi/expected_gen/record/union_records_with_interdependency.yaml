@@ -25,19 +25,19 @@ paths:
           content:
             application/fhir+json:
               schema:
-                $ref: '#/components/schemas/Patient'
+                $ref: "#/components/schemas/Patient"
             application/fhir+xml:
               schema:
-                $ref: '#/components/schemas/Patient'
+                $ref: "#/components/schemas/Patient"
 components:
   schemas:
     Extension:
       oneOf:
-        - $ref: '#/components/schemas/ExtensionExtension'
-        - $ref: '#/components/schemas/StringExtension'
-        - $ref: '#/components/schemas/CodingExtension'
-        - $ref: '#/components/schemas/CodeExtension'
-        - $ref: '#/components/schemas/IntegerExtension'
+        - $ref: "#/components/schemas/ExtensionExtension"
+        - $ref: "#/components/schemas/StringExtension"
+        - $ref: "#/components/schemas/CodingExtension"
+        - $ref: "#/components/schemas/CodeExtension"
+        - $ref: "#/components/schemas/IntegerExtension"
     CodeExtension:
       required:
         - url
@@ -45,18 +45,18 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueCode:
           type: string
     Identifier:
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             value:
               type: string
             assigner:
-              $ref: '#/components/schemas/Reference'
+              $ref: "#/components/schemas/Reference"
             id:
               type: string
             element:
@@ -64,7 +64,7 @@ components:
               format: int64
     Coding:
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             id:
@@ -72,9 +72,9 @@ components:
             extension:
               type: array
               items:
-                $ref: '#/components/schemas/Extension'
+                $ref: "#/components/schemas/Extension"
             system:
-              $ref: '#/components/schemas/uri'
+              $ref: "#/components/schemas/uri"
             version:
               type: string
             display:
@@ -91,12 +91,12 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueCoding:
-          $ref: '#/components/schemas/Coding'
+          $ref: "#/components/schemas/Coding"
     Reference:
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             reference:
@@ -104,7 +104,7 @@ components:
             type:
               type: string
             identifier:
-              $ref: '#/components/schemas/Identifier'
+              $ref: "#/components/schemas/Identifier"
             display:
               type: string
             id:
@@ -127,18 +127,18 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueString:
           type: string
     ExtensionExtension:
       allOf:
-        - $ref: '#/components/schemas/Element'
+        - $ref: "#/components/schemas/Element"
         - type: object
           properties:
             extension:
               type: array
               items:
-                $ref: '#/components/schemas/Extension'
+                $ref: "#/components/schemas/Extension"
     IntegerExtension:
       required:
         - url
@@ -146,7 +146,7 @@ components:
       type: object
       properties:
         url:
-          $ref: '#/components/schemas/uri'
+          $ref: "#/components/schemas/uri"
         valueInteger:
           type: integer
           format: int64
@@ -156,10 +156,10 @@ components:
         ext:
           type: array
           items:
-            $ref: '#/components/schemas/Extension'
+            $ref: "#/components/schemas/Extension"
         id:
           type: string
         ref:
-          $ref: '#/components/schemas/Reference'
+          $ref: "#/components/schemas/Reference"
     uri:
       type: string

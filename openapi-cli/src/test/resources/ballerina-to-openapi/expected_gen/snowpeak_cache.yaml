@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Locations'
+                $ref: "#/components/schemas/Locations"
         "409":
           description: Conflict
           content:
@@ -68,10 +68,10 @@ components:
         _links:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/Link'
+            $ref: "#/components/schemas/Link"
     Location:
       allOf:
-        - $ref: '#/components/schemas/Links'
+        - $ref: "#/components/schemas/Links"
         - required:
             - address
             - id
@@ -96,5 +96,5 @@ components:
           type: array
           description: collection of locations
           items:
-            $ref: '#/components/schemas/Location'
+            $ref: "#/components/schemas/Location"
       description: Represents a collection of locations

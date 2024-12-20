@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: "#/components/schemas/Pet"
       responses:
         "202":
           description: Accepted
@@ -34,7 +34,7 @@ components:
           type: integer
           format: int64
         type:
-          $ref: '#/components/schemas/Type'
+          $ref: "#/components/schemas/Type"
     Type:
       type: object
       properties:

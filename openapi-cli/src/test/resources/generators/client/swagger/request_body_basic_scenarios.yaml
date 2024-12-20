@@ -35,7 +35,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
     put:
       summary: 02 Example for rb has inline requestbody.
       operationId: updateUser
@@ -67,7 +67,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
     put:
       operationId: updateNewUser
       summary: 04 Example for rb has inline requestbody.
@@ -75,7 +75,7 @@ paths:
         200:
           description: OK
       requestBody:
-        $ref: '#/components/requestBodies/PetBody'
+        $ref: "#/components/requestBodies/PetBody"
 
   /path03:
     post:
@@ -144,7 +144,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/User'
+            $ref: "#/components/schemas/User"
   schemas:
     User:
       type: object

@@ -52,5 +52,5 @@ components:
     Error:
       type: object
       oneOf:
-        - $ref: '#/components/schemas/Activity'
-        - $ref: '#/components/schemas/Profile01'
+        - $ref: "#/components/schemas/Activity"
+        - $ref: "#/components/schemas/Profile01"

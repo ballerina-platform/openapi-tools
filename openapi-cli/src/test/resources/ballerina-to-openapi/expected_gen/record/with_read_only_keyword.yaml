@@ -21,21 +21,21 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Album'
+                  $ref: "#/components/schemas/Album"
     post:
       operationId: postAlbums
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Album'
+              $ref: "#/components/schemas/Album"
       responses:
         "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Album'
+                $ref: "#/components/schemas/Album"
   /albums/{id}:
     get:
       operationId: getAlbumsId
@@ -51,7 +51,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Album'
+                $ref: "#/components/schemas/Album"
         "404":
           description: NotFound
 components:

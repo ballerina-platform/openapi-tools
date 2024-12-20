@@ -38,6 +38,7 @@ dependencies {
         exclude group: "javax.validation", module: "validation-api"
     }
     implementation "io.swagger.core.v3:swagger-models"
+    implementation "io.swagger.parser.v3:swagger-parser-safe-url-resolver:${swaggerParserVersion}"
     implementation "javax.ws.rs:javax.ws.rs-api"
     implementation "com.github.jknack:handlebars"
     implementation "info.picocli:picocli"
@@ -116,6 +117,7 @@ shadowJar {
         include(dependency('com.github.jknack:handlebars'))
         include(dependency('org.antlr:antlr4:4.5'))
         include(dependency('io.swagger.parser.v3:swagger-parser'))
+        include(dependency('io.swagger.parser.v3:swagger-parser-safe-url-resolver'))
         include(dependency('com.atlassian.commonmark:commonmark'))
         include(dependency('com.atlassian.commonmark:commonmark-ext-gfm-tables'))
         exclude('META-INF/*.SF')

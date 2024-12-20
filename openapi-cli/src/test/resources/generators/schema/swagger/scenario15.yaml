@@ -71,5 +71,5 @@ components:
             $ref: "#/components/schemas/Activity"
     AnyOF:
       anyOf:
-        - $ref: '#/components/schemas/User'
-        - $ref: '#/components/schemas/Activity'
+        - $ref: "#/components/schemas/User"
+        - $ref: "#/components/schemas/Activity"
