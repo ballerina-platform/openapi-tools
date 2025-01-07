@@ -52,7 +52,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PAT
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY;
 
 /**
- * This class is to contain the sanitized utils for naming.
+ * This class is to contain the aligned utils for naming.
  *
  * @since 2.1.0
  */
@@ -270,7 +270,7 @@ public class OASModifier {
                 outErrorStream.println("Schema name sanitization contains errors: ");
                 messages.forEach(outErrorStream::println);
             }
-            throw new BallerinaOpenApiException("Failed to generate the sanitized OpenAPI specification. Please " +
+            throw new BallerinaOpenApiException("Failed to generate the aligned OpenAPI specification. Please " +
                     "consider generating the client/service without the sanitization option.");
         }
         return openAPI;
@@ -423,20 +423,20 @@ public class OASModifier {
             return;
         }
 
-        String sanitizedName = getValidNameForParameter(parameterName);
-        if (parameterName.equals(sanitizedName)) {
+        String alignedName = getValidNameForParameter(parameterName);
+        if (parameterName.equals(alignedName)) {
             return;
         }
 
         if (Objects.isNull(parameter.getExtensions())) {
             parameter.setExtensions(new HashMap<>());
         }
-        parameter.getExtensions().put(BALLERINA_NAME_EXT, sanitizedName);
+        parameter.getExtensions().put(BALLERINA_NAME_EXT, alignedName);
     }
 
     private static Schema getSchemaWithBallerinaNameExtension(String propertyName, Schema<?> propertySchema) {
-        String sanitizedPropertyName = getValidNameForParameter(propertyName);
-        if (propertyName.equals(sanitizedPropertyName)) {
+        String alignedPropertyName = getValidNameForParameter(propertyName);
+        if (propertyName.equals(alignedPropertyName)) {
             return propertySchema;
         }
 
@@ -451,7 +451,7 @@ public class OASModifier {
         if (Objects.isNull(propertySchema.getExtensions())) {
             propertySchema.setExtensions(new HashMap<>());
         }
-        propertySchema.getExtensions().put(BALLERINA_NAME_EXT, sanitizedPropertyName);
+        propertySchema.getExtensions().put(BALLERINA_NAME_EXT, alignedPropertyName);
         return propertySchema;
     }
 

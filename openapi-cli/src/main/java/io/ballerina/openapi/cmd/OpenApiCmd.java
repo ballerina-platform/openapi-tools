@@ -84,7 +84,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getVali
 @CommandLine.Command(
         name = "openapi",
         description = "Generate the Ballerina sources for a given OpenAPI definition and vice versa.",
-        subcommands = {Add.class, Flatten.class, Sanitize.class}
+        subcommands = {Add.class, Flatten.class, Align.class}
 )
 public class OpenApiCmd implements BLauncherCmd {
     private static final String CMD_NAME = "openapi";

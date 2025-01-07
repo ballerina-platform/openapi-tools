@@ -98,67 +98,67 @@ public class NegativeCmdTests extends OpenAPICommandTest {
                 "\"json\" or \"yaml\".Defaulting to format of the input file"));
     }
 
-    @Test(description = "Test without the input OpenAPI file in `sanitize` sub command")
-    public void testSanitizeWithOutInputOpenAPIFile() throws IOException {
+    @Test(description = "Test without the input OpenAPI file in `align` sub command")
+    public void testAlignWithOutInputOpenAPIFile() throws IOException {
         String[] addArgs = {"-f", "json"};
-        Sanitize sanitize = new Sanitize(printStream, false);
-        new CommandLine(sanitize).parseArgs(addArgs);
-        sanitize.execute();
+        Align align = new Align(printStream, false);
+        new CommandLine(align).parseArgs(addArgs);
+        align.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("ERROR: an OpenAPI definition path is required to sanitize the OpenAPI " +
+        Assert.assertTrue(output.contains("ERROR: an OpenAPI definition path is required to align the OpenAPI " +
                 "definition"));
     }
 
-    @Test(description = "Test with the invalid input OpenAPI file in `sanitize` sub command")
-    public void testSanitizeWithInvalidInputOpenAPIFile() throws IOException {
-        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi-1.json"};
-        Sanitize sanitize = new Sanitize(printStream, false);
-        new CommandLine(sanitize).parseArgs(args);
-        sanitize.execute();
+    @Test(description = "Test with the invalid input OpenAPI file in `align` sub command")
+    public void testAlignWithInvalidInputOpenAPIFile() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/align/openapi-1.json"};
+        Align align = new Align(printStream, false);
+        new CommandLine(align).parseArgs(args);
+        align.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("ERROR: error occurred while reading the OpenAPI definition file"));
     }
 
-    @Test(description = "Test with invalid invalid input OpenAPI file extension in `sanitize` sub command")
-    public void testSanitizeWithInvalidInputOpenAPIFileExtension() throws IOException {
-        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.txt"};
-        Sanitize sanitize = new Sanitize(printStream, false);
-        new CommandLine(sanitize).parseArgs(args);
-        sanitize.execute();
+    @Test(description = "Test with invalid input OpenAPI file extension in `align` sub command")
+    public void testAlignWithInvalidInputOpenAPIFileExtension() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/align/openapi.txt"};
+        Align align = new Align(printStream, false);
+        new CommandLine(align).parseArgs(args);
+        align.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("ERROR: invalid input OpenAPI definition file extension. The OpenAPI " +
                 "definition file should be in YAML or JSON format"));
     }
 
-    @Test(description = "Test with the invalid output OpenAPI file format in `sanitize` sub command")
-    public void testSanitizeWithInvalidOutputOpenAPIFileFormat() throws IOException {
-        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi.json", "-f", "txt", "-o", tmpDir.toString()};
-        Sanitize sanitize = new Sanitize(printStream, false);
-        new CommandLine(sanitize).parseArgs(args);
-        sanitize.execute();
+    @Test(description = "Test with the invalid output OpenAPI file format in `align` sub command")
+    public void testAlignWithInvalidOutputOpenAPIFileFormat() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/align/openapi.json", "-f", "txt", "-o", tmpDir.toString()};
+        Align align = new Align(printStream, false);
+        new CommandLine(align).parseArgs(args);
+        align.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("WARNING: invalid output format. The output format should be either " +
                 "\"json\" or \"yaml\".Defaulting to format of the input file"));
     }
 
-    @Test(description = "Test with the input OpenAPI file in `sanitize` sub command which has parsing issues")
-    public void testSanitizeWithInputOpenAPIFileParsingIssues() throws IOException {
-        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_invalid.json", "-f", "txt", "-o",
+    @Test(description = "Test with the input OpenAPI file in `align` sub command which has parsing issues")
+    public void testAlignWithInputOpenAPIFileParsingIssues() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/align/openapi_invalid.json", "-f", "txt", "-o",
                 tmpDir.toString()};
-        Sanitize sanitize = new Sanitize(printStream, false);
-        new CommandLine(sanitize).parseArgs(args);
-        sanitize.execute();
+        Align align = new Align(printStream, false);
+        new CommandLine(align).parseArgs(args);
+        align.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("WARNING: invalid output format. The output format should be either " +
                 "\"json\" or \"yaml\".Defaulting to format of the input file"));
     }
 
-    @Test(description = "Test with the input OpenAPI file with Swagger V2 in `sanitize` sub command")
-    public void testSanitizeWithSwaggerV2() throws IOException {
-        String[] args = {"-i", resourceDir + "/cmd/sanitize/openapi_2.0.yaml", "-o", tmpDir.toString()};
-        Sanitize sanitize = new Sanitize(printStream, false);
-        new CommandLine(sanitize).parseArgs(args);
-        sanitize.execute();
+    @Test(description = "Test with the input OpenAPI file with Swagger V2 in `align` sub command")
+    public void testAlignWithSwaggerV2() throws IOException {
+        String[] args = {"-i", resourceDir + "/cmd/align/openapi_2.0.yaml", "-o", tmpDir.toString()};
+        Align align = new Align(printStream, false);
+        new CommandLine(align).parseArgs(args);
+        align.execute();
         String output = readOutput(true);
         Assert.assertTrue(output.contains("WARNING: Swagger version 2.0 found in the OpenAPI definition. The " +
                 "generated OpenAPI definition will be in OpenAPI version 3.0.x"));
