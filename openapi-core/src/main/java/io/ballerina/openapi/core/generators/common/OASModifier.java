@@ -267,10 +267,10 @@ public class OASModifier {
         if (Objects.isNull(openAPI)) {
             List<String> messages = parseResult.getMessages();
             if (Objects.nonNull(messages) && !messages.isEmpty()) {
-                outErrorStream.println("Schema name sanitization contains errors: ");
+                outErrorStream.println("Aligning schema name for Ballerina contains errors: ");
                 messages.forEach(outErrorStream::println);
             }
-            throw new BallerinaOpenApiException("Failed to generate the aligned OpenAPI specification. Please " +
+            throw new BallerinaOpenApiException("Failed to align the OpenAPI specification for Ballerina. Please " +
                     "consider generating the client/service without the sanitization option.");
         }
         return openAPI;
