@@ -1,0 +1,56 @@
+NAME
+       bal openapi align - Align the OpenAPI contract file according to
+       the best practices of Ballerina.
+
+SYNOPSIS
+       bal openapi align [-i | --input] <openapi-contract-file-path>
+                         [-o | --output] <output-file-path>
+                         [-n | --name] <generated-file-name>
+                         [-f | --format] [json|yaml]
+                         [-t | --tags] <tag-names>
+                         [--operations] <operation-names>
+
+DESCRIPTION
+       Align the OpenAPI contract file according to the best naming
+       practices of Ballerina. The Ballerina name extensions are added
+       to the schemas which can not be modified directly.
+
+
+OPTIONS
+       -i, --input <openapi-contract-file-path>
+            This is a mandatory input. The given OpenAPI contract will be aligned.
+            The OpenAPI contract can be either a YAML or a JSON.
+
+       -o, --output <output-file-path>
+            This is an optional input. The given output file path will be used to
+            save the aligned OpenAPI contract. The default output file path is
+            the executed directory.
+
+       -n, --name <generated-file-name>
+            This is an optional input. The given name will be used to save the
+            aligned OpenAPI contract. The default name is `aligned_ballerina_openapi`.
+
+       -f, --format [json|yaml]
+            This is an optional input. The aligned OpenAPI contract will be
+            saved in the given format. The format can be either JSON or YAML.
+            The default format is same as the input file format.
+
+       -t, --tags <tag-names>
+            This is an optional input. The aligned OpenAPI contract will only
+            have the operations with the given tags.
+
+       --operations <operation-names>
+            This is an optional input. The aligned OpenAPI contract will only
+            have the given operations.
+
+EXAMPLES
+       Align the `service.yaml` OpenAPI contract file.
+           $ bal openapi align -i service.yaml
+
+       Align the `service.yaml` OpenAPI contract file and save it as
+       `aligned_svc.json` file.
+           $ bal openapi align -i hello.yaml -n aligned_svc -f json
+
+       Align the `service.json` OpenAPI contract file by filtering the
+       operations with the `service` tag.
+           $ bal openapi align -i service.json -t service

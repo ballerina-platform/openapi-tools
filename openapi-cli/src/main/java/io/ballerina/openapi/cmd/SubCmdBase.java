@@ -47,7 +47,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNS
 import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveContractFileName;
 
 /**
- * Abstract class representing the {@link Flatten} and {@link Sanitize} sub command
+ * Abstract class representing the {@link Flatten} and {@link Align} sub command
  * implementations.
  *
  * @since 2.2.0
@@ -61,7 +61,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
 
     public enum CommandType {
         FLATTEN("flatten"),
-        SANITIZE("sanitize");
+        ALIGN("align");
 
         private final String name;
 
@@ -111,13 +111,13 @@ public abstract class SubCmdBase implements BLauncherCmd {
     @CommandLine.Option(names = {"-i", "--input"}, description = "OpenAPI definition file path.")
     public String inputPath;
 
-    @CommandLine.Option(names = {"-o", "--output"}, description = "Location of the sanitized OpenAPI definition.")
+    @CommandLine.Option(names = {"-o", "--output"}, description = "Location of the aligned OpenAPI definition.")
     private String outputPath;
 
-    @CommandLine.Option(names = {"-n", "--name"}, description = "Name of the sanitized OpenAPI definition file.")
+    @CommandLine.Option(names = {"-n", "--name"}, description = "Name of the aligned OpenAPI definition file.")
     private String fileName;
 
-    @CommandLine.Option(names = {"-f", "--format"}, description = "Output format of the sanitized OpenAPI definition.")
+    @CommandLine.Option(names = {"-f", "--format"}, description = "Output format of the aligned OpenAPI definition.")
     private String format;
 
     @CommandLine.Option(names = {"-t", "--tags"}, description = "Tags that need to be considered when sanitizing.")
