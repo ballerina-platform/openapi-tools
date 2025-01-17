@@ -26,43 +26,43 @@ import java.io.PrintStream;
 import java.util.Optional;
 
 /**
- * Main class to implement "sanitize" subcommand which is used to flatten and sanitize the OpenAPI definition
+ * Main class to implement "align" subcommand which is used to flatten and align the OpenAPI definition
  * by generating Ballerina friendly type schema names and Ballerina type name extensions.
  *
  * @since 2.2.0
  */
 @CommandLine.Command(
-        name = "sanitize",
-        description = "Sanitize the OpenAPI definition by generating Ballerina friendly type schema names and " +
+        name = "align",
+        description = "Align the OpenAPI definition by generating Ballerina friendly type schema names and " +
                 "Ballerina type name extensions."
 )
-public class Sanitize extends SubCmdBase {
+public class Align extends SubCmdBase {
 
-    private static final String INFO_MSG_PREFIX = "Sanitized";
+    private static final String INFO_MSG_PREFIX = "Aligned";
 
-    public Sanitize() {
-        super(CommandType.SANITIZE, INFO_MSG_PREFIX);
+    public Align() {
+        super(CommandType.ALIGN, INFO_MSG_PREFIX);
     }
 
-    public Sanitize(PrintStream errorStream, boolean exitWhenFinish) {
-        super(CommandType.SANITIZE, INFO_MSG_PREFIX, errorStream, exitWhenFinish);
+    public Align(PrintStream errorStream, boolean exitWhenFinish) {
+        super(CommandType.ALIGN, INFO_MSG_PREFIX, errorStream, exitWhenFinish);
     }
 
     @Override
     public String getDefaultFileName() {
-        return "sanitized_openapi";
+        return "aligned_ballerina_openapi";
     }
 
     @Override
     public Optional<OpenAPI> generate(String openAPIFileContent) {
         Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent, true);
-        return filteredOpenAPI.flatMap(this::sanitizeOpenAPI);
+        return filteredOpenAPI.flatMap(this::alignOpenAPI);
     }
 
-    private Optional<OpenAPI> sanitizeOpenAPI(OpenAPI openAPI) {
-        OASModifier oasSanitizer = new OASModifier();
+    private Optional<OpenAPI> alignOpenAPI(OpenAPI openAPI) {
+        OASModifier oasAligner = new OASModifier();
         try {
-            return Optional.of(oasSanitizer.modifyWithBallerinaConventions(openAPI));
+            return Optional.of(oasAligner.modifyWithBallerinaConventions(openAPI));
         } catch (BallerinaOpenApiException exp) {
             printError("ERROR: %s".formatted(exp.getMessage()));
             return Optional.empty();
