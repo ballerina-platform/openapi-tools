@@ -12,7 +12,7 @@ The `openapi` command in Ballerina is used for OpenAPI to Ballerina and Ballerin
 Code generation from OpenAPI to Ballerina can produce `ballerina service stubs` and `ballerina client stubs`.
 The OpenAPI compiler plugin will allow you to validate a service implementation against an OpenAPI contract during
  the compile time.
-This plugin ensures that the implementation of a service does not deviate from its OpenAPI contract.    
+This plugin ensures that the implementation of a service does not deviate from its OpenAPI contract.   
 
 ### OpenAPI to Ballerina
 #### Generate Service and Client Stub from an OpenAPI Contract
@@ -102,7 +102,7 @@ The Compiler Plugin is activated if a service has the `openapi:ServiceInfo` anno
 the service and the OpenAPI Contract and validates both against a pre-defined set of validation rules. 
 If any of the rules fail, the plugin will give the result as one or more compilation errors.
 
-### Annotation for Validator Plugin
+### Annotation for Validator Plugin 
 The `@openapi:ServiceInfo` annotation is used to bind the service with an OpenAPI contract. You need to add 
 this annotation to the service file with the required values for enabling the validations.  
 The following is an example of the annotation usage.
@@ -126,7 +126,7 @@ This is a required attribute.
 
 - **Tag** (Optional) : **string[]?**     :
 The compiler will only validate resources against operations, which are tagged with a tag specified in the list.
-If not specified, the compiler will validate resources against all the operations defined in the OpenAPI contract.
+If not specified, the compiler will validate resources against all the operations defined in the OpenAPI contract. 
 
 - **Operations** (Optional): **string[]?**  :
 Should contain a list of operation names that need to be validated against the resources in the service.
