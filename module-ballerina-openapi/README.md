@@ -61,6 +61,168 @@ If you need to document an OpenAPI contract for only one given service, then use
     bal openapi -i <ballerina-file-path> (-s | --service) <service-name>
 ```
 
+### Using Annotations in Ballerina OpenAPI Conversion
+### `@openapi:ServiceInfo` Annotation
+The `@openapi:ServiceInfo` annotation is used to specify metadata about the Ballerina service during OpenAPI
+generation. 
+The following is an example of the annotation usage.
+```ballerina
+@openapi:ServiceInfo {
+    contract: "/path/to/openapi.json",
+    tags: ["store"],
+    operations: ["op1", "op2"],
+    failOnErrors: true,
+    excludeTags: ["pets", "user"],
+    excludeOperations: ["op1", "op2"],
+    title: "store",
+    version: "0.1.0",
+    description: "API system description",
+    email: "mark@abc.com",
+    contactName: "ABC company",
+    contactURL: "http://mock-api-contact",
+    termsOfService: "http://mock-api-doc",
+    licenseName: "ABC",
+    licenseURL: "http://abc-license.com",
+    embed: true
+}
+service /greet on new http:Listener(9090) {
+    ...
+}
+```
+#### Annotation Supports for the Following Attributes:
+- **Contract** (Required) : **string**  :
+  Here, you can provide a path to the OpenAPI contract as a string and the OpenAPI file can either be `.yaml` or `.json`.
+  This is a required attribute.
+
+- **Tag** (Optional) : **string[]?**     :
+  The compiler will only validate resources against operations, which are tagged with a tag specified in the list.
+  If not specified, the compiler will validate resources against all the operations defined in the OpenAPI contract.
+
+- **Operations** (Optional): **string[]?**  :
+  Should contain a list of operation names that need to be validated against the resources in the service.
+  If not specified, the compiler will validate resources against all the operations defined in the OpenAPI contract. If both tags and operations are defined, it will validate against the union set of the resources.
+
+- **ExcludeTags** (Optional) : **string[]?**    :
+  This feature is for users to store the tag. It does not need to be validated.
+  At the same time, the `excludeTag` and `Tag` cannot store and the plugin will generate warning messages regarding
+  it.
+
+- **ExcludeOperations** (Optional) : **string[]?**  :
+  This feature is for users to store the operations that do not need to be validated.
+  At the same time, the `excludeOperations` and  `Operations` can not store and they will generate warning messages.
+  The `Tag` feature can store with `excludeOperations`. Then, all the tag operations will be validated except the `exclude`
+  operations.
+
+- **FailOnErrors** (Optional) : **boolean value**   :
+  If you need to turn off the validation, add this to the annotation with the value as `false`.
+
+- **title** (Optional) :
+  This feature adds the title of the `info` section in the generated OpenAPI contract.
+
+- **version** (Optional) :
+  This feature adds the version of the `info` section in the generated OpenAPI contract.
+
+- **description** (Optional) :
+  This feature can be used to add the description of the `info` section in the generated OpenAPI contract. A brief
+  description of the API, outlining its purpose, features, and any other relevant details that help users understand
+  what the API does and how to use it.
+
+- **email** (Optional) : 
+  This feature can be used to add the email address to the `contact` section in the OpenAPI contract. This describes
+  email details for the API provider or support.
+
+- **contactName** (Optional) :
+  Users can use this attribute to add the name of the person or organization responsible for the API.
+
+- **contactURL** (Optional) :
+  Users can use this attribute to add the URL to a web page with more information about the API, the provider, or support.
+
+- **termsOfService** (Optional) :
+  Users can use this to add the URL details to the terms of service for the API.
+
+- **licenseName** (Optional) :
+  Users can use this to add the name of the license under which the API is provided.
+
+- **licenseURL** (Optional) :
+  Users can use this to add the URL details regarding the full text of the license.
+
+- **embed** (Optional) : **boolean value** :
+  This feature turns on generating OpenAPI documentation for the service for introspection endpoint support when used
+  with `true` in the annotation.
+
+### `@openapi:ResourceInfo` Annotation
+The `@openapi:ResourceInfo` annotation provides metadata for specific resource functions.
+The following is an example of the Ballerina resource function with the OpenAPI annotation.
+```ballerina
+@openapi:ResourceInfo {
+    operationId: "createStoreData",
+    summary: "API for adding store amount",
+    tags: ["retail", "rate"]
+}
+resource function post store(Inventory payload) returns string? {
+}
+```
+Following is the generated OpenAPI contract with the given details
+```yaml
+...
+paths:
+  /store:
+    post:
+      tags:
+      - retail
+      - rate
+      summary: API for adding store amount
+      operationId: createStoreData
+      requestBody:
+        content:
+          application/json:
+            schema:
+...
+```
+#### Annotation Supports for the Following Attributes:
+- **operationId** (Optional) :
+  Users can use this to update opearation Id in particular operation in OpenAPI contract.
+
+- **summary** (Optional) :
+  This attribute helps users to add summary for the particular operation in the OpenAPI contract.
+
+- **tags** (Optional) :
+  This attribute specifies the tag in the list map to the tags list in operation.
+
+### `@openapi:Example` Annotation
+The `@openapi:Example` annotation renders examples in the OpenAPI contract. It can be attached to parameters,
+record types, or record fields.
+The following is an example for Ballerina object level example mapping.
+```ballerina
+@openapi:Example {
+  value: {
+    id: 10,
+    name: "Jessica Smith"
+  }
+}
+type User record {
+  int id;
+  string name
+}
+```
+Following is the generated OpenAPI contract with the given details.
+```yaml
+...
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      example:
+        id: 10
+        name: Jessica Smith
+...
+```
+
 ### Samples for OpenAPI Commands
 #### Generate Service and Client Stub from OpenAPI
 ```bash
@@ -94,54 +256,3 @@ This command will generate the `helloworld-openapi.yaml` file that is related to
   ```
 This `--json` option can be used with the Ballerina to OpenAPI command to generate the `helloworld-openapi.json` file 
 instead of generating the YAML file.
-
-## OpenAPI Validator Compiler Plugin
-
-The OpenAPI Validator Compiler plugin validates a service against a given OpenAPI contract. 
-The Compiler Plugin is activated if a service has the `openapi:ServiceInfo` annotation. This plugin compares 
-the service and the OpenAPI Contract and validates both against a pre-defined set of validation rules. 
-If any of the rules fail, the plugin will give the result as one or more compilation errors.
-
-### Annotation for Validator Plugin 
-The `@openapi:ServiceInfo` annotation is used to bind the service with an OpenAPI contract. You need to add 
-this annotation to the service file with the required values for enabling the validations.  
-The following is an example of the annotation usage.
-```ballerina
-@openapi:ServiceInfo{
-    contract: “/path/to/openapi.json|yaml”,
-    [ tag : “store” ],
-    [ operations: [“op1”, “op2”] ] 
-    [ failOnErrors]: true/false → default : true
-    [ excludeTags ]: [“pets”, “user”]
-    [ excludeOperations: [“op1”, “op2”] ]
-   }
-service greet on new http:Listener(9090) {
-    ...
-}
-```
-#### Annotation Support for the Following Attributes:
-- **Contract** (Required) : **string**  :
-Here, you can provide a path to the OpenAPI contract as a string and the OpenAPI file can either be `.yaml` or `.json`.
-This is a required attribute.
-
-- **Tag** (Optional) : **string[]?**     :
-The compiler will only validate resources against operations, which are tagged with a tag specified in the list.
-If not specified, the compiler will validate resources against all the operations defined in the OpenAPI contract. 
-
-- **Operations** (Optional): **string[]?**  :
-Should contain a list of operation names that need to be validated against the resources in the service.
-If not specified, the compiler will validate resources against all the operations defined in the OpenAPI contract. If both tags and operations are defined, it will validate against the union set of the resources.
-
-- **ExcludeTags** (Optional) : **string[]?**    :
-This feature is for users to store the tag. It does not need to be validated.
-At the same time, the `excludeTag` and `Tag` cannot store and the plugin will generate warning messages regarding
- it.
-
-- **ExcludeOperations** (Optional) : **string[]?**  :
-This feature is for users to store the operations that do not need to be validated.
-At the same time, the `excludeOperations` and  `Operations` can not store and they will generate warning messages.
-The `Tag` feature can store with `excludeOperations`. Then, all the tag operations will be validated except the `exclude`
- operations.
- 
-- **FailOnErrors** (Optional) : **boolean value**   :
-If you need to turn off the validation, add this to the annotation with the value as `false`.
