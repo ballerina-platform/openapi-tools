@@ -160,6 +160,7 @@ The following is an example of the Ballerina resource function with the OpenAPI 
     tags: ["retail", "rate"]
 }
 resource function post store(Inventory payload) returns string? {
+        // logic here
 }
 ```
 Following is the generated OpenAPI contract with the given details
