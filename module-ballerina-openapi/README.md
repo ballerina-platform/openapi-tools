@@ -83,14 +83,14 @@ The following is an example of the annotation usage.
     termsOfService: "http://mock-api-doc",
     licenseName: "ABC",
     licenseURL: "http://abc-license.com",
-    embed: true
+    embed: true // (default value => false)
 }
 service /greet on new http:Listener(9090) {
     ...
 }
 ```
 #### Annotation Supports for the Following Attributes:
-- **Contract** (Required) : **string**  :
+- **Contract** (Optional) : **string**  :
   Here, you can provide a path to the OpenAPI contract as a string and the OpenAPI file can either be `.yaml` or `.json`.
   This is a required attribute.
 
