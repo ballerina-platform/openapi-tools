@@ -21,7 +21,6 @@ module io.ballerina.openapi.core {
     requires info.picocli;
     requires io.ballerina.lang;
     requires io.ballerina.parser;
-    requires io.ballerina.stdlib.http;
     requires io.ballerina.cli;
     requires io.ballerina.tools.api;
     requires io.ballerina.runtime;
