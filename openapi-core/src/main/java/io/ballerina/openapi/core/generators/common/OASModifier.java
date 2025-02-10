@@ -128,7 +128,7 @@ public class OASModifier {
     }
 
     private void processOperationWithInlineObjectSchema(Operation operation) {
-        if (Objects.nonNull(operation.getRequestBody())) {
+        if (Objects.nonNull(operation.getRequestBody()) && Objects.nonNull(operation.getRequestBody().getContent())) {
             updateInlineObjectInContent(operation.getRequestBody().getContent());
         }
         processParametersWithInlineObjectSchema(operation.getParameters());
