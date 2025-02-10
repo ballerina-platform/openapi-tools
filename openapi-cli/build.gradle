@@ -48,7 +48,6 @@ dependencies {
     implementation "org.ballerinalang:ballerina-cli"
     implementation "org.ballerinalang:ballerina-tools-api"
     implementation group: 'org.ballerinalang', name: 'toml-parser', version: "${ballerinaLangVersion}"
-    implementation "io.ballerina.stdlib:http-native"
     implementation "com.google.code.findbugs:jsr305"
     testImplementation "org.testng:testng"
     testImplementation 'junit:junit:4.13.1'

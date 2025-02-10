@@ -19,7 +19,6 @@
 module io.ballerina.openapi.idl.client {
     requires io.ballerina.lang;
     requires io.ballerina.parser;
-    requires io.ballerina.stdlib.http;
     requires io.ballerina.tools.api;
     requires io.ballerina.formatter.core;
     requires io.ballerina.openapi.converter;
