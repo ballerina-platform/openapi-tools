@@ -1189,76 +1189,76 @@ oneOf:
 > 1. If any field in the record type has a `jsondata:Name` annotation, the name specified in the annotation will be
 > used as the schema name.
 > 
-> Ballerina record type:
-> ```ballerina
-> public type Album record {|
->     string artist;
->     @jsondata:Name {value: "_id"}
->     string id;
->     string title;
-> |};
-> ```
+>    Ballerina record type:
+>    ```ballerina
+>    public type Album record {|
+>        string artist;
+>        @jsondata:Name {value: "_id"}
+>        string id;
+>        string title;
+>    |};
+>    ```
 > 
-> Generated schema:
-> ```yml
-> Album:
->   required:
->   - _id
->   - artist
->   - title
->   type: object
->   properties:
->     _id:
->       type: string
->     title:
->       type: string
->     artist:
->       type: string
->   additionalProperties: false
-> ```
+>    Generated schema:
+>    ```yml
+>    Album:
+>      required:
+>      - _id
+>      - artist
+>      - title
+>      type: object
+>      properties:
+>        _id:
+>          type: string
+>        title:
+>          type: string
+>        artist:
+>          type: string
+>      additionalProperties: false
+>    ```
+>    
 > 2. If we have a record defined in a separate package, for example, packageA:
-> ```ballerina
-> type RecA record {|
->    int a = 10;
->    string c = "c";
->|};
->
-> ```
-> and it is included in packageB:
->```ballerina
-> type RecB record {|
->    *packageA:RecA;
->     string b = "b";
->|};
->```
-> In the OpenAPI Specification (OAS) mapping for `RecB`, the default value access API cannot retrieve default values
-> from another package. To address this, we generate all the fields explicitly for `RecB` to ensure accessibility.
-> ```yaml
-> RecA:
->   type: object
->   properties:
->     a:
->       type: integer
->     c:
->      type: string
->   additionalProperties: false
-> RecB:
->   type: object
->   allOf:
->   - $ref: '#/components/schemas/RecA'
->   - required:
->     - b
->     type: object
->     properties:
->       b:
->        type: string
->        default: b
->       a:
->        type: integer
->       c:
+>    ```ballerina
+>    type RecA record {|
+>       int a = 10;
+>       string c = "c";
+>    |};
+>    ```
+>    and it is included in packageB:
+>    ```ballerina
+>    type RecB record {|
+>       *packageA:RecA;
+>        string b = "b";
+>    |};
+>    ```
+>    In the OpenAPI Specification (OAS) mapping for `RecB`, the default value access API cannot retrieve default values
+>    from another package. To address this, we generate all the fields explicitly for `RecB` to ensure accessibility.
+>    ```yaml
+>    RecA:
+>      type: object
+>      properties:
+>        a:
+>          type: integer
+>        c:
 >         type: string
->    additionalProperties: false
-```
+>      additionalProperties: false
+>    RecB:
+>      type: object
+>      allOf:
+>      - $ref: '#/components/schemas/RecA'
+>      - required:
+>        - b
+>        type: object
+>        properties:
+>          b:
+>           type: string
+>           default: b
+>          a:
+>           type: integer
+>          c:
+>            type: string
+>       additionalProperties: false
+>    ```
 
 ### Ballerina constraints mapping to type schema
 
