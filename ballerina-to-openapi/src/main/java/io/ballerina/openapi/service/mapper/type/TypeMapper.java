@@ -56,4 +56,6 @@ public interface TypeMapper {
         }
         schema.setDefault(defaultValue);
     }
+
+    String getJsonSchemaString(TypeSymbol typeSymbol);
 }

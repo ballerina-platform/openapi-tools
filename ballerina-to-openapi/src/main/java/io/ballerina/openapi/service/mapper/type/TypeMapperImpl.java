@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.service.mapper.type;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.ErrorTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
@@ -29,13 +30,22 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.OpenAPISchema2JsonSchema;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
+import static io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper.extractNodesFromProject;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 /**
@@ -48,10 +58,52 @@ public class TypeMapperImpl implements TypeMapper {
 
     private final Components components;
     private final AdditionalData componentMapperData;
+    private final OpenAPISchema2JsonSchema converter = new OpenAPISchema2JsonSchema();
 
     public TypeMapperImpl(Components components, AdditionalData componentMapperData) {
         this.components = components;
         this.componentMapperData = componentMapperData;
+    }
+
+    public TypeMapperImpl(SyntaxNodeAnalysisContext context) {
+        this.components = new Components().schemas(new HashMap<>());
+        SemanticModel semanticModel = context.semanticModel();
+        Project project = context.currentPackage().project();
+        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(project, semanticModel);
+        this.componentMapperData = new AdditionalData(semanticModel, moduleMemberVisitor);
+    }
+
+    public String getJsonSchemaString(TypeSymbol typeSymbol) throws UnsupportedOperationException {
+        if (!isAnydata(typeSymbol)) {
+            throw new UnsupportedOperationException("Only 'anydata' type is supported for JSON schema generation.");
+        }
+        typeSymbol = getReferredType(typeSymbol);
+        Components components = new Components().schemas(new HashMap<>());
+        Schema schema = getTypeSchema(typeSymbol, components, componentMapperData);
+        BallerinaTypeExtensioner.removeExtensionFromSchema(schema);
+        converter.process(schema);
+        Map<String, Object> jsonSchema = schema.getJsonSchema();
+        jsonSchema.put("$schema", "http://json-schema.org/draft-04/schema#");
+        Map<String, Object> definitions = new HashMap<>();
+        Map<String, Schema> schemas = components.getSchemas();
+        BallerinaTypeExtensioner.removeExtensionFromComponents(components);
+        if (Objects.nonNull(schemas)) {
+            schemas.forEach((key, value) -> {
+                if (Objects.nonNull(value)) {
+                    converter.process(value);
+                    definitions.put(key, value.getJsonSchema());
+                }
+            });
+        }
+        if (!definitions.isEmpty()) {
+            jsonSchema.put("definitions", definitions);
+        }
+        String jsonSchemaString = Json.pretty(jsonSchema);
+        return jsonSchemaString.replaceAll("#/components/schemas/", "#/definitions/");
+    }
+
+    private boolean isAnydata(TypeSymbol typeSymbol) {
+        return typeSymbol.subtypeOf(componentMapperData.semanticModel().types().ANYDATA);
     }
 
     public Schema getTypeSchema(TypeSymbol typeSymbol) {

@@ -46,34 +46,49 @@ public final class BallerinaTypeExtensioner {
     }
 
     public static void removeExtensions(OpenAPI openAPI) {
-        removeExtensionsFromSchemas(openAPI, (extensions, orgName, moduleName) -> true);
+        removeExtensionsFromOpenAPI(openAPI, (extensions, orgName, moduleName) -> true);
     }
 
     public static void removeCurrentModuleTypeExtensions(OpenAPI openAPI, ModuleID moduleID) {
         String orgName = moduleID.orgName();
         String moduleName = moduleID.moduleName();
 
-        removeExtensionsFromSchemas(openAPI, (extensions, org, mod) -> fromSameModule(extensions, orgName,
+        removeExtensionsFromOpenAPI(openAPI, (extensions, org, mod) -> fromSameModule(extensions, orgName,
                 moduleName));
     }
 
-    private static void removeExtensionsFromSchemas(OpenAPI openAPI, ExtensionRemovalCondition condition) {
+    private static void removeExtensionsFromOpenAPI(OpenAPI openAPI, ExtensionRemovalCondition condition) {
         Components components = openAPI.getComponents();
         if (Objects.isNull(components)) {
             return;
         }
+        removeExtensionFromComponents(components, condition);
+    }
 
+    public static void removeExtensionFromComponents(Components components) {
+        removeExtensionFromComponents(components, (extensions, orgName, moduleName) -> true);
+    }
+
+    private static void removeExtensionFromComponents(Components components, ExtensionRemovalCondition condition) {
         Map<String, Schema> schemas = components.getSchemas();
         if (Objects.isNull(schemas)) {
             return;
         }
 
         schemas.forEach((key, schema) -> {
-            Map<?, ?> extensions = schema.getExtensions();
-            if (Objects.nonNull(extensions) && condition.shouldRemove(extensions, null, null)) {
-                extensions.remove(X_BALLERINA_TYPE);
-            }
+            removeExtensionFromSchema(schema, condition);
         });
+    }
+
+    public static void removeExtensionFromSchema(Schema schema) {
+        removeExtensionFromSchema(schema, (extensions, orgName, moduleName) -> true);
+    }
+
+    private static void removeExtensionFromSchema(Schema schema, ExtensionRemovalCondition condition) {
+        Map<?, ?> extensions = schema.getExtensions();
+        if (Objects.nonNull(extensions) && condition.shouldRemove(extensions, null, null)) {
+            extensions.remove(X_BALLERINA_TYPE);
+        }
     }
 
     @FunctionalInterface
