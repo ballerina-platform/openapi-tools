@@ -121,11 +121,21 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             // Type inclusion in a record is a TypeReferenceType and the referred type is a RecordType
             if (typeInclusion.typeKind() == TypeDescKind.TYPE_REFERENCE &&
                     ((TypeReferenceTypeSymbol) typeInclusion).typeDescriptor().typeKind() == TypeDescKind.RECORD) {
-                Schema includedRecordSchema = new Schema();
-                includedRecordSchema.set$ref(getTypeName(typeInclusion));
+                Schema includedRecordSchema;
+                if (additionalData.enableExpansion()) {
+                    if (additionalData.visitedTypes().contains(MapperCommonUtils.getTypeName(typeInclusion))) {
+                        ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_140);
+                        additionalData.diagnostics().add(error);
+                        continue;
+                    }
+                    includedRecordSchema = TypeMapperImpl.getTypeSchema(typeInclusion, components, additionalData);
+                } else {
+                    includedRecordSchema = new Schema();
+                    includedRecordSchema.set$ref(getTypeName(typeInclusion));
+                    TypeMapperImpl.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion,
+                            components, additionalData);
+                }
                 allOfSchemaList.add(includedRecordSchema);
-                TypeMapperImpl.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion,
-                        components, additionalData);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
                         .typeDescriptor();

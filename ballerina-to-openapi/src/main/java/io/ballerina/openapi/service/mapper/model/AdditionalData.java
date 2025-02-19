@@ -29,15 +29,30 @@ import java.util.List;
  * @param moduleMemberVisitor - The module member visitor.
  * @param diagnostics - The list of diagnostics.
  * @param enableBallerinaExt - The flag to enable ballerina extension in the type schema.
+ * @param enableExpansion - The flag to enable expansion in the reference type schema.
+ * @param visitedTypes - The list of visited types.
  *
  * @since 1.9.0
  */
 public record AdditionalData(SemanticModel semanticModel,
                              ModuleMemberVisitor moduleMemberVisitor,
                              List<OpenAPIMapperDiagnostic> diagnostics,
-                             boolean enableBallerinaExt) {
+                             boolean enableBallerinaExt,
+                             boolean enableExpansion,
+                             List<String> visitedTypes) {
 
     public AdditionalData(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
-        this(semanticModel, moduleMemberVisitor, new ArrayList<>(), false);
+        this(semanticModel, moduleMemberVisitor, new ArrayList<>(), false, false, new ArrayList<>());
+    }
+
+    public AdditionalData(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
+                          List<OpenAPIMapperDiagnostic> diagnostics, boolean enableBallerinaExt) {
+        this(semanticModel, moduleMemberVisitor, diagnostics, enableBallerinaExt, false, new ArrayList<>());
+    }
+
+    public AdditionalData(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
+                          List<OpenAPIMapperDiagnostic> diagnostics, boolean enableBallerinaExt,
+                          boolean enableExpansion) {
+        this(semanticModel, moduleMemberVisitor, diagnostics, enableBallerinaExt, enableExpansion, new ArrayList<>());
     }
 }

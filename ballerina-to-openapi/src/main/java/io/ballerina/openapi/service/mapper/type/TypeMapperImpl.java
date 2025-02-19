@@ -39,6 +39,7 @@ import io.swagger.v3.core.util.OpenAPISchema2JsonSchema;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -74,16 +75,32 @@ public class TypeMapperImpl implements TypeMapper {
     }
 
     public String getJsonSchemaString(TypeSymbol typeSymbol) throws UnsupportedOperationException {
+        return getJsonSchemaString(typeSymbol, false);
+    }
+
+    public String getJsonSchemaString(TypeSymbol typeSymbol, boolean enableExpansion)
+            throws UnsupportedOperationException {
         if (!isAnydata(typeSymbol)) {
             throw new UnsupportedOperationException("Only 'anydata' type is supported for JSON schema generation.");
         }
         typeSymbol = getReferredType(typeSymbol);
         Components components = new Components().schemas(new HashMap<>());
+        AdditionalData componentMapperData = cloneComponentMapperData(enableExpansion);
         Schema schema = getTypeSchema(typeSymbol, components, componentMapperData);
+        if (componentMapperData.enableExpansion() && componentMapperData.diagnostics().stream()
+                .anyMatch(diagnostic -> diagnostic.getCode().equals("OAS_CONVERTOR_140"))) {
+            throw new UnsupportedOperationException("Recursive references are not supported for JSON schema " +
+                    "generation with reference expansion.");
+        }
         BallerinaTypeExtensioner.removeExtensionFromSchema(schema);
         converter.process(schema);
         Map<String, Object> jsonSchema = schema.getJsonSchema();
         jsonSchema.put("$schema", "http://json-schema.org/draft-04/schema#");
+        if (componentMapperData.enableExpansion()) {
+            String jsonSchemaString = Json.pretty(jsonSchema);
+            return jsonSchemaString.replaceAll("#/components/schemas/", "#/definitions/");
+        }
+
         Map<String, Object> definitions = new HashMap<>();
         Map<String, Schema> schemas = components.getSchemas();
         BallerinaTypeExtensioner.removeExtensionFromComponents(components);
@@ -102,6 +119,11 @@ public class TypeMapperImpl implements TypeMapper {
         return jsonSchemaString.replaceAll("#/components/schemas/", "#/definitions/");
     }
 
+    private AdditionalData cloneComponentMapperData(boolean enableExpansion) {
+        return new AdditionalData(componentMapperData.semanticModel(), componentMapperData.moduleMemberVisitor(),
+                new ArrayList<>(), false, enableExpansion);
+    }
+
     private boolean isAnydata(TypeSymbol typeSymbol) {
         return typeSymbol.subtypeOf(componentMapperData.semanticModel().types().ANYDATA);
     }
@@ -117,6 +139,12 @@ public class TypeMapperImpl implements TypeMapper {
 
     public static Schema getTypeSchema(TypeSymbol typeSymbol, Components components, AdditionalData componentMapperData,
                                        boolean skipNilType) {
+        if (componentMapperData.enableExpansion()) {
+            TypeSymbol referredType = ReferenceTypeMapper.getReferredType(typeSymbol);
+            if (Objects.nonNull(referredType)) {
+                typeSymbol = referredType;
+            }
+        }
         return switch (typeSymbol.typeKind()) {
             case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, components, componentMapperData);
             case ARRAY ->

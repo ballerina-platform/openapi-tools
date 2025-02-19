@@ -24,6 +24,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -88,6 +89,22 @@ public final class BallerinaTypeExtensioner {
         Map<?, ?> extensions = schema.getExtensions();
         if (Objects.nonNull(extensions) && condition.shouldRemove(extensions, null, null)) {
             extensions.remove(X_BALLERINA_TYPE);
+        }
+        Map<String, Schema> properties = schema.getProperties();
+        if (Objects.nonNull(properties)) {
+            properties.values().forEach(value -> removeExtensionFromSchema(value, condition));
+        }
+        List<Schema> allOfSchemas = schema.getAllOf();
+        if (Objects.nonNull(allOfSchemas)) {
+            allOfSchemas.forEach(value -> removeExtensionFromSchema(value, condition));
+        }
+        List<Schema> oneOfSchemas = schema.getOneOf();
+        if (Objects.nonNull(oneOfSchemas)) {
+            oneOfSchemas.forEach(value -> removeExtensionFromSchema(value, condition));
+        }
+        List<Schema> anyOfSchemas = schema.getAnyOf();
+        if (Objects.nonNull(anyOfSchemas)) {
+            anyOfSchemas.forEach(value -> removeExtensionFromSchema(value, condition));
         }
     }
 
