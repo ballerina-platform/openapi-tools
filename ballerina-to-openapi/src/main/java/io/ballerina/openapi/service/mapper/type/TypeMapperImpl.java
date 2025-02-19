@@ -57,6 +57,11 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTyp
  */
 public class TypeMapperImpl implements TypeMapper {
 
+    public static final String COMPONENTS_SCHEMAS = "#/components/schemas/";
+    public static final String DEFINITIONS = "#/definitions/";
+    public static final String DEFINITIONS_FIELD = "definitions";
+    public static final String JSON_SCHEMA_FIELD = "$schema";
+    public static final String JSON_SCHEMA_VERSION = "http://json-schema.org/draft-04/schema#";
     private final Components components;
     private final AdditionalData componentMapperData;
     private final OpenAPISchema2JsonSchema converter = new OpenAPISchema2JsonSchema();
@@ -95,12 +100,15 @@ public class TypeMapperImpl implements TypeMapper {
         BallerinaTypeExtensioner.removeExtensionFromSchema(schema);
         converter.process(schema);
         Map<String, Object> jsonSchema = schema.getJsonSchema();
-        jsonSchema.put("$schema", "http://json-schema.org/draft-04/schema#");
+        jsonSchema.put(JSON_SCHEMA_FIELD, JSON_SCHEMA_VERSION);
         if (componentMapperData.enableExpansion()) {
-            String jsonSchemaString = Json.pretty(jsonSchema);
-            return jsonSchemaString.replaceAll("#/components/schemas/", "#/definitions/");
+            return getJsonString(jsonSchema);
         }
+        populateDefinitions(components, jsonSchema);
+        return getJsonString(jsonSchema);
+    }
 
+    private void populateDefinitions(Components components, Map<String, Object> jsonSchema) {
         Map<String, Object> definitions = new HashMap<>();
         Map<String, Schema> schemas = components.getSchemas();
         BallerinaTypeExtensioner.removeExtensionFromComponents(components);
@@ -113,10 +121,13 @@ public class TypeMapperImpl implements TypeMapper {
             });
         }
         if (!definitions.isEmpty()) {
-            jsonSchema.put("definitions", definitions);
+            jsonSchema.put(DEFINITIONS_FIELD, definitions);
         }
+    }
+
+    private static String getJsonString(Map<String, Object> jsonSchema) {
         String jsonSchemaString = Json.pretty(jsonSchema);
-        return jsonSchemaString.replaceAll("#/components/schemas/", "#/definitions/");
+        return jsonSchemaString.replaceAll(COMPONENTS_SCHEMAS, DEFINITIONS);
     }
 
     private AdditionalData cloneComponentMapperData(boolean enableExpansion) {
