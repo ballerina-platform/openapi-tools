@@ -58,4 +58,6 @@ public interface TypeMapper {
     }
 
     String getJsonSchemaString(TypeSymbol typeSymbol);
+
+    String getJsonSchemaString(TypeSymbol typeSymbol, boolean enableExpansion);
 }
