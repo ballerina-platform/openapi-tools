@@ -21,8 +21,6 @@ import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
-import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
@@ -59,15 +57,6 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
                                    AdditionalData additionalData) {
         if (isBuiltInSubTypes(typeSymbol)) {
             return SimpleTypeMapper.getTypeSchema(typeSymbol.typeDescriptor(), additionalData);
-        }
-        if (additionalData.enableExpansion()) {
-            if (additionalData.visitedTypes().contains(MapperCommonUtils.getTypeName(typeSymbol))) {
-                ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_140);
-                additionalData.diagnostics().add(error);
-                return null;
-            }
-            additionalData.visitedTypes().add(MapperCommonUtils.getTypeName(typeSymbol));
-            return TypeMapperImpl.getTypeSchema(getReferredType(typeSymbol), components, additionalData);
         }
         if (!AbstractTypeMapper.hasMapping(components, typeSymbol)) {
             createComponentMapping(typeSymbol, components, additionalData);

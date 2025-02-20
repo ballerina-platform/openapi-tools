@@ -26,12 +26,16 @@ import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TableTypeSymbol;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.swagger.v3.core.util.Json;
@@ -88,7 +92,6 @@ public class TypeMapperImpl implements TypeMapper {
         if (!isAnydata(typeSymbol)) {
             throw new UnsupportedOperationException("Only 'anydata' type is supported for JSON schema generation.");
         }
-        typeSymbol = getReferredType(typeSymbol);
         Components components = new Components().schemas(new HashMap<>());
         AdditionalData componentMapperData = cloneComponentMapperData(enableExpansion);
         Schema schema = getTypeSchema(typeSymbol, components, componentMapperData);
@@ -150,13 +153,23 @@ public class TypeMapperImpl implements TypeMapper {
 
     public static Schema getTypeSchema(TypeSymbol typeSymbol, Components components, AdditionalData componentMapperData,
                                        boolean skipNilType) {
+        String typeName = typeSymbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE) ?
+                MapperCommonUtils.getTypeName(typeSymbol) : "";
         if (componentMapperData.enableExpansion()) {
+            if (componentMapperData.visitedTypes().contains(MapperCommonUtils.getTypeName(typeSymbol))) {
+                ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_140);
+                componentMapperData.diagnostics().add(error);
+                return null;
+            }
+            if (!typeName.isEmpty()) {
+                componentMapperData.visitedTypes().add(typeName);
+            }
             TypeSymbol referredType = ReferenceTypeMapper.getReferredType(typeSymbol);
             if (Objects.nonNull(referredType)) {
                 typeSymbol = referredType;
             }
         }
-        return switch (typeSymbol.typeKind()) {
+        Schema schema = switch (typeSymbol.typeKind()) {
             case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, components, componentMapperData);
             case ARRAY ->
                     ArrayTypeMapper.getSchema((ArrayTypeSymbol) typeSymbol, components, componentMapperData);
@@ -177,6 +190,10 @@ public class TypeMapperImpl implements TypeMapper {
                     ErrorTypeMapper.getSchema((ErrorTypeSymbol) typeSymbol, components, componentMapperData);
             default -> SimpleTypeMapper.getTypeSchema(typeSymbol, componentMapperData);
         };
+        if (componentMapperData.enableExpansion() && !typeName.isEmpty()) {
+            componentMapperData.visitedTypes().remove(typeName);
+        }
+        return schema;
     }
 
     protected static void createComponentMapping(TypeReferenceTypeSymbol typeSymbol, Components components,
