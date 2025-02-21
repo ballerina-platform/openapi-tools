@@ -57,7 +57,11 @@ public interface TypeMapper {
         schema.setDefault(defaultValue);
     }
 
-    String getJsonSchemaString(TypeSymbol typeSymbol);
+    SchemaResult getSchema(TypeSymbol typeSymbol, boolean enableExpansion) throws UnsupportedOperationException;
 
-    String getJsonSchemaString(TypeSymbol typeSymbol, boolean enableExpansion);
+    Schema getSchema(TypeSymbol typeSymbol) throws UnsupportedOperationException;
+
+    String getJsonSchemaString(TypeSymbol typeSymbol) throws UnsupportedOperationException;
+
+    String getJsonSchemaString(TypeSymbol typeSymbol, boolean enableExpansion) throws UnsupportedOperationException;
 }

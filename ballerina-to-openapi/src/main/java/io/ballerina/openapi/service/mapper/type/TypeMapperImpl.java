@@ -83,11 +83,11 @@ public class TypeMapperImpl implements TypeMapper {
         this.componentMapperData = new AdditionalData(semanticModel, moduleMemberVisitor);
     }
 
-    public String getJsonSchemaString(TypeSymbol typeSymbol) throws UnsupportedOperationException {
-        return getJsonSchemaString(typeSymbol, false);
+    public Schema getSchema(TypeSymbol typeSymbol) throws UnsupportedOperationException {
+        return getSchema(typeSymbol, true).schema();
     }
 
-    public String getJsonSchemaString(TypeSymbol typeSymbol, boolean enableExpansion)
+    public SchemaResult getSchema(TypeSymbol typeSymbol, boolean enableExpansion)
             throws UnsupportedOperationException {
         if (!isAnydata(typeSymbol)) {
             throw new UnsupportedOperationException("Only 'anydata' type is supported for JSON schema generation.");
@@ -101,13 +101,23 @@ public class TypeMapperImpl implements TypeMapper {
                     "generation with reference expansion.");
         }
         BallerinaTypeExtensioner.removeExtensionFromSchema(schema);
-        converter.process(schema);
-        Map<String, Object> jsonSchema = schema.getJsonSchema();
+        return new SchemaResult(schema, components);
+    }
+
+    public String getJsonSchemaString(TypeSymbol typeSymbol) throws UnsupportedOperationException {
+        return getJsonSchemaString(typeSymbol, false);
+    }
+
+    public String getJsonSchemaString(TypeSymbol typeSymbol, boolean enableExpansion)
+            throws UnsupportedOperationException {
+        SchemaResult result = getSchema(typeSymbol, enableExpansion);
+        converter.process(result.schema());
+        Map<String, Object> jsonSchema = result.schema().getJsonSchema();
         jsonSchema.put(JSON_SCHEMA_FIELD, JSON_SCHEMA_VERSION);
         if (componentMapperData.enableExpansion()) {
             return getJsonString(jsonSchema);
         }
-        populateDefinitions(components, jsonSchema);
+        populateDefinitions(result.components(), jsonSchema);
         return getJsonString(jsonSchema);
     }
 
