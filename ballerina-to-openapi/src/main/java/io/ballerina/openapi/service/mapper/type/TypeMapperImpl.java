@@ -92,16 +92,16 @@ public class TypeMapperImpl implements TypeMapper {
         if (!isAnydata(typeSymbol)) {
             throw new UnsupportedOperationException("Only 'anydata' type is supported for JSON schema generation.");
         }
-        Components components = new Components().schemas(new HashMap<>());
-        AdditionalData componentMapperData = cloneComponentMapperData(enableExpansion);
-        Schema schema = getTypeSchema(typeSymbol, components, componentMapperData);
-        if (componentMapperData.enableExpansion() && componentMapperData.diagnostics().stream()
+        Components localComponents = new Components().schemas(new HashMap<>());
+        AdditionalData additionalData = cloneComponentMapperData(enableExpansion);
+        Schema schema = getTypeSchema(typeSymbol, localComponents, additionalData);
+        if (additionalData.enableExpansion() && additionalData.diagnostics().stream()
                 .anyMatch(diagnostic -> diagnostic.getCode().equals("OAS_CONVERTOR_140"))) {
             throw new UnsupportedOperationException("Recursive references are not supported for JSON schema " +
                     "generation with reference expansion.");
         }
         BallerinaTypeExtensioner.removeExtensionFromSchema(schema);
-        return new SchemaResult(schema, components);
+        return new SchemaResult(schema, localComponents);
     }
 
     public String getJsonSchemaString(TypeSymbol typeSymbol) throws UnsupportedOperationException {
@@ -140,7 +140,7 @@ public class TypeMapperImpl implements TypeMapper {
 
     private static String getJsonString(Map<String, Object> jsonSchema) {
         String jsonSchemaString = Json.pretty(jsonSchema);
-        return jsonSchemaString.replaceAll(COMPONENTS_SCHEMAS, DEFINITIONS);
+        return jsonSchemaString.replace(COMPONENTS_SCHEMAS, DEFINITIONS);
     }
 
     private AdditionalData cloneComponentMapperData(boolean enableExpansion) {
