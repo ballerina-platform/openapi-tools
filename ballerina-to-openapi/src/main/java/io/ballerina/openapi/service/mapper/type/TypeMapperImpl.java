@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.service.mapper.type;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
 import io.ballerina.compiler.api.symbols.ErrorTypeSymbol;
 import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
@@ -25,17 +26,31 @@ import io.ballerina.compiler.api.symbols.RecordFieldSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 import io.ballerina.compiler.api.symbols.TableTypeSymbol;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
+import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
+import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.OpenAPISchema2JsonSchema;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
+import static io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper.extractNodesFromProject;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 /**
@@ -46,12 +61,95 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTyp
  */
 public class TypeMapperImpl implements TypeMapper {
 
+    public static final String COMPONENTS_SCHEMAS = "#/components/schemas/";
+    public static final String DEFINITIONS = "#/definitions/";
+    public static final String DEFINITIONS_FIELD = "definitions";
+    public static final String JSON_SCHEMA_FIELD = "$schema";
+    public static final String JSON_SCHEMA_VERSION = "http://json-schema.org/draft-04/schema#";
     private final Components components;
     private final AdditionalData componentMapperData;
+    private final OpenAPISchema2JsonSchema converter = new OpenAPISchema2JsonSchema();
 
     public TypeMapperImpl(Components components, AdditionalData componentMapperData) {
         this.components = components;
         this.componentMapperData = componentMapperData;
+    }
+
+    public TypeMapperImpl(SyntaxNodeAnalysisContext context) {
+        this.components = new Components().schemas(new HashMap<>());
+        SemanticModel semanticModel = context.semanticModel();
+        Project project = context.currentPackage().project();
+        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(project, semanticModel);
+        this.componentMapperData = new AdditionalData(semanticModel, moduleMemberVisitor);
+    }
+
+    public Schema getSchema(TypeSymbol typeSymbol) throws UnsupportedOperationException {
+        return getSchema(typeSymbol, true).schema();
+    }
+
+    public SchemaResult getSchema(TypeSymbol typeSymbol, boolean enableExpansion)
+            throws UnsupportedOperationException {
+        if (!isAnydata(typeSymbol)) {
+            throw new UnsupportedOperationException("Only 'anydata' type is supported for JSON schema generation.");
+        }
+        Components localComponents = new Components().schemas(new HashMap<>());
+        AdditionalData additionalData = cloneComponentMapperData(enableExpansion);
+        Schema schema = getTypeSchema(typeSymbol, localComponents, additionalData);
+        if (additionalData.enableExpansion() && additionalData.diagnostics().stream()
+                .anyMatch(diagnostic -> diagnostic.getCode().equals("OAS_CONVERTOR_140"))) {
+            throw new UnsupportedOperationException("Recursive references are not supported for JSON schema " +
+                    "generation with reference expansion.");
+        }
+        BallerinaTypeExtensioner.removeExtensionFromSchema(schema);
+        return new SchemaResult(schema, localComponents);
+    }
+
+    public String getJsonSchemaString(TypeSymbol typeSymbol) throws UnsupportedOperationException {
+        return getJsonSchemaString(typeSymbol, false);
+    }
+
+    public String getJsonSchemaString(TypeSymbol typeSymbol, boolean enableExpansion)
+            throws UnsupportedOperationException {
+        SchemaResult result = getSchema(typeSymbol, enableExpansion);
+        converter.process(result.schema());
+        Map<String, Object> jsonSchema = result.schema().getJsonSchema();
+        jsonSchema.put(JSON_SCHEMA_FIELD, JSON_SCHEMA_VERSION);
+        if (componentMapperData.enableExpansion()) {
+            return getJsonString(jsonSchema);
+        }
+        populateDefinitions(result.components(), jsonSchema);
+        return getJsonString(jsonSchema);
+    }
+
+    private void populateDefinitions(Components components, Map<String, Object> jsonSchema) {
+        Map<String, Object> definitions = new HashMap<>();
+        Map<String, Schema> schemas = components.getSchemas();
+        BallerinaTypeExtensioner.removeExtensionFromComponents(components);
+        if (Objects.nonNull(schemas)) {
+            schemas.forEach((key, value) -> {
+                if (Objects.nonNull(value)) {
+                    converter.process(value);
+                    definitions.put(key, value.getJsonSchema());
+                }
+            });
+        }
+        if (!definitions.isEmpty()) {
+            jsonSchema.put(DEFINITIONS_FIELD, definitions);
+        }
+    }
+
+    private static String getJsonString(Map<String, Object> jsonSchema) {
+        String jsonSchemaString = Json.pretty(jsonSchema);
+        return jsonSchemaString.replace(COMPONENTS_SCHEMAS, DEFINITIONS);
+    }
+
+    private AdditionalData cloneComponentMapperData(boolean enableExpansion) {
+        return new AdditionalData(componentMapperData.semanticModel(), componentMapperData.moduleMemberVisitor(),
+                new ArrayList<>(), false, enableExpansion);
+    }
+
+    private boolean isAnydata(TypeSymbol typeSymbol) {
+        return typeSymbol.subtypeOf(componentMapperData.semanticModel().types().ANYDATA);
     }
 
     public Schema getTypeSchema(TypeSymbol typeSymbol) {
@@ -65,7 +163,23 @@ public class TypeMapperImpl implements TypeMapper {
 
     public static Schema getTypeSchema(TypeSymbol typeSymbol, Components components, AdditionalData componentMapperData,
                                        boolean skipNilType) {
-        return switch (typeSymbol.typeKind()) {
+        String typeName = typeSymbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE) ?
+                MapperCommonUtils.getTypeName(typeSymbol) : "";
+        if (componentMapperData.enableExpansion()) {
+            if (componentMapperData.visitedTypes().contains(MapperCommonUtils.getTypeName(typeSymbol))) {
+                ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_140);
+                componentMapperData.diagnostics().add(error);
+                return null;
+            }
+            if (!typeName.isEmpty()) {
+                componentMapperData.visitedTypes().add(typeName);
+            }
+            TypeSymbol referredType = ReferenceTypeMapper.getReferredType(typeSymbol);
+            if (Objects.nonNull(referredType)) {
+                typeSymbol = referredType;
+            }
+        }
+        Schema schema = switch (typeSymbol.typeKind()) {
             case MAP -> MapTypeMapper.getSchema((MapTypeSymbol) typeSymbol, components, componentMapperData);
             case ARRAY ->
                     ArrayTypeMapper.getSchema((ArrayTypeSymbol) typeSymbol, components, componentMapperData);
@@ -86,6 +200,10 @@ public class TypeMapperImpl implements TypeMapper {
                     ErrorTypeMapper.getSchema((ErrorTypeSymbol) typeSymbol, components, componentMapperData);
             default -> SimpleTypeMapper.getTypeSchema(typeSymbol, componentMapperData);
         };
+        if (componentMapperData.enableExpansion() && !typeName.isEmpty()) {
+            componentMapperData.visitedTypes().remove(typeName);
+        }
+        return schema;
     }
 
     protected static void createComponentMapping(TypeReferenceTypeSymbol typeSymbol, Components components,

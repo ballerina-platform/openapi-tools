@@ -111,7 +111,9 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_138("OAS_CONVERTOR_138", "Failed to find the package to obtain the OpenAPI definition from the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_139("OAS_CONVERTOR_139", "Failed to find the OpenAPI definition resource for the " +
-            "service contract type: '%s'", DiagnosticSeverity.ERROR);
+            "service contract type: '%s'", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_140("OAS_CONVERTOR_140", "Failed to resolve recursive references for `expand: true` option",
+            DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;

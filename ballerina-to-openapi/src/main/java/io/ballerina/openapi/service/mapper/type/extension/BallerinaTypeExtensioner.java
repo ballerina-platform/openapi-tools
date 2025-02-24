@@ -24,6 +24,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,34 +47,65 @@ public final class BallerinaTypeExtensioner {
     }
 
     public static void removeExtensions(OpenAPI openAPI) {
-        removeExtensionsFromSchemas(openAPI, (extensions, orgName, moduleName) -> true);
+        removeExtensionsFromOpenAPI(openAPI, (extensions, orgName, moduleName) -> true);
     }
 
     public static void removeCurrentModuleTypeExtensions(OpenAPI openAPI, ModuleID moduleID) {
         String orgName = moduleID.orgName();
         String moduleName = moduleID.moduleName();
 
-        removeExtensionsFromSchemas(openAPI, (extensions, org, mod) -> fromSameModule(extensions, orgName,
+        removeExtensionsFromOpenAPI(openAPI, (extensions, org, mod) -> fromSameModule(extensions, orgName,
                 moduleName));
     }
 
-    private static void removeExtensionsFromSchemas(OpenAPI openAPI, ExtensionRemovalCondition condition) {
+    private static void removeExtensionsFromOpenAPI(OpenAPI openAPI, ExtensionRemovalCondition condition) {
         Components components = openAPI.getComponents();
         if (Objects.isNull(components)) {
             return;
         }
+        removeExtensionFromComponents(components, condition);
+    }
 
+    public static void removeExtensionFromComponents(Components components) {
+        removeExtensionFromComponents(components, (extensions, orgName, moduleName) -> true);
+    }
+
+    private static void removeExtensionFromComponents(Components components, ExtensionRemovalCondition condition) {
         Map<String, Schema> schemas = components.getSchemas();
         if (Objects.isNull(schemas)) {
             return;
         }
 
         schemas.forEach((key, schema) -> {
-            Map<?, ?> extensions = schema.getExtensions();
-            if (Objects.nonNull(extensions) && condition.shouldRemove(extensions, null, null)) {
-                extensions.remove(X_BALLERINA_TYPE);
-            }
+            removeExtensionFromSchema(schema, condition);
         });
+    }
+
+    public static void removeExtensionFromSchema(Schema schema) {
+        removeExtensionFromSchema(schema, (extensions, orgName, moduleName) -> true);
+    }
+
+    private static void removeExtensionFromSchema(Schema schema, ExtensionRemovalCondition condition) {
+        Map<?, ?> extensions = schema.getExtensions();
+        if (Objects.nonNull(extensions) && condition.shouldRemove(extensions, null, null)) {
+            extensions.remove(X_BALLERINA_TYPE);
+        }
+        Map<String, Schema> properties = schema.getProperties();
+        if (Objects.nonNull(properties)) {
+            properties.values().forEach(value -> removeExtensionFromSchema(value, condition));
+        }
+        List<Schema> allOfSchemas = schema.getAllOf();
+        if (Objects.nonNull(allOfSchemas)) {
+            allOfSchemas.forEach(value -> removeExtensionFromSchema(value, condition));
+        }
+        List<Schema> oneOfSchemas = schema.getOneOf();
+        if (Objects.nonNull(oneOfSchemas)) {
+            oneOfSchemas.forEach(value -> removeExtensionFromSchema(value, condition));
+        }
+        List<Schema> anyOfSchemas = schema.getAnyOf();
+        if (Objects.nonNull(anyOfSchemas)) {
+            anyOfSchemas.forEach(value -> removeExtensionFromSchema(value, condition));
+        }
     }
 
     @FunctionalInterface

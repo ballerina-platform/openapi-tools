@@ -84,7 +84,7 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
             if (referencedType.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
                 return getReferredType(referencedType);
             } else {
-                return typeSymbol;
+                return referencedType;
             }
         }
         if (typeSymbol.typeKind().equals(TypeDescKind.INTERSECTION)) {

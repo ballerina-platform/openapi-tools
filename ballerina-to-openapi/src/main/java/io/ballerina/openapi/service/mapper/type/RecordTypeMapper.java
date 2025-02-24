@@ -50,13 +50,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getConstantValues;
 import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
 import static io.ballerina.openapi.service.mapper.Constants.NAME_CONFIG;
 import static io.ballerina.openapi.service.mapper.Constants.VALUE;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getConstantValues;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getNameFromAnnotation;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getRecordFieldTypeDescription;
-import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 /**
  * This {@link RecordTypeMapper} class represents the record type mapper.
@@ -121,11 +120,8 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             // Type inclusion in a record is a TypeReferenceType and the referred type is a RecordType
             if (typeInclusion.typeKind() == TypeDescKind.TYPE_REFERENCE &&
                     ((TypeReferenceTypeSymbol) typeInclusion).typeDescriptor().typeKind() == TypeDescKind.RECORD) {
-                Schema includedRecordSchema = new Schema();
-                includedRecordSchema.set$ref(getTypeName(typeInclusion));
+                Schema includedRecordSchema = TypeMapperImpl.getTypeSchema(typeInclusion, components, additionalData);
                 allOfSchemaList.add(includedRecordSchema);
-                TypeMapperImpl.createComponentMapping((TypeReferenceTypeSymbol) typeInclusion,
-                        components, additionalData);
 
                 RecordTypeSymbol includedRecordTypeSymbol = (RecordTypeSymbol) ((TypeReferenceTypeSymbol) typeInclusion)
                         .typeDescriptor();
