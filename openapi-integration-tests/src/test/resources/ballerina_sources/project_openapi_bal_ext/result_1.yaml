@@ -57,7 +57,7 @@ components:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.6.0
+        version: 2.7.0
         modulePrefix: time
         name: Date
     DateFields:
@@ -81,7 +81,7 @@ components:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.6.0
+        version: 2.7.0
         modulePrefix: time
         name: DateFields
     OptionalTimeOfDayFields:
@@ -100,7 +100,7 @@ components:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.6.0
+        version: 2.7.0
         modulePrefix: time
         name: OptionalTimeOfDayFields
     Seconds:
@@ -111,7 +111,7 @@ components:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.6.0
+        version: 2.7.0
         modulePrefix: time
         name: Seconds
     Student:
@@ -161,10 +161,16 @@ components:
             of Delta
           format: double
       additionalProperties: false
+      description: |-
+        This is closed so it is a subtype of Delta
+        Fields can negative
+        if any of the three fields are > 0, then all must be >= 0
+        if any of the three fields are < 0, then all must be <= 0
+        Semantic is that durations should be left out
       x-ballerina-type:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.6.0
+        version: 2.7.0
         modulePrefix: time
         name: ZoneOffset
