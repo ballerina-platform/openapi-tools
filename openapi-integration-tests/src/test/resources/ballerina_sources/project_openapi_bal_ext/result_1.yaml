@@ -161,12 +161,6 @@ components:
             of Delta
           format: double
       additionalProperties: false
-      description: |-
-        This is closed so it is a subtype of Delta
-        Fields can negative
-        if any of the three fields are > 0, then all must be >= 0
-        if any of the three fields are < 0, then all must be <= 0
-        Semantic is that durations should be left out
       x-ballerina-type:
         orgName: ballerina
         pkgName: time
