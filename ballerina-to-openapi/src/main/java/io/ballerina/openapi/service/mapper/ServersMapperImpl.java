@@ -207,12 +207,7 @@ public class ServersMapperImpl implements ServersMapper {
     }
 
     private static String getValidPort(String port) {
-        try {
-            Integer.parseInt(port);
-            return port;
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return port.matches("\\d+") ? port : null;
     }
 
     /**
