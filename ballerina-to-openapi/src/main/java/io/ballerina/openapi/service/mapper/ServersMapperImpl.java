@@ -41,6 +41,7 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -83,10 +84,21 @@ public class ServersMapperImpl implements ServersMapper {
                 }
             }
         }
+        if (hasEmptyServer()) {
+            Server defaultServer = getDefaultServerWithBasePath(service.absoluteResourcePath());
+            openAPI.setServers(Collections.singletonList(defaultServer));
+        }
         if (servers.size() > 1) {
             Server mainServer = addEnumValues(servers);
             openAPI.setServers(Collections.singletonList(mainServer));
         }
+    }
+
+    private boolean hasEmptyServer() {
+        return openAPI.getServers().isEmpty() ||
+                openAPI.getServers().stream()
+                        .allMatch(server -> Objects.isNull(server.getUrl()) &&
+                                (Objects.isNull(server.getVariables()) || server.getVariables().isEmpty()));
     }
 
 
@@ -181,7 +193,7 @@ public class ServersMapperImpl implements ServersMapper {
 
         if (list.isPresent()) {
             SeparatedNodeList<FunctionArgumentNode> arg = (list.get()).arguments();
-            port = arg.get(0).toString();
+            port = getValidPort(arg.get(0).toString());
             if (arg.size() > 1 && (arg.get(1) instanceof NamedArgumentNode)) {
                 ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
                 if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
@@ -194,6 +206,10 @@ public class ServersMapperImpl implements ServersMapper {
         return server;
     }
 
+    private static String getValidPort(String port) {
+        return port.matches("\\d+") ? port : null;
+    }
+
     /**
      * Set server variables port and server.
      */
@@ -201,8 +217,9 @@ public class ServersMapperImpl implements ServersMapper {
                                                 ServerVariables serverVariables, Server server) {
 
         String serverUrl;
-        if (host != null && port != null) {
-            ServerVariable serverUrlVariable = new ServerVariable();
+        port = Objects.isNull(port) ? "9090" : port;
+        ServerVariable serverUrlVariable = new ServerVariable();
+        if (host != null) {
             serverUrlVariable._default(host);
             ServerVariable portVariable =  new ServerVariable();
             portVariable._default(port);
@@ -210,19 +227,7 @@ public class ServersMapperImpl implements ServersMapper {
             serverVariables.addServerVariable(SERVER, serverUrlVariable);
             serverVariables.addServerVariable(PORT, portVariable);
             serverUrl = String.format("{server}:{port}%s", serviceBasePath);
-            server.setUrl(serverUrl);
-            server.setVariables(serverVariables);
-        } else if (host != null) {
-            ServerVariable serverUrlVariable = new ServerVariable();
-            serverUrlVariable._default(host);
-
-            serverVariables.addServerVariable(SERVER, serverUrlVariable);
-            serverUrl = "{server}" + serviceBasePath;
-            server.setUrl(serverUrl);
-            server.setVariables(serverVariables);
-
-        } else if (port != null) {
-            ServerVariable serverUrlVariable = new ServerVariable();
+        } else {
             if (port.equals("443")) {
                 serverUrlVariable._default("https://localhost");
                 ServerVariable portVariable =  new ServerVariable();
@@ -239,9 +244,9 @@ public class ServersMapperImpl implements ServersMapper {
                 serverVariables.addServerVariable(PORT, portVariable);
             }
             serverUrl = "{server}:{port}" + serviceBasePath;
-            server.setUrl(serverUrl);
-            server.setVariables(serverVariables);
         }
+        server.setUrl(serverUrl);
+        server.setVariables(serverVariables);
     }
 
     // Extract host value for creating URL.
@@ -281,7 +286,7 @@ public class ServersMapperImpl implements ServersMapper {
         serverVariables.addServerVariable(SERVER, serverUrlVariable);
 
         ServerVariable portVariable =  new ServerVariable();
-        portVariable._default("8080");
+        portVariable._default("9090");
         serverVariables.addServerVariable(PORT, portVariable);
 
         Server server = new Server();

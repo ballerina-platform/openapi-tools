@@ -17,7 +17,7 @@ servers:
       server:
         default: localhost
       port:
-        default: "8080"
+        default: "9090"
 paths:
   /users:
     get:

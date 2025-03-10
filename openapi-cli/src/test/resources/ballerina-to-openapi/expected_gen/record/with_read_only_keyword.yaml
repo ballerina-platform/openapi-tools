@@ -8,7 +8,7 @@ servers:
       server:
         default: http://localhost
       port:
-        default: port
+        default: "9090"
 paths:
   /albums:
     get:
