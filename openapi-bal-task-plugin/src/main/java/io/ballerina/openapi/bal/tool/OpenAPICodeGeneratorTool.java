@@ -113,8 +113,19 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
         ImmutablePair<OASClientConfig, OASServiceMetadata> codeGeneratorConfig;
         TomlNodeLocation location = toolContext.currentPackage().ballerinaToml().get().tomlAstNode().location();
         try {
+            // Check the file path
+            String oasPath = toolContext.filePath();
+            if (Objects.isNull(oasPath)) {
+                DiagnosticMessages error = DiagnosticMessages.CONTRACT_PATH_NOT_PROVIDED;
+                createDiagnostics(toolContext, error, location);
+                return;
+            }
+            if (oasPath.isBlank()) {
+                DiagnosticMessages error = DiagnosticMessages.EMPTY_CONTRACT_PATH;
+                createDiagnostics(toolContext, error, location);
+            }
             // Validate the OAS file whether we can handle within OpenAPI tool
-            if (!canHandle(toolContext)) {
+            if (!canHandle(oasPath)) {
                 DiagnosticMessages error = DiagnosticMessages.WARNING_FOR_UNSUPPORTED_CONTRACT;
                 createDiagnostics(toolContext, error, location);
                 return;
@@ -199,14 +210,7 @@ public class OpenAPICodeGeneratorTool implements CodeGeneratorTool {
      * This method uses to check whether given specification can be handled via the openapi client generation tool.
      * This includes basic requirements like file extension check.
      */
-    private boolean canHandle(ToolContext toolContext) {
-        String oasPath = toolContext.filePath();
-        if (oasPath.isBlank()) {
-            TomlNodeLocation location = toolContext.currentPackage().ballerinaToml().get().tomlAstNode().location();
-            DiagnosticMessages error = DiagnosticMessages.EMPTY_CONTRACT_PATH;
-            createDiagnostics(toolContext, error, location);
-            return false;
-        }
+    private boolean canHandle(String oasPath) {
         return (oasPath.endsWith(YAML_EXTENSION) || oasPath.endsWith(JSON_EXTENSION) ||
                 oasPath.endsWith(YML_EXTENSION));
     }

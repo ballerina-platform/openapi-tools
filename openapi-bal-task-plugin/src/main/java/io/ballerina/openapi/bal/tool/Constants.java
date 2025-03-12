@@ -71,7 +71,8 @@ public class Constants {
         ERROR_WHILE_UPDATING_TOML("OAS_CLIENT_11", "error occurred when updating Ballerina.toml " +
                 "file with the client native dependency.", DiagnosticSeverity.ERROR),
         OPENAPI_EXCEPTION("OAS_CLIENT_12", "exception occurred while reading the openapi contract: %s",
-                DiagnosticSeverity.ERROR);
+                DiagnosticSeverity.ERROR),
+        CONTRACT_PATH_NOT_PROVIDED("OAS_CLIENT_13", "OpenAPI file path is not provided.", DiagnosticSeverity.ERROR);
 
         private final String code;
         private final String description;
