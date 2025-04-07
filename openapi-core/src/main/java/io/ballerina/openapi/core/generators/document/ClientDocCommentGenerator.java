@@ -126,8 +126,6 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
                         }
                         classMember = funcDef;
-                    } else {
-                        updatedList.add(classMember);
                     }
                     updatedList.add(classMember);
                 });
