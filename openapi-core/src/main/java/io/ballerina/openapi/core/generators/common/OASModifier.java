@@ -299,6 +299,11 @@ public class OASModifier {
         Map<String, Schema> schemas = components.getSchemas();
         Map<String, Schema> modifiedSchemas = new HashMap<>();
 
+        Map<String, Parameter> parameters = components.getParameters();
+        if (Objects.nonNull(parameters) && !parameters.isEmpty()) {
+            parameters.forEach((s, parameter) -> addBallerinaNameExtension(parameter));
+        }
+
         for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
             String schemaName = schema.getKey();
             String modifiedName = nameMap.get(schemaName);
@@ -417,6 +422,9 @@ public class OASModifier {
 
         for (Parameter parameter : parameters) {
             String location = parameter.getIn();
+            if (Objects.isNull(location)) {
+                continue;
+            }
             if (location.equals(PATH)) {
                 String modifiedPathParam = parameterNames.get(parameter.getName());
                 parameter.setName(modifiedPathParam);
@@ -600,7 +608,11 @@ public class OASModifier {
     public static Map<String, String> collectParameterNames(List<Parameter> parameters) {
         Map<String, String> parameterNames = new HashMap<>();
         for (Parameter parameter: parameters) {
-            parameterNames.put(parameter.getName(), getValidNameForParameter(parameter.getName()));
+            String parameterName = parameter.getName();
+            if (Objects.isNull(parameterName)) {
+                continue;
+            }
+            parameterNames.put(parameter.getName(), getValidNameForParameter(parameterName));
         }
         return getResolvedNameMapping(parameterNames);
     }
