@@ -18,6 +18,7 @@
 package io.ballerina.openapi.core.generators.common;
 
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.core.util.Json;
@@ -32,14 +33,18 @@ import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -50,6 +55,7 @@ import java.util.regex.Pattern;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PATH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
 /**
  * This class is to contain the aligned utils for naming.
@@ -63,6 +69,8 @@ public class OASModifier {
             "\\\")|('\\$ref'\\s*:\\s*'#/components/schemas/%s')";
     private static final PrintStream outErrorStream = System.err;
     private static final String BALLERINA_NAME_EXT = "x-ballerina-name";
+    public static final String ENDS_WITH_FULLSTOP = "\\.$";
+    public static final String EMPTY = "";
 
     List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -542,8 +550,8 @@ public class OASModifier {
     }
 
     private static void updateRef(String schemaName, String modifiedName, Schema value) {
-        String ref = value.get$ref().replaceAll("\\s+", "");
-        String patternString = "/" + schemaName.replaceAll("\\s+", "") + "(?!\\S)";
+        String ref = value.get$ref().replaceAll("\\s+", EMPTY);
+        String patternString = "/" + schemaName.replaceAll("\\s+", EMPTY) + "(?!\\S)";
         Pattern pattern = Pattern.compile(patternString);
         Matcher matcher = pattern.matcher(ref);
         ref = matcher.replaceAll("/" + modifiedName);
@@ -615,5 +623,126 @@ public class OASModifier {
         // Append the remaining text after the last match
         result.append(input.substring(lastEnd));
         return result.toString();
+    }
+
+    public OpenAPI modifyDescriptions(OpenAPI openapi) {
+        Paths paths = openapi.getPaths();
+        if (Objects.isNull(paths) || paths.isEmpty()) {
+            return openapi;
+        }
+        paths.forEach((path, pathItem) -> pathItem.readOperationsMap().forEach((method, operation) -> {
+            updateParameterDescriptions(openapi, operation);
+            updateRequestBodyDescription(openapi, operation);
+            updateApiResponseDescriptions(openapi, operation);
+        }));
+
+        Components components = openapi.getComponents();
+        if (Objects.isNull(components) || Objects.isNull(components.getSchemas())) {
+            return openapi;
+        }
+        components.getSchemas().forEach((schemaName, schema) -> {
+            updatePropertyDescriptions(schema);
+        });
+        return openapi;
+    }
+
+    private static void updatePropertyDescriptions(Schema schema) {
+        if (schema instanceof ObjectSchema objectSchema && Objects.nonNull(objectSchema.getProperties())
+                && !objectSchema.getProperties().isEmpty()) {
+            objectSchema.getProperties()
+                    .forEach((propertyName, property) -> updatePropertyDescription(property));
+        }
+    }
+
+    private static void updatePropertyDescription(Schema schema) {
+        String description = schema.getDescription();
+        if (Objects.isNull(description)) {
+            return;
+        }
+        String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
+        schema.setDescription(modifiedDescription);
+    }
+
+    private static void updateApiResponseDescriptions(OpenAPI openapi, Operation operation) {
+        ApiResponses responses = operation.getResponses();
+        if (Objects.isNull(responses)) {
+            return;
+        }
+        Collection<ApiResponse> values = responses.values();
+        Iterator<ApiResponse> iteratorRes = values.iterator();
+        if (iteratorRes.hasNext()) {
+            ApiResponse response = iteratorRes.next();
+            String description = response.getDescription();
+            if (Objects.nonNull(description)) {
+                String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
+                response.setDescription(modifiedDescription);
+            } else if (Objects.nonNull(response.get$ref())) {
+                try {
+                    if (Objects.isNull(openapi.getComponents()) ||
+                            Objects.isNull(openapi.getComponents().getResponses())) {
+                        return;
+                    }
+                    ApiResponse apiResponseRef = openapi.getComponents().getResponses()
+                            .get(extractReferenceType(response.get$ref()));
+                    String modifiedDescription = apiResponseRef.getDescription();
+                    apiResponseRef.setDescription(modifiedDescription);
+                } catch (InvalidReferenceException e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    private static void updateRequestBodyDescription(OpenAPI openapi, Operation operation) {
+        RequestBody requestBody = operation.getRequestBody();
+        if (Objects.isNull(requestBody)) {
+            return;
+        }
+        String description = requestBody.getDescription();
+        if (Objects.nonNull(description)) {
+            String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
+            requestBody.setDescription(modifiedDescription);
+        } else if (Objects.nonNull(requestBody.get$ref())) {
+            try {
+                if (Objects.isNull(openapi.getComponents()) ||
+                        Objects.isNull(openapi.getComponents().getRequestBodies())) {
+                    return;
+                }
+                RequestBody requestBodyRef = openapi.getComponents().getRequestBodies()
+                        .get(extractReferenceType(requestBody.get$ref()));
+                String modifiedDescription = requestBodyRef.getDescription();
+                requestBodyRef.setDescription(modifiedDescription);
+            } catch (InvalidReferenceException e) {
+                // Ignore
+            }
+        }
+    }
+
+    private static void updateParameterDescriptions(OpenAPI openapi, Operation operation) {
+        if (Objects.isNull(operation.getParameters())) {
+            return;
+        }
+        operation.getParameters().forEach(parameter -> updateParameterDescription(openapi, parameter));
+    }
+
+    private static void updateParameterDescription(OpenAPI openapi, Parameter parameter) {
+        String description = parameter.getDescription();
+        if (Objects.nonNull(description)) {
+            String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
+            parameter.setDescription(modifiedDescription);
+        } else if (Objects.nonNull(parameter.get$ref())) {
+            try {
+                if (Objects.isNull(openapi.getComponents()) ||
+                        Objects.isNull(openapi.getComponents().getParameters())) {
+                    return;
+                }
+                Parameter parameterRef = openapi.getComponents().getParameters()
+                        .get(extractReferenceType(parameter.get$ref()));
+                String modifiedDescription = parameterRef.getDescription();
+                parameterRef.setDescription(modifiedDescription);
+            } catch (InvalidReferenceException e) {
+                // Ignore
+            }
+        }
     }
 }
