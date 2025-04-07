@@ -126,6 +126,9 @@ public abstract class SubCmdBase implements BLauncherCmd {
     @CommandLine.Option(names = {"--operations"}, description = "Operations that need to be included when sanitizing.")
     public String operations;
 
+    @CommandLine.Option(names = {"--docs-only"}, description = "Sanitize only docs.")
+    public boolean docsOnly;
+
     protected SubCmdBase(CommandType cmdType, String infoMsgPrefix) {
         this.cmdType = cmdType;
         this.infoMsgPrefix = infoMsgPrefix;
