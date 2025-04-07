@@ -210,6 +210,7 @@ import static io.ballerina.openapi.core.generators.type.GeneratorConstants.HTTP_
  */
 public class AuthConfigGeneratorImp {
 
+    public static final String LAX_DATA_BINDING = "laxDataBinding";
     private final Map<String, String> headerApiKeyNameList = new HashMap<>();
     private final Map<String, String> queryApiKeyNameList = new HashMap<>();
     private final List<Node> apiKeysConfigRecordFields = new ArrayList<>();
@@ -1043,9 +1044,9 @@ public class AuthConfigGeneratorImp {
 
         ExpressionNode laxDataBindingExp = createFieldAccessExpressionNode(
                 createSimpleNameReferenceNode(createIdentifierToken(CONFIG)),
-                createToken(DOT_TOKEN), createSimpleNameReferenceNode(createIdentifierToken("laxDataBinding")));
+                createToken(DOT_TOKEN), createSimpleNameReferenceNode(createIdentifierToken(LAX_DATA_BINDING)));
         SpecificFieldNode laxDataBindingField = createSpecificFieldNode(null,
-                createIdentifierToken("laxDataBinding"),
+                createIdentifierToken(LAX_DATA_BINDING),
                 createToken(COLON_TOKEN), laxDataBindingExp);
         argumentsList.add(laxDataBindingField);
 
@@ -1354,7 +1355,7 @@ public class AuthConfigGeneratorImp {
         String apiComment = "Enables relaxed data binding on the client side. When enabled, `nil` values are treated " +
                 "as optional, \nand absent fields are handled as `nilable` types. Enabled by default.";
         MetadataNode laxDataBindingMetadata = getMetadataNode(apiComment);
-        IdentifierToken laxDataBindingFieldName = AbstractNodeFactory.createIdentifierToken("laxDataBinding");
+        IdentifierToken laxDataBindingFieldName = AbstractNodeFactory.createIdentifierToken(LAX_DATA_BINDING);
         TypeDescriptorNode laxDataBindingFieldType = createSimpleNameReferenceNode(createIdentifierToken(BOOLEAN));
         RecordFieldWithDefaultValueNode laxDataBindingFieldNode = NodeFactory.createRecordFieldWithDefaultValueNode(
                 laxDataBindingMetadata, null, laxDataBindingFieldType, laxDataBindingFieldName,
