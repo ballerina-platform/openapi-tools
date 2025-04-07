@@ -199,16 +199,15 @@ public abstract class SubCmdBase implements BLauncherCmd {
 
     public Optional<OpenAPI> getFlattenOpenAPI(OpenAPI openAPI) {
         // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `camelCaseFlattenNaming: true`
-        InlineModelResolver inlineModelResolver = new InlineModelResolver(true, true);
+        InlineModelResolver inlineModelResolver = new InlineModelResolver(false, true);
         inlineModelResolver.flatten(openAPI);
         return Optional.of(openAPI);
     }
 
-    public Optional<OpenAPI> getFilteredOpenAPI(String openAPIFileContent, boolean enableResolver) {
+    public Optional<OpenAPI> getFilteredOpenAPI(String openAPIFileContent) {
         // Read the contents of the file with default parser options
         // Flattening will be done after filtering the operations
         ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(enableResolver);
         SwaggerParseResult parserResult = new OpenAPIParser().readContents(openAPIFileContent, null,
                 parseOptions);
         if (!parserResult.getMessages().isEmpty() &&

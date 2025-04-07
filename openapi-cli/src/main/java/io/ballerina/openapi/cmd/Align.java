@@ -55,7 +55,7 @@ public class Align extends SubCmdBase {
 
     @Override
     public Optional<OpenAPI> generate(String openAPIFileContent) {
-        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent, true);
+        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent);
         return filteredOpenAPI.flatMap(this::alignOpenAPI);
     }
 
