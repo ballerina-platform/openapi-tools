@@ -49,6 +49,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.PIPE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_RETURN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ERROR;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP_RESPONSE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.NILLABLE;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPTIONAL_ERROR;
 
@@ -110,7 +111,8 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
             for (Map.Entry<String, ApiResponse> entry : responses.entrySet()) {
                 String statusCode = entry.getKey();
                 ApiResponse response = entry.getValue();
-                noContentResponseFound = populateReturnType(statusCode, response, returnTypes, returnTypesSet);
+                noContentResponseFound = noContentResponseFound ||
+                        populateReturnType(statusCode, response, returnTypes, returnTypesSet);
             }
         }
         returnTypesInfo = new ReturnTypesInfo(returnTypes, noContentResponseFound);
@@ -126,10 +128,10 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
         boolean noContentResponseFound = false;
         if (statusCode.startsWith("2")) {
             Content content = response.getContent();
-            if (content != null && content.size() > 0) {
+            if (content != null && !content.isEmpty()) {
                 Set<Map.Entry<String, MediaType>> mediaTypes = content.entrySet();
+                TypeDescriptorNode type = null;
                 for (Map.Entry<String, MediaType> media : mediaTypes) {
-                    TypeDescriptorNode type;
                     if (media.getValue().getSchema() != null) {
                         Schema<?> schema = media.getValue().getSchema();
                         Optional<TypeDescriptorNode> dataType = getDataType(media, schema);
@@ -143,12 +145,15 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
                         String mediaType = GeneratorUtils.getBallerinaMediaType(media.getKey().trim(), false);
                         type = createSimpleNameReferenceNode(createIdentifierToken(mediaType));
                     }
-                    if (!returnTypesSet.contains(type.toString())) {
-                        returnTypesSet.add(type.toString());
-                        returnTypes.add(type);
+                    // Currently support for first compatible media type
+                    if (!type.toString().equals(HTTP_RESPONSE)) {
+                        break;
                     }
-                    // Currently support for first media type
-                    break;
+                }
+
+                if (!returnTypesSet.contains(type.toString())) {
+                    returnTypesSet.add(type.toString());
+                    returnTypes.add(type);
                 }
             } else {
                 noContentResponseFound = true;
