@@ -41,6 +41,7 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,6 +72,7 @@ public class OASModifier {
     private static final String BALLERINA_NAME_EXT = "x-ballerina-name";
     public static final String ENDS_WITH_FULLSTOP = "\\.$";
     public static final String EMPTY = "";
+    public static final String LINE_BREAK = "\n";
 
     List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -163,7 +165,7 @@ public class OASModifier {
         });
     }
 
-    private void updateInlineObjectSchema(Schema<?> schema) {
+    private static void updateInlineObjectSchema(Schema<?> schema) {
         if (Objects.isNull(schema)) {
             return;
         }
@@ -174,7 +176,7 @@ public class OASModifier {
         handleInlineObjectSchemaProperties(schema);
     }
 
-    private void handleInlineObjectSchemaInComposedSchema(Schema<?> schema) {
+    private static void handleInlineObjectSchemaInComposedSchema(Schema<?> schema) {
         if (schema instanceof ComposedSchema composedSchema) {
             processSubSchemas(composedSchema.getAllOf());
             processSubSchemas(composedSchema.getAnyOf());
@@ -182,9 +184,9 @@ public class OASModifier {
         }
     }
 
-    private void processSubSchemas(List<Schema> subSchemas) {
+    private static void processSubSchemas(List<Schema> subSchemas) {
         if (Objects.nonNull(subSchemas)) {
-            subSchemas.forEach(this::updateInlineObjectSchema);
+            subSchemas.forEach(OASModifier::updateInlineObjectSchema);
         }
     }
 
@@ -203,25 +205,25 @@ public class OASModifier {
                         Objects.nonNull(schema.getProperties()));
     }
 
-    private void handleInlineObjectSchemaItems(Schema<?> schema) {
+    private static void handleInlineObjectSchemaItems(Schema<?> schema) {
         if (Objects.nonNull(schema.getItems())) {
             updateInlineObjectSchema(schema.getItems());
         }
     }
 
-    private void handleInlineObjectSchemaInAdditionalProperties(Schema<?> schema) {
+    private static void handleInlineObjectSchemaInAdditionalProperties(Schema<?> schema) {
         if (schema.getAdditionalProperties() instanceof Schema) {
             updateInlineObjectSchema((Schema) schema.getAdditionalProperties());
         }
     }
 
-    private void handleInlineObjectSchemaProperties(Schema<?> schema) {
+    private static void handleInlineObjectSchemaProperties(Schema<?> schema) {
         if (Objects.nonNull(schema.getProperties())) {
-            schema.getProperties().values().forEach(this::updateInlineObjectSchema);
+            schema.getProperties().values().forEach(OASModifier::updateInlineObjectSchema);
         }
     }
 
-    private void updateInlineObjectInContent(Map<String, io.swagger.v3.oas.models.media.MediaType> content) {
+    private static void updateInlineObjectInContent(Map<String, io.swagger.v3.oas.models.media.MediaType> content) {
         for (Map.Entry<String, io.swagger.v3.oas.models.media.MediaType> entry : content.entrySet()) {
             Schema schema = entry.getValue().getSchema();
             updateInlineObjectSchema(schema);
@@ -243,6 +245,7 @@ public class OASModifier {
                     objectSchema.setProperties(getPropertiesWithBallerinaNameExtension(properties));
                 }
             }
+            handleInlineObjectSchemaInComposedSchema(schemaValue);
         }
     }
 
@@ -700,7 +703,7 @@ public class OASModifier {
         }
         String description = requestBody.getDescription();
         if (Objects.nonNull(description)) {
-            String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
+            String modifiedDescription = getModifiedReqBodyDescription(description, requestBody);
             requestBody.setDescription(modifiedDescription);
         } else if (Objects.nonNull(requestBody.get$ref())) {
             try {
@@ -716,6 +719,20 @@ public class OASModifier {
                 // Ignore
             }
         }
+    }
+
+    private static String getModifiedReqBodyDescription(String description, RequestBody requestBody) {
+        String modifiedDescription;
+        if (description.contains(LINE_BREAK)) {
+            List<String> descriptionLines = new ArrayList<>(Arrays.asList(requestBody.getDescription()
+                    .split(LINE_BREAK)));
+            String firstLine = descriptionLines.removeFirst();
+            descriptionLines.addFirst(firstLine.replaceAll(ENDS_WITH_FULLSTOP, EMPTY));
+            modifiedDescription = String.join(LINE_BREAK, descriptionLines);
+        } else {
+            modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
+        }
+        return modifiedDescription;
     }
 
     private static void updateParameterDescriptions(OpenAPI openapi, Operation operation) {
