@@ -65,6 +65,7 @@ import io.swagger.v3.oas.models.PathItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -276,11 +277,11 @@ public class BallerinaClientGenerator {
      * This function is to filter the operations based on the user given tags and operations.
      */
     protected Map<String, Map<PathItem.HttpMethod, Operation>> filterOperations() {
-        Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = new HashMap<>();
+        Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = new LinkedHashMap<>();
         List<String> filterTags = filter.getTags();
         List<String> filterOperations = filter.getOperations();
         for (Map.Entry<String, PathItem> pathEntry : openAPI.getPaths().entrySet()) {
-            Map<PathItem.HttpMethod, Operation> operations = new HashMap<>();
+            Map<PathItem.HttpMethod, Operation> operations = new LinkedHashMap<>();
             Map<PathItem.HttpMethod, Operation> operationMap = pathEntry.getValue().readOperationsMap();
             if (operationMap.isEmpty()) {
                 continue;

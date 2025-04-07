@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -103,21 +104,15 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
         members.forEach(member -> {
             if (member.kind().equals(SyntaxKind.CLASS_DEFINITION)) {
                 ClassDefinitionNode classDef = (ClassDefinitionNode) member;
-                HashMap<String, Node> updatedList = new HashMap<>();
+                List<Node> updatedList = new LinkedList<>();
                 NodeList<Node> classMembers = classDef.members();
-                //sort these members according to .toString();
-                List<String> storeMembers = new ArrayList<>();
-                List<Node> clientInitNodes = new ArrayList<>();
                 classMembers.forEach(classMember -> {
-                    String sortKey = "";
                     if (classMember.kind().equals(SyntaxKind.OBJECT_METHOD_DEFINITION) ||
                             classMember.kind().equals(SyntaxKind.RESOURCE_ACCESSOR_DEFINITION)) {
                         FunctionDefinitionNode funcDef = (FunctionDefinitionNode) classMember;
 
                         //remote : operationId
                         if (isResource) {
-                            sortKey = funcDef.toSourceCode();
-                            storeMembers.add(sortKey);
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
                             StringBuilder path = new StringBuilder();
                             for (Node node: nodes) {
@@ -127,24 +122,15 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                                     funcDef.functionName().text();
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
                         } else {
-                            sortKey = funcDef.functionName().text();
-                            storeMembers.add(sortKey);
                             String key = funcDef.functionName().text();
                             funcDef = updateDocCommentsForFunctionNode(operationDetailsMap, funcDef, key);
                         }
                         classMember = funcDef;
                     } else {
-                        clientInitNodes.add(classMember);
+                        updatedList.add(classMember);
                     }
-                    updatedList.put(sortKey, classMember);
+                    updatedList.add(classMember);
                 });
-                //sort the members
-                List<Node> sortedNodes = new ArrayList<>();
-                sortedNodes.addAll(clientInitNodes);
-                storeMembers.sort(String::compareTo);
-                for (String memberStr: storeMembers) {
-                     sortedNodes.add(updatedList.get(memberStr));
-                }
                 classDef = classDef.modify(
                         classDef.metadata().orElse(null),
                         classDef.visibilityQualifier().orElse(null),
@@ -152,7 +138,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                         classDef.classKeyword(),
                         classDef.className(),
                         classDef.openBrace(),
-                        updatedList.isEmpty() ? classDef.members() : createNodeList(sortedNodes),
+                        updatedList.isEmpty() ? classDef.members() : createNodeList(updatedList),
                         classDef.closeBrace(),
                         classDef.semicolonToken().orElse(null));
                 member = classDef;
