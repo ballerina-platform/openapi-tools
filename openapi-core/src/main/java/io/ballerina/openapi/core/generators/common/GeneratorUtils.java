@@ -583,6 +583,8 @@ public class GeneratorUtils {
             return SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
         } else if (mediaType.equals("application/x-www-form-urlencoded")) {
             return "map<string>";
+        } else if (mediaType.equals(MULTIPART_FORM_DATA) && isRequest) {
+            return "record{}";
         } else {
             return isRequest ? HTTP_REQUEST : HTTP_RESPONSE;
         }
