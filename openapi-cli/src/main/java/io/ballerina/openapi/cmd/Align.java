@@ -63,7 +63,7 @@ public class Align extends SubCmdBase {
         OASModifier oasAligner = new OASModifier();
         openAPI = oasAligner.modifyDescriptions(openAPI);
         try {
-            return Optional.of(docsOnly ? openAPI : oasAligner.modifyWithBallerinaConventions(openAPI));
+            return Optional.of(docsOnly ? openAPI : oasAligner.modifyWithBallerinaNamingConventions(openAPI));
         } catch (BallerinaOpenApiException exp) {
             printError("ERROR: %s".formatted(exp.getMessage()));
             return Optional.empty();

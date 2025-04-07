@@ -120,7 +120,7 @@ public class OASModifier {
     }
 
 
-    public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi, Map<String, String> nameMap)
+    public OpenAPI modifyWithBallerinaNamingConventions(OpenAPI openapi, Map<String, String> nameMap)
             throws BallerinaOpenApiException {
         openapi = modifyOASWithSchemaName(openapi, nameMap);
         modifyOASWithParameterName(openapi);
@@ -130,67 +130,68 @@ public class OASModifier {
     }
 
     private void modifyOASWithInlineObjectPropertyName(OpenAPI openAPI) {
-        openAPI.getPaths().forEach((path, pathItem) -> processPathItem(pathItem));
+        openAPI.getPaths().forEach((path, pathItem) -> modifyNameInPathItem(pathItem));
     }
 
-    private void processPathItem(PathItem pathItem) {
-        pathItem.readOperationsMap().forEach((method, operation) -> processOperationWithInlineObjectSchema(operation));
+    private void modifyNameInPathItem(PathItem pathItem) {
+        pathItem.readOperationsMap()
+                .forEach((method, operation) -> modifyNameInOperationWithInlineObjectSchema(operation));
     }
 
-    private void processOperationWithInlineObjectSchema(Operation operation) {
+    private void modifyNameInOperationWithInlineObjectSchema(Operation operation) {
         if (Objects.nonNull(operation.getRequestBody()) && Objects.nonNull(operation.getRequestBody().getContent())) {
-            updateInlineObjectInContent(operation.getRequestBody().getContent());
+            modifyNameInInlineObjectContent(operation.getRequestBody().getContent());
         }
-        processParametersWithInlineObjectSchema(operation.getParameters());
-        processResponsesWithInlineObjectSchema(operation.getResponses());
+        modifyNameInParametersWithInlineObjectSchema(operation.getParameters());
+        modifyNameInResponsesWithInlineObjectSchema(operation.getResponses());
     }
 
-    private void processParametersWithInlineObjectSchema(List<Parameter> parameters) {
+    private void modifyNameInParametersWithInlineObjectSchema(List<Parameter> parameters) {
         if (Objects.isNull(parameters)) {
             return;
         }
 
         for (Parameter parameter : parameters) {
             if (Objects.nonNull(parameter.getSchema())) {
-                updateInlineObjectSchema(parameter.getSchema());
+                modifyNameInInlineObjectSchema(parameter.getSchema());
             }
         }
     }
 
-    private void processResponsesWithInlineObjectSchema(Map<String, ApiResponse> responses) {
+    private void modifyNameInResponsesWithInlineObjectSchema(Map<String, ApiResponse> responses) {
         responses.forEach((status, response) -> {
             if (Objects.nonNull(response.getContent())) {
-                updateInlineObjectInContent(response.getContent());
+                modifyNameInInlineObjectContent(response.getContent());
             }
         });
     }
 
-    private static void updateInlineObjectSchema(Schema<?> schema) {
+    private static void modifyNameInInlineObjectSchema(Schema<?> schema) {
         if (Objects.isNull(schema)) {
             return;
         }
-        handleInlineObjectSchemaInComposedSchema(schema);
-        handleInlineObjectSchema(schema);
-        handleInlineObjectSchemaItems(schema);
-        handleInlineObjectSchemaInAdditionalProperties(schema);
-        handleInlineObjectSchemaProperties(schema);
+        modifyNameInInlineComposedSchema(schema);
+        modifyNameInInlineObjectSchemaInternal(schema);
+        modifyNameInInlineObjectSchemaItems(schema);
+        modifyNameInInlineObjectSchemaWithAdditionalProperties(schema);
+        modifyNameInInlineObjectSchemaProperties(schema);
     }
 
-    private static void handleInlineObjectSchemaInComposedSchema(Schema<?> schema) {
+    private static void modifyNameInInlineComposedSchema(Schema<?> schema) {
         if (schema instanceof ComposedSchema composedSchema) {
-            processSubSchemas(composedSchema.getAllOf());
-            processSubSchemas(composedSchema.getAnyOf());
-            processSubSchemas(composedSchema.getOneOf());
+            modifyNameInSubSchemas(composedSchema.getAllOf());
+            modifyNameInSubSchemas(composedSchema.getAnyOf());
+            modifyNameInSubSchemas(composedSchema.getOneOf());
         }
     }
 
-    private static void processSubSchemas(List<Schema> subSchemas) {
+    private static void modifyNameInSubSchemas(List<Schema> subSchemas) {
         if (Objects.nonNull(subSchemas)) {
-            subSchemas.forEach(OASModifier::updateInlineObjectSchema);
+            subSchemas.forEach(OASModifier::modifyNameInInlineObjectSchema);
         }
     }
 
-    private static void handleInlineObjectSchema(Schema<?> schema) {
+    private static void modifyNameInInlineObjectSchemaInternal(Schema<?> schema) {
         if (isInlineObjectSchema(schema)) {
             Map<String, Schema> properties = schema.getProperties();
             if (Objects.nonNull(properties) && !properties.isEmpty()) {
@@ -205,28 +206,28 @@ public class OASModifier {
                         Objects.nonNull(schema.getProperties()));
     }
 
-    private static void handleInlineObjectSchemaItems(Schema<?> schema) {
+    private static void modifyNameInInlineObjectSchemaItems(Schema<?> schema) {
         if (Objects.nonNull(schema.getItems())) {
-            updateInlineObjectSchema(schema.getItems());
+            modifyNameInInlineObjectSchema(schema.getItems());
         }
     }
 
-    private static void handleInlineObjectSchemaInAdditionalProperties(Schema<?> schema) {
+    private static void modifyNameInInlineObjectSchemaWithAdditionalProperties(Schema<?> schema) {
         if (schema.getAdditionalProperties() instanceof Schema) {
-            updateInlineObjectSchema((Schema) schema.getAdditionalProperties());
+            modifyNameInInlineObjectSchema((Schema) schema.getAdditionalProperties());
         }
     }
 
-    private static void handleInlineObjectSchemaProperties(Schema<?> schema) {
+    private static void modifyNameInInlineObjectSchemaProperties(Schema<?> schema) {
         if (Objects.nonNull(schema.getProperties())) {
-            schema.getProperties().values().forEach(OASModifier::updateInlineObjectSchema);
+            schema.getProperties().values().forEach(OASModifier::modifyNameInInlineObjectSchema);
         }
     }
 
-    private static void updateInlineObjectInContent(Map<String, io.swagger.v3.oas.models.media.MediaType> content) {
+    private static void modifyNameInInlineObjectContent(Map<String, io.swagger.v3.oas.models.media.MediaType> content) {
         for (Map.Entry<String, io.swagger.v3.oas.models.media.MediaType> entry : content.entrySet()) {
             Schema schema = entry.getValue().getSchema();
-            updateInlineObjectSchema(schema);
+            modifyNameInInlineObjectSchema(schema);
         }
     }
 
@@ -245,7 +246,7 @@ public class OASModifier {
                     objectSchema.setProperties(getPropertiesWithBallerinaNameExtension(properties));
                 }
             }
-            handleInlineObjectSchemaInComposedSchema(schemaValue);
+            modifyNameInInlineComposedSchema(schemaValue);
         }
     }
 
@@ -263,12 +264,12 @@ public class OASModifier {
         openapi.setPaths(modifiedPaths);
     }
 
-    public OpenAPI modifyWithBallerinaConventions(OpenAPI openapi) throws BallerinaOpenApiException {
+    public OpenAPI modifyWithBallerinaNamingConventions(OpenAPI openapi) throws BallerinaOpenApiException {
         Map<String, String> proposedNameMapping = getProposedNameMapping(openapi);
         if (proposedNameMapping.isEmpty()) {
             return openapi;
         }
-        return modifyWithBallerinaConventions(openapi, proposedNameMapping);
+        return modifyWithBallerinaNamingConventions(openapi, proposedNameMapping);
     }
 
     private static OpenAPI modifyOASWithSchemaName(OpenAPI openapi, Map<String, String> nameMap)
@@ -633,31 +634,61 @@ public class OASModifier {
         if (Objects.isNull(paths) || paths.isEmpty()) {
             return openapi;
         }
-        paths.forEach((path, pathItem) -> pathItem.readOperationsMap().forEach((method, operation) -> {
-            updateParameterDescriptions(openapi, operation);
-            updateRequestBodyDescription(openapi, operation);
-            updateApiResponseDescriptions(openapi, operation);
-        }));
+        paths.forEach((path, pathItem) -> modifyDescriptionInPath(openapi, pathItem));
 
         Components components = openapi.getComponents();
         if (Objects.isNull(components) || Objects.isNull(components.getSchemas())) {
             return openapi;
         }
         components.getSchemas().forEach((schemaName, schema) -> {
-            updatePropertyDescriptions(schema);
+            modifyObjectPropertyDescriptions(schema);
         });
         return openapi;
     }
 
-    private static void updatePropertyDescriptions(Schema schema) {
-        if (schema instanceof ObjectSchema objectSchema && Objects.nonNull(objectSchema.getProperties())
-                && !objectSchema.getProperties().isEmpty()) {
+    private static void modifyDescriptionInPath(OpenAPI openapi, PathItem pathItem) {
+        List<Parameter> parametersForPath = pathItem.getParameters();
+        if (Objects.nonNull(parametersForPath) && !parametersForPath.isEmpty()) {
+            parametersForPath.forEach(parameter -> modifyParameterDescription(openapi, parameter));
+        }
+        pathItem.readOperationsMap()
+                .forEach((method, operation) -> modifyDescriptionInOperation(openapi, operation));
+    }
+
+    private static void modifyDescriptionInOperation(OpenAPI openapi, Operation operation) {
+        modifyParameterDescriptions(openapi, operation);
+        modifyRequestBodyDescription(openapi, operation);
+        modifyApiResponseDescriptions(openapi, operation);
+    }
+
+    private static void modifyObjectPropertyDescriptions(Schema schema) {
+        if (Objects.isNull(schema)) {
+            return;
+        }
+
+        String description = schema.getDescription();
+        if (Objects.nonNull(description)) {
+            String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
+            schema.setDescription(modifiedDescription);
+        }
+
+        if (schema instanceof ObjectSchema objectSchema) {
+            if (Objects.isNull(objectSchema.getProperties()) || objectSchema.getProperties().isEmpty()) {
+                return;
+            }
             objectSchema.getProperties()
-                    .forEach((propertyName, property) -> updatePropertyDescription(property));
+                    .forEach((propertyName, property) -> modifyPropertyDescription(property));
+        } else if (schema instanceof ComposedSchema composedSchema) {
+            modifyDescriptionInInlineComposedSchema(composedSchema);
+        } else if (schema instanceof ArraySchema) {
+            if (Objects.isNull(schema.getItems())) {
+                return;
+            }
+            modifyPropertyDescription(schema.getItems());
         }
     }
 
-    private static void updatePropertyDescription(Schema schema) {
+    private static void modifyPropertyDescription(Schema schema) {
         String description = schema.getDescription();
         if (Objects.isNull(description)) {
             return;
@@ -666,7 +697,7 @@ public class OASModifier {
         schema.setDescription(modifiedDescription);
     }
 
-    private static void updateApiResponseDescriptions(OpenAPI openapi, Operation operation) {
+    private static void modifyApiResponseDescriptions(OpenAPI openapi, Operation operation) {
         ApiResponses responses = operation.getResponses();
         if (Objects.isNull(responses)) {
             return;
@@ -687,7 +718,11 @@ public class OASModifier {
                     }
                     ApiResponse apiResponseRef = openapi.getComponents().getResponses()
                             .get(extractReferenceType(response.get$ref()));
-                    String modifiedDescription = apiResponseRef.getDescription();
+                    description = apiResponseRef.getDescription();
+                    if (Objects.isNull(description)) {
+                        return;
+                    }
+                    String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
                     apiResponseRef.setDescription(modifiedDescription);
                 } catch (InvalidReferenceException e) {
                     // Ignore
@@ -696,7 +731,7 @@ public class OASModifier {
         }
     }
 
-    private static void updateRequestBodyDescription(OpenAPI openapi, Operation operation) {
+    private static void modifyRequestBodyDescription(OpenAPI openapi, Operation operation) {
         RequestBody requestBody = operation.getRequestBody();
         if (Objects.isNull(requestBody)) {
             return;
@@ -713,7 +748,11 @@ public class OASModifier {
                 }
                 RequestBody requestBodyRef = openapi.getComponents().getRequestBodies()
                         .get(extractReferenceType(requestBody.get$ref()));
-                String modifiedDescription = requestBodyRef.getDescription();
+                description = requestBodyRef.getDescription();
+                if (Objects.isNull(description)) {
+                    return;
+                }
+                String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
                 requestBodyRef.setDescription(modifiedDescription);
             } catch (InvalidReferenceException e) {
                 // Ignore
@@ -735,14 +774,14 @@ public class OASModifier {
         return modifiedDescription;
     }
 
-    private static void updateParameterDescriptions(OpenAPI openapi, Operation operation) {
+    private static void modifyParameterDescriptions(OpenAPI openapi, Operation operation) {
         if (Objects.isNull(operation.getParameters())) {
             return;
         }
-        operation.getParameters().forEach(parameter -> updateParameterDescription(openapi, parameter));
+        operation.getParameters().forEach(parameter -> modifyParameterDescription(openapi, parameter));
     }
 
-    private static void updateParameterDescription(OpenAPI openapi, Parameter parameter) {
+    private static void modifyParameterDescription(OpenAPI openapi, Parameter parameter) {
         String description = parameter.getDescription();
         if (Objects.nonNull(description)) {
             String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
@@ -755,11 +794,27 @@ public class OASModifier {
                 }
                 Parameter parameterRef = openapi.getComponents().getParameters()
                         .get(extractReferenceType(parameter.get$ref()));
-                String modifiedDescription = parameterRef.getDescription();
+                description = parameterRef.getDescription();
+                if (Objects.isNull(description)) {
+                    return;
+                }
+                String modifiedDescription = description.replaceAll(ENDS_WITH_FULLSTOP, EMPTY);
                 parameterRef.setDescription(modifiedDescription);
             } catch (InvalidReferenceException e) {
                 // Ignore
             }
         }
+    }
+
+    private static void modifyDescriptionInSubSchemas(List<Schema> subSchemas) {
+        if (Objects.nonNull(subSchemas)) {
+            subSchemas.forEach(OASModifier::modifyObjectPropertyDescriptions);
+        }
+    }
+
+    private static void modifyDescriptionInInlineComposedSchema(ComposedSchema composedSchema) {
+        modifyDescriptionInSubSchemas(composedSchema.getAllOf());
+        modifyDescriptionInSubSchemas(composedSchema.getAnyOf());
+        modifyDescriptionInSubSchemas(composedSchema.getOneOf());
     }
 }
