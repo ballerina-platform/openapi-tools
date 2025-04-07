@@ -1039,6 +1039,15 @@ public class AuthConfigGeneratorImp {
                 createIdentifierToken("validation"),
                 createToken(COLON_TOKEN), validationValExp);
         argumentsList.add(validationField);
+        argumentsList.add(comma);
+
+        ExpressionNode laxDataBindingExp = createFieldAccessExpressionNode(
+                createSimpleNameReferenceNode(createIdentifierToken(CONFIG)),
+                createToken(DOT_TOKEN), createSimpleNameReferenceNode(createIdentifierToken("laxDataBinding")));
+        SpecificFieldNode laxDataBindingField = createSpecificFieldNode(null,
+                createIdentifierToken("laxDataBinding"),
+                createToken(COLON_TOKEN), laxDataBindingExp);
+        argumentsList.add(laxDataBindingField);
 
         SeparatedNodeList<MappingFieldNode> arguments = createSeparatedNodeList(argumentsList);
         MappingConstructorExpressionNode mappingConstructorExpressionNode =
