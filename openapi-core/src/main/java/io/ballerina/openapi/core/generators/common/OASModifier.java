@@ -429,6 +429,8 @@ public class OASModifier {
         for (Parameter parameter : parameters) {
             String location = parameter.getIn();
             if (Objects.isNull(location)) {
+                // This is parameter reference, just keep it as it is
+                modifiedParameters.add(parameter);
                 continue;
             }
             if (location.equals(PATH)) {
