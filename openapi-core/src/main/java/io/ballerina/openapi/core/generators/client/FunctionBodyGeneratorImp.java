@@ -39,6 +39,7 @@ import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
+import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp.ApiKeyNamePair;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.mime.MimeType;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -208,14 +209,14 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                                                   List<StatementNode> statementsList) throws
             BallerinaOpenApiException {
 
-        List<String> queryApiKeyNameList = new ArrayList<>();
-        List<String> headerApiKeyNameList = new ArrayList<>();
+        List<ApiKeyNamePair> queryApiKeyNameList = new ArrayList<>();
+        List<ApiKeyNamePair> headerApiKeyNameList = new ArrayList<>();
 
         Set<String> securitySchemesAvailable = getSecurityRequirementForOperation(operation.getValue());
 
         if (!securitySchemesAvailable.isEmpty()) {
-            Map<String, String> queryApiKeyMap = ballerinaAuthConfigGeneratorImp.getQueryApiKeyNameList();
-            Map<String, String> headerApiKeyMap = ballerinaAuthConfigGeneratorImp.getHeaderApiKeyNameList();
+            Map<String, ApiKeyNamePair> queryApiKeyMap = ballerinaAuthConfigGeneratorImp.getQueryApiKeyNameMap();
+            Map<String, ApiKeyNamePair> headerApiKeyMap = ballerinaAuthConfigGeneratorImp.getHeaderApiKeyNameMap();
             for (String schemaName : securitySchemesAvailable) {
                 if (queryApiKeyMap.containsKey(schemaName)) {
                     queryApiKeyNameList.add(queryApiKeyMap.get(schemaName));
@@ -247,7 +248,8 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
      * Handle query parameters and headers within a remote function.
      */
     public void handleQueryParamsAndHeaders(List<Parameter> queryParameters, List<StatementNode> statementsList,
-                                            List<String> queryApiKeyNameList, List<String> headerApiKeyNameList)
+                                            List<ApiKeyNamePair> queryApiKeyNameList,
+                                            List<ApiKeyNamePair> headerApiKeyNameList)
             throws BallerinaOpenApiException {
 
         boolean combinationOfApiKeyAndHTTPOAuth = ballerinaAuthConfigGeneratorImp.isHttpOROAuth() &&
@@ -298,8 +300,8 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
      * Generate statements for query parameters and headers when a client supports both ApiKey and HTTPOrOAuth
      * authentication.
      */
-    private void addUpdatedPathAndHeaders(List<StatementNode> statementsList, List<String> queryApiKeyNameList,
-                                          List<Parameter> queryParameters, List<String> headerApiKeyNameList)
+    private void addUpdatedPathAndHeaders(List<StatementNode> statementsList, List<ApiKeyNamePair> queryApiKeyNameList,
+                                          List<Parameter> queryParameters, List<ApiKeyNamePair> headerApiKeyNameList)
             throws BallerinaOpenApiException {
 
         List<StatementNode> ifBodyStatementsList = new ArrayList<>();
@@ -362,11 +364,12 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
      * `queryParam["api-key"] = self.apiKeyConfig?.apiKey;`
      * `headerValues["api-key"] = self.apiKeyConfig?.apiKey;`
      */
-    private void addApiKeysToMap(String mapName, List<String> apiKeyNames, List<StatementNode> statementNodeList) {
-
+    private void addApiKeysToMap(String mapName, List<ApiKeyNamePair> apiKeyNames,
+                                 List<StatementNode> statementNodeList) {
         if (!apiKeyNames.isEmpty()) {
-            for (String apiKey : apiKeyNames) {
-                IdentifierToken fieldName = createIdentifierToken(mapName + "[" + '"' + apiKey.trim() + '"' + "]");
+            for (ApiKeyNamePair apiKeyNamePair : apiKeyNames) {
+                IdentifierToken fieldName = createIdentifierToken(mapName + "[" + '"' +
+                        apiKeyNamePair.actualName().trim() + '"' + "]");
                 Token equal = createToken(EQUAL_TOKEN);
                 String apiKeyConfigToken = API_KEY_CONFIG_PARAM;
                 if (ballerinaAuthConfigGeneratorImp.isHttpOROAuth() && ballerinaAuthConfigGeneratorImp.isApiKey()) {
@@ -376,7 +379,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                         createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
                         createSimpleNameReferenceNode(createIdentifierToken(apiKeyConfigToken)));
                 SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
-                        escapeIdentifier(apiKey)));
+                        escapeIdentifier(apiKeyNamePair.displayName())));
                 ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
                         fieldExpr, createToken(DOT_TOKEN), valueExpr);
                 statementNodeList.add(createAssignmentStatementNode(fieldName, equal, apiKeyExpr, createToken(

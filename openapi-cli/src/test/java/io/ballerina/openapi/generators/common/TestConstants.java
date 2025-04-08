@@ -90,7 +90,7 @@ public class TestConstants {
             "ConnectionConfig config";
     public static final String HTTP_CLIENT_CONFIG_PARAM_NO_URL = "ConnectionConfig config";
     public static final String HTTP_CLIENT_DECLARATION = "" +
-            "http:Client httpEp = check new (serviceUrl, httpClientConfig);";
+            "self.clientEp = check new (serviceUrl, httpClientConfig);";
     public static final String OAUTH2_AUTHORIZATION_CODE_CONFIG_REC = "" +
             clientConfigRecordDoc +
             "public type ConnectionConfig record {|\n" +

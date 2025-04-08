@@ -199,7 +199,9 @@ public abstract class SubCmdBase implements BLauncherCmd {
 
     public Optional<OpenAPI> getFlattenOpenAPI(OpenAPI openAPI) {
         // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `camelCaseFlattenNaming: true`
-        InlineModelResolver inlineModelResolver = new InlineModelResolver(false, true);
+        InlineModelResolver inlineModelResolver = new InlineModelResolver(true, true);
+        inlineModelResolver.flatten(openAPI);
+        // Run flatten again to flatten newly added schemas
         inlineModelResolver.flatten(openAPI);
         return Optional.of(openAPI);
     }

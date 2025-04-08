@@ -18,9 +18,9 @@
 
 package io.ballerina.openapi.generators.auth;
 
+import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -84,7 +84,7 @@ public class HttpAuthTests {
         AuthConfigGeneratorImp ballerinaAuthConfigGenerator = new AuthConfigGeneratorImp(
                 false, true);
         String expectedParam = TestConstants.HTTP_CLIENT_DECLARATION;
-        VariableDeclarationNode generatedInitParamNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
+        AssignmentStatementNode generatedInitParamNode = ballerinaAuthConfigGenerator.getClientInitializationNode();
         expectedParam = (expectedParam.trim()).replaceAll("\\s+", "");
         String generatedParamsStr = (generatedInitParamNode.toString().trim()).replaceAll("\\s+", "");
         Assert.assertEquals(expectedParam, generatedParamsStr);

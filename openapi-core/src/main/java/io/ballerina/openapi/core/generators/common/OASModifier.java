@@ -36,6 +36,7 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -304,6 +305,11 @@ public class OASModifier {
             parameters.forEach((s, parameter) -> addBallerinaNameExtension(parameter));
         }
 
+        Map<String, SecurityScheme> securitySchemes = components.getSecuritySchemes();
+        if (Objects.nonNull(securitySchemes) && !securitySchemes.isEmpty()) {
+            securitySchemes.forEach((s, securityScheme) -> addBallerinaNameExtension(securityScheme));
+        }
+
         for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
             String schemaName = schema.getKey();
             String modifiedName = nameMap.get(schemaName);
@@ -452,6 +458,23 @@ public class OASModifier {
             parameter.setExtensions(new HashMap<>());
         }
         parameter.getExtensions().put(BALLERINA_NAME_EXT, alignedName);
+    }
+
+    private static void addBallerinaNameExtension(SecurityScheme securityScheme) {
+        String securitySchemeName = securityScheme.getName();
+        if (Objects.isNull(securitySchemeName)) {
+            return;
+        }
+
+        String alignedName = getValidNameForParameter(securitySchemeName);
+        if (securitySchemeName.equals(alignedName)) {
+            return;
+        }
+
+        if (Objects.isNull(securityScheme.getExtensions())) {
+            securityScheme.setExtensions(new HashMap<>());
+        }
+        securityScheme.getExtensions().put(BALLERINA_NAME_EXT, alignedName);
     }
 
     private static Schema getSchemaWithBallerinaNameExtension(String propertyName, Schema<?> propertySchema) {

@@ -117,7 +117,7 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
 
     public BallerinaClientGeneratorWithStatusCodeBinding(OASClientConfig oasClientConfig) {
         super(oasClientConfig);
-        authConfigGeneratorImp = new AuthConfigGeneratorWithStatusCodeBinding(false, false);
+        authConfigGeneratorImp = new AuthConfigGeneratorImp(false, false);
     }
 
     /**
