@@ -26,7 +26,6 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.util.InlineModelResolver;
 import picocli.CommandLine;
 
 import java.io.IOException;
