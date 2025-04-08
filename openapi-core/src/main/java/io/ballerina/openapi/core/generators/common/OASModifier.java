@@ -612,7 +612,7 @@ public class OASModifier {
     }
 
     private static String getValidStringFromIdentifier(String identifier, String prefix) {
-        if (!identifier.matches("\\b[0-9]*\\b")) {
+        if (!identifier.matches("\\b[0-9]*\\b") && identifier.matches(".*[a-zA-Z].*")) {
             String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
             StringBuilder validName = new StringBuilder();
             for (String part : split) {
@@ -625,7 +625,7 @@ public class OASModifier {
             }
             identifier = validName.toString();
         } else {
-            identifier = prefix + identifier;
+            identifier = prefix + GeneratorUtils.escapeIdentifier(identifier);
         }
         return identifier;
     }
