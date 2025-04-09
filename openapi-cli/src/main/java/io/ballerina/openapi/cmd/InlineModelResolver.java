@@ -492,9 +492,10 @@ public class InlineModelResolver {
                 Schema model = createModelFromProperty(property, modelName);
                 String existing = matchGenerated(model);
                 if (existing != null) {
-                    propsToUpdate.put(key, new Schema().$ref(existing));
+                    propsToUpdate.put(key, createAllOfWrappedSchemaForProperty(property, existing));
                 } else {
-                    propsToUpdate.put(key, new Schema().$ref(RefType.SCHEMAS.getInternalPrefix() + modelName));
+                    propsToUpdate.put(key, createAllOfWrappedSchemaForProperty(property,
+                            RefType.SCHEMAS.getInternalPrefix() + modelName));
                     modelsToAdd.put(modelName, model);
                     addGenerated(modelName, model);
                     openAPI.getComponents().addSchemas(modelName, model);
@@ -538,9 +539,9 @@ public class InlineModelResolver {
                         Schema innerModel = createModelFromProperty(inner, modelName);
                         String existing = matchGenerated(innerModel);
                         if (existing != null) {
-                            property.setAdditionalProperties(new Schema().$ref(existing));
+                            property.setAdditionalProperties(createAllOfWrappedSchemaForProperty(inner, existing));
                         } else {
-                            property.setAdditionalProperties(new Schema().$ref(modelName));
+                            property.setAdditionalProperties(createAllOfWrappedSchemaForProperty(inner, modelName));
                             addGenerated(modelName, innerModel);
                             openAPI.getComponents().addSchemas(modelName, innerModel);
                         }
@@ -758,5 +759,11 @@ public class InlineModelResolver {
 
     public void setSkipMatches(boolean skipMatches) {
         this.skipMatches = skipMatches;
+    }
+
+    public Schema createAllOfWrappedSchemaForProperty(Schema source, String newRef) {
+        return Objects.nonNull(source.getDescription()) ?
+                new ComposedSchema().$ref(newRef).description(source.getDescription()) :
+                new Schema().$ref(newRef);
     }
 }
