@@ -18,6 +18,7 @@
 
 package io.ballerina.openapi.core.generators.client.mime;
 
+import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -26,6 +27,9 @@ import io.swagger.v3.oas.models.media.MediaType;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
+import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
+
 /**
  * Defines the payload structure of json mime type.
  *
@@ -33,11 +37,18 @@ import java.util.Map;
  */
 public class JsonType extends MimeType {
 
+    private final List<ImportDeclarationNode> imports;
+
+    public JsonType(List<ImportDeclarationNode> imports) {
+        this.imports = imports;
+    }
+
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
+        addImport(imports, JSON_DATA);
         String payloadName = "jsonBody";
         VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json", payloadName
-                , "payload.toJson()");
+                , "jsondata:toJson(payload)");
         statementsList.add(jsonVariable);
         setPayload(statementsList, payloadName, mediaTypeEntry.getKey());
     }

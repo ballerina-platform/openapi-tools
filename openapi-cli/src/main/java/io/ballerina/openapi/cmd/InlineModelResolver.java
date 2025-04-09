@@ -445,7 +445,6 @@ public class InlineModelResolver {
 
     public String uniqueName(String key) {
         int count = 0;
-        boolean done = false;
         String uniqueKey;
         String concatenated = "";
         for (int i = 0; i < key.split("[-|\\s|_]").length; i++) {

@@ -66,6 +66,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.MIME;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
+import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
 
 /**
  * Defines the payload structure of multipart form-data mime type.
@@ -87,16 +88,17 @@ public class MultipartFormData extends MimeType {
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
         ballerinaUtilGenerator.setRequestBodyMultipartFormDatafound(true);
         addImport(imports, MIME);
+        addImport(imports, JSON_DATA);
         VariableDeclarationNode encodingMap = getMultipartMap(mediaTypeEntry);
 
         VariableDeclarationNode bodyPartsVariable;
         if (encodingMap == null) {
             bodyPartsVariable = GeneratorUtils.getSimpleStatement("mime:Entity[]", "bodyParts",
-                    "check createBodyParts(payload)");
+                    "check createBodyParts(check jsondata:toJson(payload).ensureType())");
         } else {
             statementsList.add(encodingMap);
             bodyPartsVariable = GeneratorUtils.getSimpleStatement("mime:Entity[]", "bodyParts",
-                    "check createBodyParts(payload, encodingMap)");
+                    "check createBodyParts(check jsondata:toJson(payload).ensureType(), encodingMap)");
         }
         statementsList.add(bodyPartsVariable);
 
