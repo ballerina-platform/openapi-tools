@@ -480,48 +480,40 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
         return createAnnotationNode(GeneratorConstants.CONSTRAINT_ARRAY, annotBody);
     }
 
-
     private static List<String> getNumberAnnotFields(Schema<?> numberSchema) {
-
         List<String> fields = new ArrayList<>();
         boolean isInt = GeneratorUtils.isIntegerSchema(numberSchema);
+
         if (numberSchema.getMinimum() != null && numberSchema.getExclusiveMinimum() == null) {
-            String value = numberSchema.getMinimum().toString();
-            String fieldRef = GeneratorConstants.MINIMUM + GeneratorConstants.COLON +
-                    (isInt ? numberSchema.getMinimum().intValue() : value);
-            fields.add(fieldRef);
+            String value = formatIntegerConstraintValue(numberSchema.getMinimum(), isInt);
+            fields.add(GeneratorConstants.MINIMUM + GeneratorConstants.COLON + value);
         }
+
         if (numberSchema.getMaximum() != null && numberSchema.getExclusiveMaximum() == null) {
-            String value = numberSchema.getMaximum().toString();
-            String fieldRef = GeneratorConstants.MAXIMUM + GeneratorConstants.COLON +
-                    (isInt ? numberSchema.getMaximum().intValue() : value);
-            fields.add(fieldRef);
+            String value = formatIntegerConstraintValue(numberSchema.getMaximum(), isInt);
+            fields.add(GeneratorConstants.MAXIMUM + GeneratorConstants.COLON + value);
         }
-        if (numberSchema.getExclusiveMinimum() != null &&
-                numberSchema.getExclusiveMinimum() && numberSchema.getMinimum() != null) {
-            String value = numberSchema.getMinimum().toString();
-            String fieldRef = GeneratorConstants.EXCLUSIVE_MIN + GeneratorConstants.COLON +
-                    (isInt ? numberSchema.getMinimum().intValue() : value);
-            fields.add(fieldRef);
+
+        if (numberSchema.getExclusiveMinimum() != null && numberSchema.getExclusiveMinimum()
+                && numberSchema.getMinimum() != null) {
+            String value = formatIntegerConstraintValue(numberSchema.getMinimum(), isInt);
+            fields.add(GeneratorConstants.EXCLUSIVE_MIN + GeneratorConstants.COLON + value);
         }
+
         if (numberSchema.getMinimum() == null && numberSchema.getExclusiveMinimumValue() != null) {
-            String value = numberSchema.getExclusiveMinimumValue().toString();
-            String fieldRef = GeneratorConstants.EXCLUSIVE_MIN + GeneratorConstants.COLON +
-                    (isInt ? numberSchema.getExclusiveMinimumValue().intValue() : value);
-            fields.add(fieldRef);
+            String value = formatIntegerConstraintValue(numberSchema.getExclusiveMinimumValue(), isInt);
+            fields.add(GeneratorConstants.EXCLUSIVE_MIN + GeneratorConstants.COLON + value);
         }
-        if (numberSchema.getExclusiveMaximum() != null &&
-                numberSchema.getExclusiveMaximum() && numberSchema.getMaximum() != null) {
-            String value = numberSchema.getMaximum().toString();
-            String fieldRef = GeneratorConstants.EXCLUSIVE_MAX + GeneratorConstants.COLON +
-                    (isInt ? numberSchema.getMaximum().intValue() : value);
-            fields.add(fieldRef);
+
+        if (numberSchema.getExclusiveMaximum() != null && numberSchema.getExclusiveMaximum()
+                && numberSchema.getMaximum() != null) {
+            String value = formatIntegerConstraintValue(numberSchema.getMaximum(), isInt);
+            fields.add(GeneratorConstants.EXCLUSIVE_MAX + GeneratorConstants.COLON + value);
         }
+
         if (numberSchema.getMaximum() == null && numberSchema.getExclusiveMaximumValue() != null) {
-            String value = numberSchema.getExclusiveMaximumValue().toString();
-            String fieldRef = GeneratorConstants.EXCLUSIVE_MAX + GeneratorConstants.COLON +
-                    (isInt ? numberSchema.getExclusiveMaximumValue().intValue() : value);
-            fields.add(fieldRef);
+            String value = formatIntegerConstraintValue(numberSchema.getExclusiveMaximumValue(), isInt);
+            fields.add(GeneratorConstants.EXCLUSIVE_MAX + GeneratorConstants.COLON + value);
         }
 
         //TODO: This will be enable once constraint package gives this support.
@@ -531,6 +523,20 @@ public class ConstraintGeneratorImp implements ConstraintGenerator {
 //            fields.add(fieldRef);
 //        }
         return fields;
+    }
+
+    private static String formatIntegerConstraintValue(Number number, boolean isIntType) {
+        double numericValue = number.doubleValue();
+        if (isIntType) {
+            long truncatedValue = (long) numericValue;
+            if (truncatedValue <= Integer.MAX_VALUE && truncatedValue >= Integer.MIN_VALUE) {
+                return String.valueOf((int) truncatedValue);
+            } else {
+                return String.valueOf(truncatedValue);
+            }
+        } else {
+            return number.toString();
+        }
     }
 
     private List<String> getStringAnnotFields(Schema stringSchema) {
