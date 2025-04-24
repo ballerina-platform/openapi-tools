@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: Constraint Test API
+  version: "1.0"
+
+paths:
+  /admin:
+    post:
+      operationId: "test1"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Person"
+      responses:
+        200:
+          description: OK
+
+components:
+  schemas:
+    Address:
+      type: string
+      minLength: 5
+    Person:
+      type: object
+      required:
+        - id
+      properties:
+        name:
+          type: string
+          maxLength: 14
+        hobby:
+          type: array
+          items:
+            type: string
+          maxItems: 5
+          minItems: 2
+        id:
+          type: integer
+          maximum: 9007199254740991.0
+          minimum: -9007199254740991.0
+        address:
+          $ref: "#/components/schemas/Address"
+        salary:
+          type: number
+          format: float
+          maximum: 100000
+        net:
+          type: number
+          minimum: 500000

@@ -79,7 +79,8 @@ public class UrlEncodedType extends MimeType {
         if (requestBodyEncodingMap != null) {
             statementsList.add(requestBodyEncodingMap);
             VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING, payloadName,
-                    "createFormURLEncodedRequestBody(check jsondata:toJson(payload).ensureType(), requestBodyEncoding)");
+                    "createFormURLEncodedRequestBody(check jsondata:toJson(payload).ensureType(), " +
+                            "requestBodyEncoding)");
             statementsList.add(requestBodyVariable);
         } else {
             VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING, payloadName,

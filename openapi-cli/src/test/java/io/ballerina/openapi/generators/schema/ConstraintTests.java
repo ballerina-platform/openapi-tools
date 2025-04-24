@@ -348,6 +348,24 @@ public class ConstraintTests {
                 "schema/ballerina/constraint/format_type_v3.bal", syntaxTreeV3);
     }
 
+    @Test(description = "Tests that decimal values defined for integer fields in the OpenAPI schema are correctly" +
+            " truncated and formatted as integers in the generated Ballerina constraints.")
+    public void testIntegerConstraintWithDecimalTruncation()
+            throws IOException, BallerinaOpenApiException, FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR
+                        .resolve("swagger/constraint/integer_constraint_with_decimal_values.yaml"),
+                true, false);
+        TypeHandler.createInstance(openAPI, false);
+        RequestBodyGenerator requestBodyGenerator = new RequestBodyGenerator(openAPI.getPaths()
+                .get("/admin").getPost().getRequestBody(), openAPI);
+        requestBodyGenerator.generateParameterNode();
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/constraint/integer_constraint_with_decimal_values.bal", syntaxTree);
+        List<Diagnostic> diagnostics = getDiagnostics(syntaxTree);
+        assertTrue(diagnostics.isEmpty());
+    }
+
     @AfterMethod
     private void deleteGeneratedFiles() {
         try {
