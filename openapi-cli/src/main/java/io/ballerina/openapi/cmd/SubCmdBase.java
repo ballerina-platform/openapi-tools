@@ -18,6 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.core.generators.common.InlineModelResolver;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.service.mapper.utils.CodegenUtils;
 import io.swagger.parser.OpenAPIParser;
@@ -74,7 +75,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
     }
 
     private static final String COMMAND_IDENTIFIER = "openapi-%s";
-    private static final String COMMA = ",";
+    protected static final String COMMA = ",";
 
     private static final String INFO_OUTPUT_WRITTEN_MSG = "INFO: %s OpenAPI definition file was successfully" +
             " written to: %s%n";
@@ -124,9 +125,6 @@ public abstract class SubCmdBase implements BLauncherCmd {
 
     @CommandLine.Option(names = {"--operations"}, description = "Operations that need to be included when sanitizing.")
     public String operations;
-
-    @CommandLine.Option(names = {"--docs-only"}, description = "Sanitize only docs.")
-    public boolean docsOnly;
 
     protected SubCmdBase(CommandType cmdType, String infoMsgPrefix) {
         this.cmdType = cmdType;
@@ -197,10 +195,8 @@ public abstract class SubCmdBase implements BLauncherCmd {
     public abstract String getDefaultFileName();
 
     public Optional<OpenAPI> getFlattenOpenAPI(OpenAPI openAPI) {
-        // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `camelCaseFlattenNaming: true`
+        // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `skipMatches: true`
         InlineModelResolver inlineModelResolver = new InlineModelResolver(true, true);
-        inlineModelResolver.flatten(openAPI);
-        // Run flatten again to flatten newly added schemas
         inlineModelResolver.flatten(openAPI);
         return Optional.of(openAPI);
     }

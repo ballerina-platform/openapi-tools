@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.ballerina.openapi.cmd;
+package io.ballerina.openapi.core.generators.common;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;

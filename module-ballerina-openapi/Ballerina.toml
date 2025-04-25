@@ -1,4 +1,4 @@
 [package]
 org= "ballerina"
 name= "openapi"
-version= "2.4.0-202504081016"
+version= "2.3.1"

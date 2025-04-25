@@ -37,6 +37,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -51,8 +52,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PATH;
@@ -74,8 +78,32 @@ public class OASModifier {
     public static final String ENDS_WITH_FULLSTOP = "\\.$";
     public static final String EMPTY = "";
     public static final String LINE_BREAK = "\n";
+    public static final String SLASH = "/";
+    public static final String OPEN_BRACE = "{";
+    public static final String CLOSED_BRACE = "}";
+    public static final String NAME = "name";
+    public static final String DOC = "doc";
+    public static final String BASEPATH = "basepath";
+    public static final List<String> DEFAULT_ALIGNMENT_TYPES = List.of(NAME, DOC, BASEPATH);
 
     List<Diagnostic> diagnostics = new ArrayList<>();
+
+    public OpenAPI modify(OpenAPI openAPI) throws BallerinaOpenApiException {
+        return modify(openAPI, DEFAULT_ALIGNMENT_TYPES);
+    }
+
+    public OpenAPI modify(OpenAPI openAPI, List<String> alignmentTypes) throws BallerinaOpenApiException {
+        if (alignmentTypes.contains(NAME)) {
+            openAPI = modifyWithBallerinaNamingConventions(openAPI);
+        }
+        if (alignmentTypes.contains(DOC)) {
+            openAPI = modifyDescriptions(openAPI);
+        }
+        if (alignmentTypes.contains(BASEPATH)) {
+            openAPI = modifyWithCommonBasePath(openAPI);
+        }
+        return openAPI;
+    }
 
     public List<Diagnostic> getDiagnostics() {
         return diagnostics;
@@ -259,7 +287,7 @@ public class OASModifier {
 
         Paths modifiedPaths = new Paths();
         for (Map.Entry<String, PathItem> path : paths.entrySet()) {
-            PathDetails result = updateParameterNameDetails(path);
+            PathDetails result = updateParameterNameDetails(openapi, path);
             modifiedPaths.put(result.pathValue(), result.pathItem());
         }
         openapi.setPaths(modifiedPaths);
@@ -300,11 +328,6 @@ public class OASModifier {
         Map<String, Schema> schemas = components.getSchemas();
         Map<String, Schema> modifiedSchemas = new HashMap<>();
 
-        Map<String, Parameter> parameters = components.getParameters();
-        if (Objects.nonNull(parameters) && !parameters.isEmpty()) {
-            parameters.forEach((s, parameter) -> addBallerinaNameExtension(parameter));
-        }
-
         Map<String, SecurityScheme> securitySchemes = components.getSecuritySchemes();
         if (Objects.nonNull(securitySchemes) && !securitySchemes.isEmpty()) {
             securitySchemes.forEach((s, securityScheme) -> addBallerinaNameExtension(securityScheme));
@@ -342,15 +365,16 @@ public class OASModifier {
         return new OpenAPIParser().readContents(openApiJson, null, parseOptions);
     }
 
-    private static PathDetails updateParameterNameDetails(Map.Entry<String, PathItem> path) {
+    private static PathDetails updateParameterNameDetails(OpenAPI openAPI, Map.Entry<String, PathItem> path) {
         PathItem pathItem = path.getValue();
         String pathValue = path.getKey();
+        pathValue = updateParameterNames(openAPI, pathValue, pathItem);
         if (Objects.nonNull(pathItem.getGet())) {
             Operation operation = pathItem.getGet();
             if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(pathValue, operation);
+            pathValue = updateParameterNames(openAPI, pathValue, operation);
             pathItem.setGet(operation);
         }
         if (Objects.nonNull(pathItem.getPost())) {
@@ -358,7 +382,7 @@ public class OASModifier {
             if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(pathValue, operation);
+            pathValue = updateParameterNames(openAPI, pathValue, operation);
             pathItem.setPost(operation);
         }
         if (Objects.nonNull(pathItem.getPut())) {
@@ -366,7 +390,7 @@ public class OASModifier {
             if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(pathValue, operation);
+            pathValue = updateParameterNames(openAPI, pathValue, operation);
             pathItem.setPut(operation);
         }
         if (Objects.nonNull(pathItem.getDelete())) {
@@ -374,7 +398,7 @@ public class OASModifier {
             if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(pathValue, operation);
+            pathValue = updateParameterNames(openAPI, pathValue, operation);
             pathItem.setDelete(operation);
         }
         if (Objects.nonNull(pathItem.getPatch())) {
@@ -382,7 +406,7 @@ public class OASModifier {
             if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(pathValue, operation);
+            pathValue = updateParameterNames(openAPI, pathValue, operation);
             pathItem.setPatch(operation);
         }
         if (Objects.nonNull(pathItem.getHead())) {
@@ -390,7 +414,7 @@ public class OASModifier {
             if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(pathValue, operation);
+            pathValue = updateParameterNames(openAPI, pathValue, operation);
             pathItem.setHead(operation);
         }
         if (Objects.nonNull(pathItem.getOptions())) {
@@ -398,7 +422,7 @@ public class OASModifier {
             if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(pathValue, operation);
+            pathValue = updateParameterNames(openAPI, pathValue, operation);
             pathItem.setOptions(operation);
         }
         if (Objects.nonNull(pathItem.getTrace())) {
@@ -406,39 +430,61 @@ public class OASModifier {
             if (Objects.isNull(operation.getParameters())) {
                 return new PathDetails(pathItem, pathValue);
             }
-            pathValue = updateParameterNames(pathValue, operation);
+            pathValue = updateParameterNames(openAPI, pathValue, operation);
             pathItem.setTrace(operation);
         }
         return new PathDetails(pathItem, pathValue);
     }
 
-    private static String updateParameterNames(String pathValue, Operation operation) {
-        Map<String, String> parameterNames = collectParameterNames(operation.getParameters());
+    private static String updateParameterNames(OpenAPI openAPI, String pathValue, PathItem pathItem) {
+        List<Parameter> parameters = pathItem.getParameters();
+        if (Objects.nonNull(parameters)) {
+            Map<String, String> parameterNames = collectParameterNames(openAPI, pathItem.getParameters());
+            List<Parameter> modifiedParameters = new ArrayList<>();
+            pathValue = updateParameters(openAPI, pathValue, parameterNames, parameters, modifiedParameters);
+            pathItem.setParameters(modifiedParameters);
+        }
+        return pathValue;
+    }
+
+    private static String updateParameterNames(OpenAPI openAPI, String pathValue, Operation operation) {
+        Map<String, String> parameterNames = collectParameterNames(openAPI, operation.getParameters());
         List<Parameter> parameters = operation.getParameters();
         if (Objects.nonNull(parameters)) {
             List<Parameter> modifiedParameters = new ArrayList<>();
-            pathValue = updateParameters(pathValue, parameterNames, parameters, modifiedParameters);
+            pathValue = updateParameters(openAPI, pathValue, parameterNames, parameters, modifiedParameters);
             operation.setParameters(modifiedParameters);
         }
         return pathValue;
     }
 
-    private static String updateParameters(String pathValue, Map<String, String> parameterNames,
+    private static String updateParameters(OpenAPI openAPI, String pathValue, Map<String, String> parameterNames,
                                            List<Parameter> parameters, List<Parameter> modifiedParameters) {
 
         for (Parameter parameter : parameters) {
-            String location = parameter.getIn();
+            Parameter refParameter = parameter;
+            if (Objects.nonNull(parameter.get$ref())) {
+                try {
+                    refParameter = openAPI.getComponents()
+                            .getParameters()
+                            .get(extractReferenceType(parameter.get$ref()));
+                } catch (InvalidReferenceException e) {
+                    // Ignore
+                    modifiedParameters.add(parameter);
+                    continue;
+                }
+            }
+            String location = refParameter.getIn();
             if (Objects.isNull(location)) {
-                // This is parameter reference, just keep it as it is
                 modifiedParameters.add(parameter);
                 continue;
             }
             if (location.equals(PATH)) {
-                String modifiedPathParam = parameterNames.get(parameter.getName());
-                parameter.setName(modifiedPathParam);
+                String modifiedPathParam = parameterNames.get(refParameter.getName());
+                refParameter.setName(modifiedPathParam);
                 pathValue = replaceContentInBraces(pathValue, modifiedPathParam);
             } else if (location.equals(QUERY) || location.equals(HEADER)) {
-                addBallerinaNameExtension(parameter);
+                addBallerinaNameExtension(refParameter);
             }
             modifiedParameters.add(parameter);
         }
@@ -588,10 +634,10 @@ public class OASModifier {
 
     private static void updateRef(String schemaName, String modifiedName, Schema value) {
         String ref = value.get$ref().replaceAll("\\s+", EMPTY);
-        String patternString = "/" + schemaName.replaceAll("\\s+", EMPTY) + "(?!\\S)";
+        String patternString = SLASH + schemaName.replaceAll("\\s+", EMPTY) + "(?!\\S)";
         Pattern pattern = Pattern.compile(patternString);
         Matcher matcher = pattern.matcher(ref);
-        ref = matcher.replaceAll("/" + modifiedName);
+        ref = matcher.replaceAll(SLASH + modifiedName);
         value.set$ref(ref);
     }
 
@@ -630,9 +676,18 @@ public class OASModifier {
         return identifier;
     }
 
-    public static Map<String, String> collectParameterNames(List<Parameter> parameters) {
+    public static Map<String, String> collectParameterNames(OpenAPI openAPI, List<Parameter> parameters) {
         Map<String, String> parameterNames = new HashMap<>();
         for (Parameter parameter: parameters) {
+            if (Objects.nonNull(parameter.get$ref())) {
+                try {
+                    parameter = openAPI.getComponents()
+                            .getParameters()
+                            .get(extractReferenceType(parameter.get$ref()));
+                } catch (InvalidReferenceException e) {
+                    // Ignore
+                }
+            }
             String parameterName = parameter.getName();
             if (Objects.isNull(parameterName)) {
                 continue;
@@ -654,7 +709,7 @@ public class OASModifier {
             String content = getValidNameForParameter(matcher.group(1));
             if (content.equals(expectedValue)) {
                 // Replace the content with the replacement
-                result.append("{").append(expectedValue).append("}");
+                result.append(OPEN_BRACE).append(expectedValue).append(CLOSED_BRACE);
             } else {
                 result.append(matcher.group());
             }
@@ -853,5 +908,109 @@ public class OASModifier {
         modifyDescriptionInSubSchemas(composedSchema.getAllOf());
         modifyDescriptionInSubSchemas(composedSchema.getAnyOf());
         modifyDescriptionInSubSchemas(composedSchema.getOneOf());
+    }
+
+    public OpenAPI modifyWithCommonBasePath(OpenAPI openapi) {
+        Paths paths = openapi.getPaths();
+        List<Server> servers = openapi.getServers();
+        if (Objects.isNull(paths) || paths.isEmpty() || Objects.isNull(servers) || servers.isEmpty()) {
+            return openapi;
+        }
+
+        List<String> pathValues = new ArrayList<>(paths.keySet());
+        CommonPathResult commonPathResult = getCommonPathResult(pathValues);
+        commonPathResult.commonPath().ifPresent(commonPath -> {
+            modifyPathNames(openapi, paths, commonPathResult.pathMap());
+            modifyServersUrl(servers, commonPath);
+        });
+        return openapi;
+    }
+
+    private static void modifyServersUrl(List<Server> servers, String commonPath) {
+        servers.stream()
+                .filter(server -> Objects.nonNull(server.getUrl()))
+                .forEach(server -> server.setUrl(server.getUrl().concat(commonPath)));
+    }
+
+    private static void modifyPathNames(OpenAPI openapi, Paths paths, Map<String, String> pathMap) {
+        Paths modifiedPaths = new Paths();
+        paths.forEach((pathValue, pathItem) ->
+                modifiedPaths.put(pathMap.get(pathValue), pathItem)
+        );
+        openapi.setPaths(modifiedPaths);
+    }
+
+    private record CommonPathResult(Optional<String> commonPath, Map<String, String> pathMap) {
+    }
+
+    private static CommonPathResult getCommonPathResult(List<String> pathValues) {
+        if (pathValues == null || pathValues.isEmpty()) {
+            return new CommonPathResult(Optional.empty(), Map.of());
+        }
+
+        Optional<String> commonPath = getCommonPath(pathValues);
+        if (commonPath.isEmpty()) {
+            return new CommonPathResult(Optional.empty(), Map.of());
+        }
+
+        Map<String, String> pathMap = new HashMap<>();
+        for (String path : pathValues) {
+            pathMap.put(path, removeCommonPath(path, commonPath.get()));
+        }
+        return new CommonPathResult(commonPath, pathMap);
+    }
+
+    private static Optional<String> getCommonPath(List<String> pathValues) {
+        String commonPath = getPathWithoutLastSegment(pathValues.getFirst());
+        for (int i = 1; i < pathValues.size(); i++) {
+            String path = pathValues.get(i);
+            String nonParameterizedPath = getNonParameterizedPath(path);
+            if (nonParameterizedPath.startsWith(commonPath)) {
+                continue;
+            }
+            commonPath = calculateCommonPath(getPathWithoutLastSegment(nonParameterizedPath), commonPath);
+            if (commonPath.isEmpty()) {
+                break;
+            }
+        }
+        return commonPath.isEmpty() ? Optional.empty() : Optional.of(commonPath);
+    }
+
+    private static String calculateCommonPath(String path, String commonPath) {
+        String[] pathSegments = path.split(SLASH);
+        String[] commonPathSegments = commonPath.split(SLASH);
+        StringJoiner commonPathBuilder = new StringJoiner(SLASH);
+        for (int i = 0; i < Math.min(pathSegments.length, commonPathSegments.length); i++) {
+            if (pathSegments[i].equals(commonPathSegments[i])) {
+                commonPathBuilder.add(pathSegments[i]);
+            } else {
+                break;
+            }
+        }
+        return commonPathBuilder.toString();
+    }
+
+    private static String getPathWithoutLastSegment(String path) {
+        if (path.endsWith(SLASH)) {
+            return path;
+        }
+        String[] pathSegments = path.split(SLASH);
+        return Arrays.stream(pathSegments, 0, pathSegments.length - 1)
+                .collect(Collectors.joining(SLASH));
+    }
+
+    private static String removeCommonPath(String path, String commonPath) {
+        return path.replace(commonPath, EMPTY);
+    }
+
+    private static String getNonParameterizedPath(String path) {
+        StringJoiner nonParameterizedPath = new StringJoiner(SLASH);
+        for (String part : path.split(SLASH)) {
+            if (part.startsWith(OPEN_BRACE) && part.endsWith(CLOSED_BRACE)) {
+                break;
+            }
+            nonParameterizedPath.add(part);
+        }
+        return nonParameterizedPath.toString();
     }
 }
