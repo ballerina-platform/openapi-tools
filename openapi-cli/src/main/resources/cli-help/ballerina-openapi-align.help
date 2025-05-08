@@ -9,8 +9,8 @@ SYNOPSIS
                          [-f | --format] [json|yaml]
                          [-t | --tags] <tag-names>
                          [--operations] <operation-names>
-                         [--align] <align-type-names>
-                         [--no-align] <align-type-names>
+                         [--include] <align-type-names>
+                         [--exclude] <align-type-names>
                          [--help]
 
 DESCRIPTION
@@ -23,8 +23,8 @@ DESCRIPTION
        - `basepath`: Extract the common base path from the operations and add it to the
        server url.
 
-       The alignments can be filtered using the `--align` and `--no-align` options.
-       The `--align` option has higher priority than the `--no-align` option.
+       The alignments can be filtered using the `--include` and `--exclude` options.
+       The `--include` option has higher priority than the `--exclude` option.
 
 OPTIONS
        -i, --input <openapi-contract-file-path>
@@ -53,16 +53,16 @@ OPTIONS
             This is an optional input. The aligned OpenAPI contract will only
             have the given operations.
 
-       --align <align-type-names>
+       --include <align-type-names>
             This is an optional input. The aligned OpenAPI contract will only
             have the given alignments. The supported alignments are: `name`,
             `doc` and `basepath`.
 
-       --no-align <align-type-names>
+       --exclude <align-type-names>
             This is an optional input. The aligned OpenAPI contract will not
             have the given alignments. The supported alignments are: `name`,
-            `doc`and `basepath`. The `--align` option has higher priority than
-            the `--no-align` option.
+            `doc`and `basepath`. The `--include` option has higher priority than
+            the `--exclude` option.
 
 EXAMPLES
        Align the `service.yaml` OpenAPI contract file.
@@ -77,4 +77,4 @@ EXAMPLES
            $ bal openapi align -i service.json -t service
 
        Align the `service.json` OpenAPI contract with only the `name` alignment.
-           $ bal openapi align -i service.json --align name
+           $ bal openapi align -i service.json --include name
