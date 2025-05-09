@@ -52,11 +52,11 @@ public class Align extends SubCmdBase {
     public static final List<String> DEFAULT_ALIGNMENT_TYPES = List.of(NAME, DOC, BASEPATH);
     private List<String> alignmentTypes = Arrays.asList(NAME, DOC, BASEPATH);
 
-    @CommandLine.Option(names = {"--align"}, description = "Alignment types to be included. " +
+    @CommandLine.Option(names = {"--include"}, description = "Alignment types to be included. " +
             "The available options are: name, doc, basepath.")
     public String includedAlignments;
 
-    @CommandLine.Option(names = {"--no-align"}, description = "Alignment types to be excluded. " +
+    @CommandLine.Option(names = {"--exclude"}, description = "Alignment types to be excluded. " +
             "The available options are: name, doc, basepath.")
     public String excludedAlignments;
 
