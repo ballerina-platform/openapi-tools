@@ -13,17 +13,17 @@ public class TestConstants {
     private static String commonClientConfigurationFields = "# The HTTP version understood by the client\n" +
             "    http:HttpVersion httpVersion = http:HTTP_2_0;\n" +
             "    # Configurations related to HTTP/1.x protocol\n" +
-            "    ClientHttp1Settings http1Settings?;\n" +
+            "    ClientHttp1Settingshttp1Settings = {};\n" +
             "    # Configurations related to HTTP/2 protocol\n" +
-            "    http:ClientHttp2Settings http2Settings?;\n" +
+            "    http:ClientHttp2Settings http2Settings = {};\n" +
             "    # The maximum time to wait (in seconds) for a response before closing the connection\n" +
-            "    decimal timeout = 60;\n" +
+            "    decimal timeout = 30;\n" +
             "    # The choice of setting `forwarded`/`x-forwarded` header\n" +
             "    string forwarded = \"disable\";\n" +
             "    # Configurations associated with request pooling\n" +
             "    http:PoolConfiguration poolConfig?;\n" +
             "    # HTTP caching related configurations\n" +
-            "    http:CacheConfig cache?;\n" +
+            "    http:CacheConfig cache = {};\n" +
             "    # Specifies the way of handling compression (`accept-encoding`) header\n" +
             "    http:Compression compression = http:COMPRESSION_AUTO;\n" +
             "    # Configurations associated with the behaviour of the Circuit Breaker\n" +
@@ -188,29 +188,35 @@ public class TestConstants {
             "    # The HTTP version understood by the client\n" +
             "    http:HttpVersion httpVersion = http:HTTP_2_0;\n" +
             "    # Configurations related to HTTP/1.x protocol\n" +
-            "    ClientHttp1Settings http1Settings?;\n" +
+            "    http:ClientHttp1Settings http1Settings = {};\n" +
             "    # Configurations related to HTTP/2 protocol\n" +
-            "    http:ClientHttp2Settings http2Settings?;\n" +
+            "    http:ClientHttp2Settings http2Settings = {};\n" +
             "    # The maximum time to wait (in seconds) for a response before closing the connection\n" +
-            "    decimal timeout = 60;\n" +
+            "    decimal timeout = 30;\n" +
             "    # The choice of setting `forwarded`/`x-forwarded` header\n" +
             "    string forwarded = \"disable\";\n" +
+            "    # Configurations associated with Redirection\n" +
+            "    http:FollowRedirects followRedirects?;\n" +
             "    # Configurations associated with request pooling\n" +
             "    http:PoolConfiguration poolConfig?;\n" +
             "    # HTTP caching related configurations\n" +
-            "    http:CacheConfig cache?;\n" +
+            "    http:CacheConfig cache = {};\n" +
             "    # Specifies the way of handling compression (`accept-encoding`) header\n" +
             "    http:Compression compression = http:COMPRESSION_AUTO;\n" +
             "    # Configurations associated with the behaviour of the Circuit Breaker\n" +
             "    http:CircuitBreakerConfig circuitBreaker?;\n" +
             "    # Configurations associated with retrying\n" +
             "    http:RetryConfig retryConfig?;\n" +
+            "    # Configurations associated with cookies\n" +
+            "    http:CookieConfig cookieConfig?;\n" +
             "    # Configurations associated with inbound response size limits\n" +
-            "    http:ResponseLimitConfigs responseLimits?;\n" +
+            "    http:ResponseLimitConfigs responseLimits = {};\n" +
             "    # SSL/TLS-related options\n" +
             "    http:ClientSecureSocket secureSocket?;\n" +
             "    # Proxy server related options\n" +
             "    http:ProxyConfig proxy?;\n" +
+            "    # Provides settings related to client socket configuration\n" +
+            "    http:ClientSocketConfig socketConfig = {};\n" +
             "    # Enables the inbound payload validation functionality which provided by the constraint package. " +
             "Enabled by default\n" +
             "    boolean validation = true;\n" +
