@@ -741,6 +741,11 @@ public class AuthConfigGeneratorImp {
             argumentsList.add(comma);
         });
 
+        // Remove the last comma
+        if (!argumentsList.isEmpty()) {
+            argumentsList.removeLast();
+        }
+
         SeparatedNodeList<MappingFieldNode> arguments = createSeparatedNodeList(argumentsList);
         MappingConstructorExpressionNode mappingConstructorExpressionNode =
                 createMappingConstructorExpressionNode(createToken(OPEN_BRACE_TOKEN),
