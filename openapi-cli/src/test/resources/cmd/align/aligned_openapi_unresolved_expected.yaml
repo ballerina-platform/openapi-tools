@@ -43,28 +43,6 @@ paths:
       description: Enumerate all active channels of the application
       operationId: getMetadataOfAllChannels
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
         - name: limit
           in: query
           description: Optionally specifies the maximum number of results to return.
@@ -125,24 +103,10 @@ paths:
               schema:
                 type: string
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /channels/{channelId}:
     get:
       tags:
@@ -151,36 +115,7 @@ paths:
       description: Get metadata of a channel
       operationId: getMetadataOfChannel
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: channelId
-          in: path
-          description: "The [Channel's ID](https://www.ably.io/documentation/rest/channels)."
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/channelId"
       responses:
         "200":
           description: OK
@@ -192,24 +127,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/ChannelDetails"
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /channels/{channelId}/messages:
     get:
       tags:
@@ -218,82 +139,11 @@ paths:
       description: Get message history for a channel
       operationId: getMessagesByChannel
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: channelId
-          in: path
-          description: "The [Channel's ID](https://www.ably.io/documentation/rest/channels)."
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-        - name: start
-          in: query
-          description: Beginning of time The start of the query interval as a time in
-            milliseconds since the epoch. A message qualifies as a member of the result
-            set if it was received at or after this time.
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-        - name: limit
-          in: query
-          description: "The maximum number of records to return. A limit greater than\
-          \ 1,000 is invalid."
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: integer
-        - name: end
-          in: query
-          description: The end of the query interval as a time in milliseconds since
-            the epoch. A message qualifies as a member of the result set if it was received
-            at or before this time.
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            default: now
-        - name: direction
-          in: query
-          description: "The direction of this query. The direction determines the order\
-          \ of the returned result array, but also determines which end of the query\
-          \ interval is the start point for the search. For example, a forwards query\
-          \ uses start as the start point, whereas a backwards query uses end as the\
-          \ start point."
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            default: backwards
-            enum:
-              - forwards
-              - backwards
+        - $ref: "#/components/parameters/channelId"
+        - $ref: "#/components/parameters/filterStart"
+        - $ref: "#/components/parameters/filterLimit"
+        - $ref: "#/components/parameters/filterEnd"
+        - $ref: "#/components/parameters/filterDirection"
       responses:
         "2XX":
           description: OK
@@ -332,36 +182,7 @@ paths:
       description: Publish a message to the specified channel
       operationId: publishMessagesToChannel
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: channelId
-          in: path
-          description: "The [Channel's ID](https://www.ably.io/documentation/rest/channels)."
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/channelId"
       requestBody:
         description: Message
         content:
@@ -406,24 +227,10 @@ paths:
                   messageId:
                     type: string
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /channels/{channelId}/presence:
     get:
       tags:
@@ -432,36 +239,7 @@ paths:
       description: Get presence on a channel
       operationId: getPresenceOfChannel
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: channelId
-          in: path
-          description: "The [Channel's ID](https://www.ably.io/documentation/rest/channels)."
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/channelId"
         - name: clientId
           in: query
           description: Optional filter to restrict members present with that clientId
@@ -481,7 +259,7 @@ paths:
         - name: limit
           in: query
           description: "The maximum number of records to return. A limit greater than\
-          \ 1,000 is invalid."
+          \ 1,000 is invalid"
           required: false
           style: form
           explode: true
@@ -511,24 +289,10 @@ paths:
               schema:
                 type: string
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /channels/{channelId}/presence/history:
     get:
       tags:
@@ -537,82 +301,11 @@ paths:
       description: Get presence on a channel
       operationId: getPresenceHistoryOfChannel
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: channelId
-          in: path
-          description: "The [Channel's ID](https://www.ably.io/documentation/rest/channels)."
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-        - name: start
-          in: query
-          description: Beginning of time The start of the query interval as a time in
-            milliseconds since the epoch. A message qualifies as a member of the result
-            set if it was received at or after this time.
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-        - name: limit
-          in: query
-          description: "The maximum number of records to return. A limit greater than\
-          \ 1,000 is invalid."
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: integer
-        - name: end
-          in: query
-          description: The end of the query interval as a time in milliseconds since
-            the epoch. A message qualifies as a member of the result set if it was received
-            at or before this time.
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            default: now
-        - name: direction
-          in: query
-          description: "The direction of this query. The direction determines the order\
-          \ of the returned result array, but also determines which end of the query\
-          \ interval is the start point for the search. For example, a forwards query\
-          \ uses start as the start point, whereas a backwards query uses end as the\
-          \ start point."
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            default: backwards
-            enum:
-              - forwards
-              - backwards
+        - $ref: "#/components/parameters/channelId"
+        - $ref: "#/components/parameters/filterStart"
+        - $ref: "#/components/parameters/filterLimit"
+        - $ref: "#/components/parameters/filterEnd"
+        - $ref: "#/components/parameters/filterDirection"
       responses:
         "2XX":
           description: OK
@@ -634,24 +327,10 @@ paths:
               schema:
                 type: string
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /keys/{keyName}/requestToken:
     post:
       tags:
@@ -666,37 +345,7 @@ paths:
         \ spec. Authentication is not required if using a Signed TokenRequest."
       operationId: requestAccessToken
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: keyName
-          in: path
-          description: "The [key name](https://www.ably.io/documentation/rest-api/token-request-spec#api-key-format)\
-          \ comprises of the app ID and key ID of an API key."
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/key_name"
       requestBody:
         description: Request Body
         content:
@@ -725,24 +374,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/TokenDetails"
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /push/channelSubscriptions:
     get:
       tags:
@@ -751,31 +386,9 @@ paths:
       description: Get a list of push notification subscriptions to channels.
       operationId: getPushSubscriptionsOnChannels
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
         - name: channel
           in: query
-          description: Filter to restrict to subscriptions associated with that channel.
+          description: Filter to restrict to subscriptions associated with that channel
           required: false
           style: form
           explode: true
@@ -784,7 +397,7 @@ paths:
         - name: deviceId
           in: query
           description: Optional filter to restrict to devices associated with that deviceId.
-            Cannot be used with clientId.
+            Cannot be used with clientId
           required: false
           style: form
           explode: true
@@ -793,7 +406,7 @@ paths:
         - name: clientId
           in: query
           description: Optional filter to restrict to devices associated with that clientId.
-            Cannot be used with deviceId.
+            Cannot be used with deviceId
           required: false
           style: form
           explode: true
@@ -801,7 +414,7 @@ paths:
             type: string
         - name: limit
           in: query
-          description: The maximum number of records to return.
+          description: The maximum number of records to return
           required: false
           style: form
           explode: true
@@ -817,24 +430,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/DeviceDetails"
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
     post:
       tags:
         - Push
@@ -842,29 +438,6 @@ paths:
       description: Subscribe either a single device or all devices associated with
         a client ID to receive push notifications from messages sent to a channel.
       operationId: subscribePushDeviceToChannel
-      parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
       requestBody:
         description: Request Body
         content:
@@ -944,24 +517,7 @@ paths:
         "2XX":
           description: OK
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
     delete:
       tags:
         - Push
@@ -969,31 +525,9 @@ paths:
       description: Delete a device details object.
       operationId: deletePushDeviceDetails
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
         - name: channel
           in: query
-          description: Filter to restrict to subscriptions associated with that channel.
+          description: Filter to restrict to subscriptions associated with that channel
           required: false
           style: form
           explode: true
@@ -1001,7 +535,7 @@ paths:
             type: string
         - name: deviceId
           in: query
-          description: "Must be set when clientId is empty, cannot be used with clientId."
+          description: "Must be set when clientId is empty, cannot be used with clientId"
           required: false
           style: form
           explode: true
@@ -1009,7 +543,7 @@ paths:
             type: string
         - name: clientId
           in: query
-          description: "Must be set when deviceId is empty, cannot be used with deviceId."
+          description: "Must be set when deviceId is empty, cannot be used with deviceId"
           required: false
           style: form
           explode: true
@@ -1019,24 +553,10 @@ paths:
         "2XX":
           description: OK
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /push/channels:
     get:
       tags:
@@ -1044,29 +564,6 @@ paths:
       summary: List all channels with at least one subscribed device
       description: Returns a paginated response of channel names.
       operationId: getChannelsWithPushSubscribers
-      parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
       responses:
         "2XX":
           description: OK
@@ -1087,24 +584,10 @@ paths:
                 items:
                   type: string
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /push/deviceRegistrations:
     get:
       tags:
@@ -1113,31 +596,9 @@ paths:
       description: List of device details of devices registed for push notifications.
       operationId: getRegisteredPushDevices
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
         - name: deviceId
           in: query
-          description: Optional filter to restrict to devices associated with that deviceId.
+          description: Optional filter to restrict to devices associated with that deviceId
           required: false
           style: form
           explode: true
@@ -1145,7 +606,7 @@ paths:
             type: string
         - name: clientId
           in: query
-          description: Optional filter to restrict to devices associated with that clientId.
+          description: Optional filter to restrict to devices associated with that clientId
           required: false
           style: form
           explode: true
@@ -1153,7 +614,7 @@ paths:
             type: string
         - name: limit
           in: query
-          description: The maximum number of records to return.
+          description: The maximum number of records to return
           required: false
           style: form
           explode: true
@@ -1175,24 +636,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/DeviceDetails"
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
     post:
       tags:
         - Push
@@ -1200,29 +644,6 @@ paths:
       description: "Register a device’s details, including the information necessary\
         \ to deliver push notifications to it. Requires \"push-admin\" capability."
       operationId: registerPushDevice
-      parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
       requestBody:
         description: Device Details
         content:
@@ -1246,24 +667,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/DeviceDetails"
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
     delete:
       tags:
         - Push
@@ -1272,32 +676,10 @@ paths:
         notifications through channels will also be deleted.
       operationId: unregisterAllPushDevices
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
         - name: deviceId
           in: query
           description: Optional filter to restrict to devices associated with that deviceId.
-            Cannot be used with clientId.
+            Cannot be used with clientId
           required: false
           style: form
           explode: true
@@ -1306,7 +688,7 @@ paths:
         - name: clientId
           in: query
           description: Optional filter to restrict to devices associated with that clientId.
-            Cannot be used with deviceId.
+            Cannot be used with deviceId
           required: false
           style: form
           explode: true
@@ -1316,24 +698,10 @@ paths:
         "2XX":
           description: OK
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /push/deviceRegistrations/{deviceId}:
     get:
       tags:
@@ -1342,36 +710,7 @@ paths:
       description: Get the full details of a device.
       operationId: getPushDeviceDetails
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: deviceId
-          in: path
-          description: Device's ID.
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/deviceId"
       responses:
         "2XX":
           description: OK
@@ -1386,24 +725,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/DeviceDetails"
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
     put:
       tags:
         - Push
@@ -1413,36 +735,7 @@ paths:
         \ push.recipient are mutable."
       operationId: putPushDeviceDetails
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: deviceId
-          in: path
-          description: Device's ID.
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/deviceId"
       requestBody:
         description: Device Details
         content:
@@ -1469,24 +762,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/DeviceDetails"
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
     delete:
       tags:
         - Push
@@ -1495,58 +771,12 @@ paths:
         for receiving push notifications through channels will also be deleted.
       operationId: unregisterPushDevice
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: deviceId
-          in: path
-          description: Device's ID.
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/deviceId"
       responses:
         "2XX":
           description: OK
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
     patch:
       tags:
         - Push
@@ -1555,36 +785,7 @@ paths:
         \ Only clientId, metadata and push.recipient are mutable."
       operationId: patchPushDeviceDetails
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: deviceId
-          in: path
-          description: Device's ID.
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/deviceId"
       requestBody:
         description: Device Details
         content:
@@ -1611,24 +812,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/DeviceDetails"
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /push/deviceRegistrations/{deviceId}/resetUpdateToken:
     get:
       tags:
@@ -1637,36 +824,7 @@ paths:
       description: Gets an updated device details object.
       operationId: updatePushDeviceDetails
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: deviceId
-          in: path
-          description: Device's ID.
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
+        - $ref: "#/components/parameters/deviceId"
       responses:
         "2XX":
           description: OK
@@ -1681,24 +839,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/DeviceDetails"
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /push/publish:
     post:
       tags:
@@ -1707,29 +851,6 @@ paths:
       description: A convenience endpoint to deliver a push notification payload to
         a single device or set of devices identified by their client identifier.
       operationId: publishPushNotificationToDevices
-      parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
       requestBody:
         description: Request Body
         content:
@@ -1767,24 +888,10 @@ paths:
         "2XX":
           description: OK
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /stats:
     get:
       tags:
@@ -1796,77 +903,13 @@ paths:
         \ track usage against account quotas."
       operationId: getStats
       parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
-        - name: start
-          in: query
-          description: Beginning of time The start of the query interval as a time in
-            milliseconds since the epoch. A message qualifies as a member of the result
-            set if it was received at or after this time.
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-        - name: limit
-          in: query
-          description: "The maximum number of records to return. A limit greater than\
-          \ 1,000 is invalid."
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: integer
-        - name: end
-          in: query
-          description: The end of the query interval as a time in milliseconds since
-            the epoch. A message qualifies as a member of the result set if it was received
-            at or before this time.
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            default: now
-        - name: direction
-          in: query
-          description: "The direction of this query. The direction determines the order\
-          \ of the returned result array, but also determines which end of the query\
-          \ interval is the start point for the search. For example, a forwards query\
-          \ uses start as the start point, whereas a backwards query uses end as the\
-          \ start point."
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            default: backwards
-            enum:
-              - forwards
-              - backwards
+        - $ref: "#/components/parameters/filterStart"
+        - $ref: "#/components/parameters/filterLimit"
+        - $ref: "#/components/parameters/filterEnd"
+        - $ref: "#/components/parameters/filterDirection"
         - name: unit
           in: query
-          description: Specifies the unit of aggregation in the returned results.
+          description: Specifies the unit of aggregation in the returned results
           required: false
           style: form
           explode: true
@@ -1886,24 +929,10 @@ paths:
               schema:
                 type: object
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
   /time:
     get:
       tags:
@@ -1911,29 +940,6 @@ paths:
       summary: Get the service time
       description: This returns the service time in milliseconds since the epoch.
       operationId: getTime
-      parameters:
-        - name: X-Ably-Version
-          in: header
-          description: The version of the API you wish to use.
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
-          x-ballerina-name: xAblyVersion
-        - name: format
-          in: query
-          description: The response format you would like
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-            enum:
-              - json
-              - jsonp
-              - msgpack
-              - html
       responses:
         "2XX":
           description: OK
@@ -1952,25 +958,11 @@ paths:
               schema:
                 type: string
         default:
-          description: Error
-          headers:
-            x-ably-errorcode:
-              $ref: "#/components/headers/ErrorCode"
-            x-ably-errormessage:
-              $ref: "#/components/headers/ErrorMessage"
-            x-ably-serverid:
-              $ref: "#/components/headers/ServerId"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-            application/x-msgpack:
-              schema:
-                $ref: "#/components/schemas/Error"
-            text/html:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/Error"
       security: []
+    parameters:
+      - $ref: "#/components/parameters/versionHeader"
+      - $ref: "#/components/parameters/responseFormat"
 components:
   schemas:
     DeviceDetails:
@@ -1978,7 +970,7 @@ components:
       properties:
         pushState:
           type: string
-          description: the current state of the push device.
+          description: the current state of the push device
           readOnly: true
           enum:
             - Active
@@ -1986,18 +978,18 @@ components:
             - Failed
         deviceSecret:
           type: string
-          description: Secret value for the device.
+          description: Secret value for the device
         metadata:
           type: object
           description: Optional metadata object for this device. The metadata for
             a device may only be set by clients with push-admin privileges and will
-            be used more extensively in the future with smart notifications.
+            be used more extensively in the future with smart notifications
         clientId:
           type: string
-          description: Optional trusted client identifier for the device.
+          description: Optional trusted client identifier for the device
         formFactor:
           type: string
-          description: Form factor of the push device.
+          description: Form factor of the push device
           enum:
             - phone
             - tablet
@@ -2010,10 +1002,10 @@ components:
           $ref: "#/components/schemas/Recipient"
         id:
           type: string
-          description: Unique identifier for the device generated by the device itself.
+          description: Unique identifier for the device generated by the device itself
         platform:
           type: string
-          description: Platform of the push device.
+          description: Platform of the push device
           enum:
             - ios
             - android
@@ -2022,13 +1014,13 @@ components:
       properties:
         clientId:
           type: string
-          description: The client ID of the publisher of this presence update.
+          description: The client ID of the publisher of this presence update
         data:
           type: string
-          description: "The presence update payload, if provided."
+          description: "The presence update payload, if provided"
         action:
           type: string
-          description: The event signified by a PresenceMessage.
+          description: The event signified by a PresenceMessage
           readOnly: true
           enum:
             - ABSENT
@@ -2038,23 +1030,23 @@ components:
             - UPDATE
         connectionId:
           type: string
-          description: The connection ID of the publisher of this presence update.
+          description: The connection ID of the publisher of this presence update
         extras:
           $ref: "#/components/schemas/Extras"
         id:
           type: string
-          description: Unique ID assigned by Ably to this presence update.
+          description: Unique ID assigned by Ably to this presence update
           readOnly: true
         encoding:
           type: string
           description: "This will typically be empty as all presence updates received\
             \ from Ably are automatically decoded client-side using this value. However,\
             \ if the message encoding cannot be processed, this attribute will contain\
-            \ the remaining transformations not applied to the data payload."
+            \ the remaining transformations not applied to the data payload"
         timestamp:
           type: integer
           description: "Timestamp when the presence update was received by Ably, as\
-            \ milliseconds since the epoch."
+            \ milliseconds since the epoch"
           format: int64
           readOnly: true
     Message:
@@ -2063,36 +1055,36 @@ components:
         clientId:
           type: string
           description: "The [client ID](https://www.ably.io/documentation/core-features/authentication#identified-clients)\
-            \ of the publisher of this message."
+            \ of the publisher of this message"
         data:
           type: string
-          description: "The string encoded payload, with the encoding specified below."
+          description: "The string encoded payload, with the encoding specified below"
         name:
           type: string
-          description: "The event name, if provided."
+          description: "The event name, if provided"
         connectionId:
           type: string
-          description: The connection ID of the publisher of this message.
+          description: The connection ID of the publisher of this message
         extras:
           $ref: "#/components/schemas/Extras"
         id:
           type: string
           description: "A Unique ID that can be specified by the publisher for [idempotent\
-            \ publishing](https://www.ably.io/documentation/rest/messages#idempotent)."
+            \ publishing](https://www.ably.io/documentation/rest/messages#idempotent)"
           readOnly: true
         encoding:
           type: string
           description: "This will typically be empty as all messages received from\
             \ Ably are automatically decoded client-side using this value. However,\
             \ if the message encoding cannot be processed, this attribute will contain\
-            \ the remaining transformations not applied to the data payload."
+            \ the remaining transformations not applied to the data payload"
         timestamp:
           type: integer
           description: "Timestamp when the message was received by the Ably, as milliseconds\
-            \ since the epoch."
+            \ since the epoch"
           format: int64
           readOnly: true
-      description: Message object.
+      description: Message object
     ChannelDetails:
       required:
         - channelId
@@ -2102,15 +1094,15 @@ components:
           type: boolean
           description: "In events relating to the activity of a channel in a specific\
             \ region, this optionally identifies whether or not that region is responsible\
-            \ for global coordination of the channel."
+            \ for global coordination of the channel"
         region:
           type: string
           description: "In events relating to the activity of a channel in a specific\
-            \ region, this optionally identifies the region."
+            \ region, this optionally identifies the region"
         channelId:
           type: string
           description: "The required name of the channel including any qualifier,\
-            \ if any."
+            \ if any"
         status:
           $ref: "#/components/schemas/ChannelStatus"
     Error:
@@ -2118,34 +1110,34 @@ components:
       properties:
         code:
           type: integer
-          description: Error code.
+          description: Error code
         href:
           type: string
-          description: Link to help with error.
+          description: Link to help with error
         message:
           type: string
-          description: Message explaining the error's cause.
+          description: Message explaining the error's cause
         serverId:
           type: string
-          description: Server ID with which error was encountered.
+          description: Server ID with which error was encountered
         statusCode:
           type: integer
-          description: Status error code.
-      description: Returned error from failed REST.
+          description: Status error code
+      description: Returned error from failed REST
     Recipient:
       type: object
       properties:
         registrationToken:
           type: string
           description: "when using GCM or FCM, specifies the required registration\
-            \ token."
+            \ token"
         clientId:
           type: string
           description: Client ID of recipient
           writeOnly: true
         transportType:
           type: string
-          description: Defines which push platform is being used.
+          description: Defines which push platform is being used
           enum:
             - apns
             - fcm
@@ -2156,8 +1148,8 @@ components:
           writeOnly: true
         deviceToken:
           type: string
-          description: "when using APNs, specifies the required device token."
-      description: Push recipient details for a device.
+          description: "when using APNs, specifies the required device token"
+      description: Push recipient details for a device
     ChannelStatus:
       required:
         - isActive
@@ -2170,33 +1162,33 @@ components:
           description: "A required boolean value indicating whether the channel that\
             \ is the subject of the event is active. For events indicating regional\
             \ activity of a channel this indicates activity in that region, not global\
-            \ activity."
-      description: A ChannelStatus instance.
+            \ activity"
+      description: A ChannelStatus instance
     Extras:
       type: object
       properties:
         push:
           $ref: "#/components/schemas/Push"
       description: "Extras object. Currently only allows for [push](https://www.ably.io/documentation/general/push/publish#channel-broadcast-example)\
-        \ extra."
+        \ extra"
     Notification:
       type: object
       properties:
         collapseKey:
           type: string
-          description: "Platform-specific, used to group notifications together."
+          description: "Platform-specific, used to group notifications together"
         sound:
           type: string
-          description: Platform-specific sound for the notification.
+          description: Platform-specific sound for the notification
         icon:
           type: string
-          description: Platform-specific icon for the notification.
+          description: Platform-specific icon for the notification
         body:
           type: string
-          description: Text below title on the expanded notification.
+          description: Text below title on the expanded notification
         title:
           type: string
-          description: Title to display at the notification.
+          description: Title to display at the notification
       description: Notification
     TokenDetails:
       type: object
@@ -2204,44 +1196,44 @@ components:
         capability:
           type: string
           description: Regular expression representation of the capabilities of the
-            token.
+            token
         expires:
           type: integer
-          description: Timestamp of token expiration.
+          description: Timestamp of token expiration
         keyName:
           type: string
           description: Name of the key used to create the token
         issued:
           type: integer
-          description: Timestamp of token creation.
+          description: Timestamp of token creation
         token:
           type: string
-          description: The Ably Token.
+          description: The Ably Token
     Occupancy:
       type: object
       properties:
         presenceMembers:
           type: integer
-          description: The number of members currently entered into the presence channel.
+          description: The number of members currently entered into the presence channel
         presenceSubscribers:
           type: integer
           description: The number of connections that are authorised to subscribe
-            to presence messages.
+            to presence messages
         subscribers:
           type: integer
           description: The number of connections attached that are authorised to subscribe
-            to messages.
+            to messages
         publishers:
           type: integer
           description: The number of connections attached to the channel that are
-            authorised to publish.
+            authorised to publish
         presenceConnections:
           type: integer
           description: The number of connections that are authorised to enter members
-            into the presence channel.
+            into the presence channel
       description: "An Occupancy instance indicating the occupancy of a channel. For\
         \ events indicating regional activity of a channel this indicates activity\
-        \ in that region, not global activity."
+        \ in that region, not global activity"
     TokenRequest:
       required:
         - capability
@@ -2255,7 +1247,7 @@ components:
           description: "The [capabilities](https://www.ably.io/documentation/core-features/authentication#capabilities-explained)\
             \ (i.e. a set of channel names/namespaces and, for each, a set of operations)\
             \ which should be a subset of the set of capabilities associated with\
-            \ the key specified in keyName."
+            \ the key specified in keyName"
           example:
             channel1:
               - publish
@@ -2264,19 +1256,19 @@ components:
           type: string
           description: "The [client ID](https://www.ably.io/documentation/core-features/authentication#identified-clients)\
             \ to be assosciated with the token. Can be set to * to allow for any client\
-            \ ID to be used."
+            \ ID to be used"
         keyName:
           type: string
           description: Name of the key used for the TokenRequest. The keyName comprises
-            of the app ID and key ID on an API Key.
+            of the app ID and key ID on an API Key
           example: xVLyHw.LMJZxw
         nonce:
           type: string
           description: "An unquoted, un-escaped random string of at least 16 characters.\
-            \ Used to ensure the Ably TokenRequest cannot be reused."
+            \ Used to ensure the Ably TokenRequest cannot be reused"
         timestamp:
           type: integer
-          description: Time of creation of the Ably TokenRequest.
+          description: Time of creation of the Ably TokenRequest
     Push:
       type: object
       properties:
@@ -2291,7 +1283,7 @@ components:
           $ref: "#/components/schemas/Notification"
         data:
           type: string
-          description: "Arbitrary [key-value string-to-string payload](https://www.ably.io/documentation/general/push/publish#channel-broadcast-example)."
+          description: "Arbitrary [key-value string-to-string payload](https://www.ably.io/documentation/general/push/publish#channel-broadcast-example)"
         web:
           type: object
           properties:
@@ -2317,7 +1309,7 @@ components:
             mac:
               type: string
               description: "A signature, generated as an HMAC of each of the above components,\
-              \ using the key secret value."
+              \ using the key secret value"
   responses:
     Error:
       description: Error
@@ -2340,18 +1332,18 @@ components:
             $ref: "#/components/schemas/Error"
   parameters:
     channelId:
-      name: channel_id
+      name: channelId
       in: path
-      description: "The [Channel's ID](https://www.ably.io/documentation/rest/channels)."
+      description: "The [Channel's ID](https://www.ably.io/documentation/rest/channels)"
       required: true
       style: simple
       explode: false
       schema:
         type: string
     deviceId:
-      name: device_id
+      name: deviceId
       in: path
-      description: Device's ID.
+      description: Device's ID
       required: true
       style: simple
       explode: false
@@ -2364,7 +1356,7 @@ components:
         \ of the returned result array, but also determines which end of the query\
         \ interval is the start point for the search. For example, a forwards query\
         \ uses start as the start point, whereas a backwards query uses end as the\
-        \ start point."
+        \ start point"
       required: false
       style: form
       explode: true
@@ -2379,7 +1371,7 @@ components:
       in: query
       description: The end of the query interval as a time in milliseconds since the
         epoch. A message qualifies as a member of the result set if it was received
-        at or before this time.
+        at or before this time
       required: false
       style: form
       explode: true
@@ -2390,7 +1382,7 @@ components:
       name: limit
       in: query
       description: "The maximum number of records to return. A limit greater than\
-        \ 1,000 is invalid."
+        \ 1,000 is invalid"
       required: false
       style: form
       explode: true
@@ -2401,7 +1393,7 @@ components:
       in: query
       description: Beginning of time The start of the query interval as a time in
         milliseconds since the epoch. A message qualifies as a member of the result
-        set if it was received at or after this time.
+        set if it was received at or after this time
       required: false
       style: form
       explode: true
@@ -2411,7 +1403,7 @@ components:
       name: keyName
       in: path
       description: "The [key name](https://www.ably.io/documentation/rest-api/token-request-spec#api-key-format)\
-        \ comprises of the app ID and key ID of an API key."
+        \ comprises of the app ID and key ID of an API key"
       required: true
       style: simple
       explode: false
@@ -2434,12 +1426,13 @@ components:
     versionHeader:
       name: X-Ably-Version
       in: header
-      description: The version of the API you wish to use.
+      description: The version of the API you wish to use
       required: false
       style: simple
       explode: false
       schema:
         type: string
+      x-ballerina-name: xAblyVersion
   headers:
     ErrorCode:
       description: The error code.

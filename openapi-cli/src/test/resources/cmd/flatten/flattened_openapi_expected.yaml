@@ -74,9 +74,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/PetsBody"
+                  $ref: "#/components/schemas/InlineResponse2001"
 components:
   schemas:
+    InlineResponse2001:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
     InlineResponse200:
       type: object
       properties:
