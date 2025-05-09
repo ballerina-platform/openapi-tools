@@ -55,7 +55,7 @@ public class AllOfResponsesTests {
         TypeHandler.createInstance(response, false);
         Operation post = response.getPaths().get("/users/{userId}/meetings").getPost();
         FunctionReturnTypeGeneratorImp functionReturnType = new FunctionReturnTypeGeneratorImp(post, response, "post");
-        assertEquals(functionReturnType.getReturnType().get().type().toString(), "inline_response_201|error");
+        assertEquals(functionReturnType.getReturnType().get().type().toString(), "inline_response_201|error?");
     }
 
     @Test(description = "Tests for the object response without property")
