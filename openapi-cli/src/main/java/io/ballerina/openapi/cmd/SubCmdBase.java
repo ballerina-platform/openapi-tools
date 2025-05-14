@@ -195,8 +195,8 @@ public abstract class SubCmdBase implements BLauncherCmd {
     public abstract String getDefaultFileName();
 
     public Optional<OpenAPI> getFlattenOpenAPI(OpenAPI openAPI) {
-        // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `skipMatches: true`
-        InlineModelResolver inlineModelResolver = new InlineModelResolver(true, true);
+        // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `skipMatches: false`
+        InlineModelResolver inlineModelResolver = new InlineModelResolver(true, false);
         inlineModelResolver.flatten(openAPI);
         return Optional.of(openAPI);
     }
