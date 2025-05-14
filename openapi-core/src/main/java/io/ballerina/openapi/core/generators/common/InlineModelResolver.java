@@ -116,9 +116,14 @@ public class InlineModelResolver {
                     if (model.getProperties() != null && !model.getProperties().isEmpty()) {
                         flattenProperties(model.getProperties(), pathname);
                         String modelName = resolveModelName(model.getTitle(), genericName);
-                        mediaType.setSchema(new Schema().$ref(modelName));
-                        addGenerated(modelName, model);
-                        openAPI.getComponents().addSchemas(modelName, model);
+                        String existing = matchGenerated(model);
+                        if (existing != null) {
+                            mediaType.setSchema(new Schema().$ref(existing));
+                        } else {
+                            mediaType.setSchema(new Schema().$ref(modelName));
+                            addGenerated(modelName, model);
+                            openAPI.getComponents().addSchemas(modelName, model);
+                        }
                     } else if (model instanceof ComposedSchema composedSchema) {
                         flattenComposedSchema(composedSchema, pathname);
                         if (model.get$ref() == null) {
@@ -170,9 +175,14 @@ public class InlineModelResolver {
                         if (model.getProperties() != null && !model.getProperties().isEmpty()) {
                             flattenProperties(model.getProperties(), pathname);
                             String modelName = resolveModelName(model.getTitle(), parameter.getName());
-                            parameter.setSchema(new Schema().$ref(modelName));
-                            addGenerated(modelName, model);
-                            openAPI.getComponents().addSchemas(modelName, model);
+                            String existing = matchGenerated(model);
+                            if (existing != null) {
+                                parameter.setSchema(new Schema().$ref(existing));
+                            } else {
+                                parameter.setSchema(new Schema().$ref(modelName));
+                                addGenerated(modelName, model);
+                                openAPI.getComponents().addSchemas(modelName, model);
+                            }
                         }
                     }
                 } else if (model instanceof ComposedSchema) {
