@@ -26,31 +26,20 @@ public isolated client class Client {
     # + serviceUrl - URL of the target service 
     # + return - An error if connector initialization failed 
     public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "http://localhost:8080/socialMedia") returns error? {
-        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
-        do {
-            if config.http1Settings is ClientHttp1Settings {
-                ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
-                httpClientConfig.http1Settings = {...settings};
-            }
-            if config.http2Settings is http:ClientHttp2Settings {
-                httpClientConfig.http2Settings = check config.http2Settings.ensureType(http:ClientHttp2Settings);
-            }
-            if config.cache is http:CacheConfig {
-                httpClientConfig.cache = check config.cache.ensureType(http:CacheConfig);
-            }
-            if config.responseLimits is http:ResponseLimitConfigs {
-                httpClientConfig.responseLimits = check config.responseLimits.ensureType(http:ResponseLimitConfigs);
-            }
-            if config.secureSocket is http:ClientSecureSocket {
-                httpClientConfig.secureSocket = check config.secureSocket.ensureType(http:ClientSecureSocket);
-            }
-            if config.proxy is http:ProxyConfig {
-                httpClientConfig.proxy = check config.proxy.ensureType(http:ProxyConfig);
-            }
-        }
-        http:StatusCodeClient httpEp = check new (serviceUrl, httpClientConfig);
-        self.clientEp = httpEp;
-        return;
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, http1Settings: config.http1Settings, http2Settings: config.http2Settings, timeout: config.timeout, forwarded: config.forwarded, followRedirects: config.followRedirects, poolConfig: config.poolConfig, cache: config.cache, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, cookieConfig: config.cookieConfig, responseLimits: config.responseLimits, secureSocket: config.secureSocket, proxy: config.proxy, socketConfig: config.socketConfig, validation: config.validation, laxDataBinding: config.laxDataBinding};
+        self.clientEp = check new (serviceUrl, httpClientConfig);
+    }
+
+    # Get all users
+    #
+    # + headers - Headers to be sent with the request
+    # + return - Ok
+    @MethodImpl {name: "getUsersImpl"}
+    resource isolated function get users(map<string|string[]> headers = {}, typedesc<http:Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
+
+    private isolated function getUsersImpl(map<string|string[]> headers, typedesc<http:Ok> targetType) returns http:StatusCodeResponse|error {
+        string resourcePath = string `/users`;
+        return self.clientEp->get(resourcePath, headers, targetType = targetType);
     }
 
     # Get all products
@@ -60,6 +49,11 @@ public isolated client class Client {
     @MethodImpl {name: "getProductsImpl"}
     resource isolated function get products(map<string|string[]> headers = {}, typedesc<Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
 
+    private isolated function getProductsImpl(map<string|string[]> headers, typedesc<Ok> targetType) returns http:StatusCodeResponse|error {
+        string resourcePath = string `/products`;
+        return self.clientEp->get(resourcePath, headers, targetType = targetType);
+    }
+
     # Get user by id
     #
     # + headers - Headers to be sent with the request 
@@ -67,25 +61,8 @@ public isolated client class Client {
     @MethodImpl {name: "getUserByIdImpl"}
     resource isolated function get users/[int id](map<string|string[]> headers = {}, typedesc<UserOk> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResource"} external;
 
-    # Get all users
-    #
-    # + headers - Headers to be sent with the request 
-    # + return - Ok 
-    @MethodImpl {name: "getUsersImpl"}
-    resource isolated function get users(map<string|string[]> headers = {}, typedesc<http:Ok> targetType = <>) returns targetType|error = @java:Method {'class: "io.ballerina.openapi.client.GeneratedClient", name: "invokeResourceWithoutPath"} external;
-
-    private isolated function getProductsImpl(map<string|string[]> headers, typedesc<Ok> targetType) returns http:StatusCodeResponse|error {
-        string resourcePath = string `/products`;
-        return self.clientEp->get(resourcePath, headers, targetType = targetType);
-    }
-
     private isolated function getUserByIdImpl(int id, map<string|string[]> headers, typedesc<UserOk> targetType) returns http:StatusCodeResponse|error {
         string resourcePath = string `/users/${getEncodedUri(id)}`;
-        return self.clientEp->get(resourcePath, headers, targetType = targetType);
-    }
-
-    private isolated function getUsersImpl(map<string|string[]> headers, typedesc<http:Ok> targetType) returns http:StatusCodeResponse|error {
-        string resourcePath = string `/users`;
         return self.clientEp->get(resourcePath, headers, targetType = targetType);
     }
 }

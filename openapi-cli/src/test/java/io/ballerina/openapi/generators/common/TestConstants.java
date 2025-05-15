@@ -262,7 +262,7 @@ public class TestConstants {
             "    # Configurations associated with retrying\n" +
             "    http:RetryConfig retryConfig?;\n" +
             "    # Configurations associated with cookies\n" +
-            "    http:CookieConfigcookieConfig?;\n" +
+            "    http:CookieConfig cookieConfig?;\n" +
             "    # Configurations associated with inbound response size limits\n" +
             "    http:ResponseLimitConfigs responseLimits = {};\n" +
             "    # SSL/TLS-related options\n" +
