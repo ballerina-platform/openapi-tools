@@ -118,7 +118,6 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
             Assert.fail("Code generation failed. : " + readOutput(true));
         }
     }
-
     @Test(description = "Test openapi to ballerina code generation with default file headers")
     public void testBothClientServiceGeneration() throws IOException {
         Path petstoreYaml = resourceDir.resolve(Paths.get("petstore.yaml"));
@@ -144,6 +143,7 @@ public class BallerinaCodeGeneratorLicenseTests extends OpenAPICommandTest {
             Assert.fail("Code generation failed. : " + readOutput(true));
         }
     }
+
 
     @Test(description = "Test openapi to ballerina code generation with user provided license headers")
     public void testUserGivenLicenseHeader() throws IOException {
