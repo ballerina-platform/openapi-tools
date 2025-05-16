@@ -464,7 +464,7 @@ public class InlineModelResolver {
                 concatenated = concatenated.concat(uniqueKey);
             }
         }
-        key = concatenated.replaceAll("[^a-z_.A-Z0-9 ]", "");
+        key = concatenated.replaceAll("[^a-z_A-Z0-9 ]", "");
         // should not be
         // assigned. Also declare
         // the methods parameters
