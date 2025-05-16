@@ -973,7 +973,7 @@ public class OASModifier {
                 break;
             }
         }
-        return (commonPath.isEmpty() || commonPath.trim().equals(SLASH)) ? Optional.empty() : Optional.of(commonPath);
+        return (commonPath.isEmpty() || commonPath.equals(SLASH)) ? Optional.empty() : Optional.of(commonPath);
     }
 
     private static String calculateCommonPath(String path, String commonPath) {
