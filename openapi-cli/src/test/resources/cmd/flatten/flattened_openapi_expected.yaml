@@ -39,7 +39,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PetsBody"
+              $ref: "#/components/schemas/InlineResponse200"
         required: true
       responses:
         "201":
@@ -74,20 +74,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/PetsBody"
+                  $ref: "#/components/schemas/InlineResponse200"
 components:
   schemas:
     InlineResponse200:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        tag:
-          type: string
-    PetsBody:
       type: object
       properties:
         id:

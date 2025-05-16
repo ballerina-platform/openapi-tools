@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.XML_DATA;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
+import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
 
 /**
  * Defines the payload structure of xml mime type.
@@ -45,11 +46,12 @@ public class XmlType extends MimeType {
 
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
-        String payloadName = "xmlBody";
         addImport(imports, XML_DATA);
+        addImport(imports, JSON_DATA);
 
+        String payloadName = "xmlBody";
         VariableDeclarationNode jsonVariable = GeneratorUtils.getSimpleStatement("json", "jsonBody",
-                "payload.toJson()");
+                "jsondata:toJson(payload)");
         statementsList.add(jsonVariable);
         VariableDeclarationNode xmlBody = GeneratorUtils.getSimpleStatement("xml?", payloadName,
                 "check xmldata:fromJson(jsonBody)");

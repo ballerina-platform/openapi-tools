@@ -20,6 +20,7 @@ package io.ballerina.openapi.core.generators.client.mime;
 
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
+import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.StatementNode;
@@ -49,7 +50,9 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENCODING;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.createEncodingMap;
+import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
 
 /**
  * Defines the payload structure of "application/x-www-form-urlencoded" mime type.
@@ -59,14 +62,16 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.createE
 public class UrlEncodedType extends MimeType {
 
     private final BallerinaUtilGenerator ballerinaUtilGenerator;
+    private final List<ImportDeclarationNode> imports;
 
-    public UrlEncodedType(BallerinaUtilGenerator ballerinaUtilGenerator) {
+    public UrlEncodedType(BallerinaUtilGenerator ballerinaUtilGenerator, List<ImportDeclarationNode> imports) {
         this.ballerinaUtilGenerator = ballerinaUtilGenerator;
+        this.imports = imports;
     }
 
     @Override
     public void setPayload(List<StatementNode> statementsList, Map.Entry<String, MediaType> mediaTypeEntry) {
-
+        addImport(imports, JSON_DATA);
         ballerinaUtilGenerator.setRequestBodyEncodingFound(true);
         VariableDeclarationNode requestBodyEncodingMap = getRequestBodyEncodingMap(
                 mediaTypeEntry.getValue().getEncoding());
@@ -74,11 +79,12 @@ public class UrlEncodedType extends MimeType {
         if (requestBodyEncodingMap != null) {
             statementsList.add(requestBodyEncodingMap);
             VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING, payloadName,
-                    "createFormURLEncodedRequestBody(payload, requestBodyEncoding)");
+                    "createFormURLEncodedRequestBody(check jsondata:toJson(payload).ensureType(), " +
+                            "requestBodyEncoding)");
             statementsList.add(requestBodyVariable);
         } else {
             VariableDeclarationNode requestBodyVariable = GeneratorUtils.getSimpleStatement(STRING, payloadName,
-                    "createFormURLEncodedRequestBody(payload)");
+                    "createFormURLEncodedRequestBody(check jsondata:toJson(payload).ensureType())");
             statementsList.add(requestBodyVariable);
         }
         setPayload(statementsList, payloadName, mediaTypeEntry.getKey());

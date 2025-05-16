@@ -42,7 +42,7 @@ public class OASModifierTests {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASModifier oasModifier = new OASModifier();
         Map<String, String> proposedNameMapping = oasModifier.getProposedNameMapping(openAPI);
-        OpenAPI modifiedOAS = oasModifier.modifyWithBallerinaConventions(openAPI, proposedNameMapping);
+        OpenAPI modifiedOAS = oasModifier.modifyWithBallerinaNamingConventions(openAPI, proposedNameMapping);
         // file comparison
         OpenAPI expectedFileContent = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(expectedPath);
         Assert.assertEquals(modifiedOAS, expectedFileContent);

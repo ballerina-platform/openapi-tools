@@ -18,6 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.cli.BLauncherCmd;
+import io.ballerina.openapi.core.generators.common.InlineModelResolver;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.service.mapper.utils.CodegenUtils;
 import io.swagger.parser.OpenAPIParser;
@@ -26,7 +27,6 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.util.InlineModelResolver;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -75,7 +75,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
     }
 
     private static final String COMMAND_IDENTIFIER = "openapi-%s";
-    private static final String COMMA = ",";
+    protected static final String COMMA = ",";
 
     private static final String INFO_OUTPUT_WRITTEN_MSG = "INFO: %s OpenAPI definition file was successfully" +
             " written to: %s%n";
@@ -195,17 +195,16 @@ public abstract class SubCmdBase implements BLauncherCmd {
     public abstract String getDefaultFileName();
 
     public Optional<OpenAPI> getFlattenOpenAPI(OpenAPI openAPI) {
-        // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `camelCaseFlattenNaming: true`
-        InlineModelResolver inlineModelResolver = new InlineModelResolver(true, true);
+        // Flatten the OpenAPI definition with `flattenComposedSchemas: true` and `skipMatches: false`
+        InlineModelResolver inlineModelResolver = new InlineModelResolver(true, false);
         inlineModelResolver.flatten(openAPI);
         return Optional.of(openAPI);
     }
 
-    public Optional<OpenAPI> getFilteredOpenAPI(String openAPIFileContent, boolean enableResolver) {
+    public Optional<OpenAPI> getFilteredOpenAPI(String openAPIFileContent) {
         // Read the contents of the file with default parser options
         // Flattening will be done after filtering the operations
         ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(enableResolver);
         SwaggerParseResult parserResult = new OpenAPIParser().readContents(openAPIFileContent, null,
                 parseOptions);
         if (!parserResult.getMessages().isEmpty() &&

@@ -145,7 +145,7 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
             for (Node field : fields) {
                 boolean isUpdated = false;
                 for (Map.Entry<String, Schema> entry : schema.getProperties().entrySet()) {
-                    String key = GeneratorUtils.escapeIdentifier(entry.getKey());
+                    String key = getKey(entry);
                     Schema<?> value = entry.getValue();
                     if (field instanceof RecordFieldNode recordFieldNode) {
                         if (recordFieldNode.fieldName().text().trim().equals(key)) {
@@ -193,6 +193,11 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                 }
             }
         }
+    }
+
+    private static String getKey(Map.Entry<String, Schema> entry) {
+        return GeneratorUtils.getBallerinaNameExtension(entry.getValue())
+                .orElse(GeneratorUtils.escapeIdentifier(entry.getKey()));
     }
 
     private static MetadataNode updateMetadataNode(Optional<MetadataNode> metadata, Schema<?> schema) {

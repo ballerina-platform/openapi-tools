@@ -23,6 +23,11 @@ import io.swagger.v3.oas.models.OpenAPI;
 import picocli.CommandLine;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -38,7 +43,22 @@ import java.util.Optional;
 )
 public class Align extends SubCmdBase {
 
+    public static final String INVALID_ALIGNMENT_OPTIONS = "ERROR: Invalid alignment type '%s' provided. " +
+            "The available options are: %s";
     private static final String INFO_MSG_PREFIX = "Aligned";
+    public static final String NAME = "name";
+    public static final String DOC = "doc";
+    public static final String BASEPATH = "basepath";
+    public static final List<String> DEFAULT_ALIGNMENT_TYPES = List.of(NAME, DOC, BASEPATH);
+    private List<String> alignmentTypes = Arrays.asList(NAME, DOC, BASEPATH);
+
+    @CommandLine.Option(names = {"--include"}, description = "Alignment types to be included. " +
+            "The available options are: name, doc, basepath.")
+    public String includedAlignments;
+
+    @CommandLine.Option(names = {"--exclude"}, description = "Alignment types to be excluded. " +
+            "The available options are: name, doc, basepath.")
+    public String excludedAlignments;
 
     public Align() {
         super(CommandType.ALIGN, INFO_MSG_PREFIX);
@@ -49,20 +69,51 @@ public class Align extends SubCmdBase {
     }
 
     @Override
+    public void execute() {
+        setAlignmentTypes();
+        super.execute();
+    }
+
+    private void setAlignmentTypes() {
+        List<String> validatedIncludedAlignments = getValidatedAlignmentTypes(includedAlignments);
+        List<String> validatedExcludedAlignments = getValidatedAlignmentTypes(excludedAlignments);
+        if (!validatedIncludedAlignments.isEmpty()) {
+            alignmentTypes = validatedIncludedAlignments;
+        } else if (!validatedExcludedAlignments.isEmpty()) {
+            alignmentTypes.removeAll(validatedExcludedAlignments);
+        }
+    }
+
+    private List<String> getValidatedAlignmentTypes(String alignmentTypes) {
+        if (Objects.isNull(alignmentTypes) || alignmentTypes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        String[] alignmentTypesList = alignmentTypes.split(COMMA);
+        List<String> validatedAlignmentTypes = new ArrayList<>();
+        for (String alignmentType : alignmentTypesList) {
+            if (DEFAULT_ALIGNMENT_TYPES.contains(alignmentType)) {
+                validatedAlignmentTypes.add(alignmentType);
+            } else {
+                printError(INVALID_ALIGNMENT_OPTIONS.formatted(alignmentType, DEFAULT_ALIGNMENT_TYPES));
+            }
+        }
+        return validatedAlignmentTypes;
+    }
+
+    @Override
     public String getDefaultFileName() {
         return "aligned_ballerina_openapi";
     }
 
     @Override
     public Optional<OpenAPI> generate(String openAPIFileContent) {
-        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent, true);
+        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent);
         return filteredOpenAPI.flatMap(this::alignOpenAPI);
     }
 
     private Optional<OpenAPI> alignOpenAPI(OpenAPI openAPI) {
-        OASModifier oasAligner = new OASModifier();
         try {
-            return Optional.of(oasAligner.modifyWithBallerinaConventions(openAPI));
+            return Optional.of(new OASModifier().modify(openAPI, alignmentTypes));
         } catch (BallerinaOpenApiException exp) {
             printError("ERROR: %s".formatted(exp.getMessage()));
             return Optional.empty();

@@ -68,7 +68,7 @@ public class Flatten extends SubCmdBase {
 
     @Override
     public Optional<OpenAPI> generate(String openAPIFileContent) {
-        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent, false);
+        Optional<OpenAPI> filteredOpenAPI = getFilteredOpenAPI(openAPIFileContent);
         if (filteredOpenAPI.isEmpty()) {
             return Optional.empty();
         }

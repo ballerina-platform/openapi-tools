@@ -19,10 +19,8 @@
 package io.ballerina.openapi.core.generators.client;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.AssignmentStatementNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
-import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
@@ -40,10 +38,8 @@ import io.ballerina.compiler.syntax.tree.OptionalTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.Token;
@@ -65,6 +61,7 @@ import io.swagger.v3.oas.models.PathItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -76,9 +73,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createAssignmentStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createClassDefinitionNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createFieldAccessExpressionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionBodyBlockNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionDefinitionNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createFunctionSignatureNode;
@@ -88,18 +83,14 @@ import static io.ballerina.compiler.syntax.tree.NodeFactory.createModulePartNode
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createObjectFieldNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createQualifiedNameReferenceNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnStatementNode;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createReturnTypeDescriptorNode;
-import static io.ballerina.compiler.syntax.tree.NodeFactory.createSimpleNameReferenceNode;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLASS_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLIENT_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COLON_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.DOT_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EOF_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.ERROR_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FINAL_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.FUNCTION_DEFINITION;
@@ -110,11 +101,9 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.PUBLIC_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURNS_KEYWORD;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.RETURN_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.DEFAULT_API_KEY_DESC;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HTTP;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SELF;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.X_BALLERINA_INIT_DESCRIPTION;
 
 /**
@@ -276,11 +265,11 @@ public class BallerinaClientGenerator {
      * This function is to filter the operations based on the user given tags and operations.
      */
     protected Map<String, Map<PathItem.HttpMethod, Operation>> filterOperations() {
-        Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = new HashMap<>();
+        Map<String, Map<PathItem.HttpMethod, Operation>> filteredOperations = new LinkedHashMap<>();
         List<String> filterTags = filter.getTags();
         List<String> filterOperations = filter.getOperations();
         for (Map.Entry<String, PathItem> pathEntry : openAPI.getPaths().entrySet()) {
-            Map<PathItem.HttpMethod, Operation> operations = new HashMap<>();
+            Map<PathItem.HttpMethod, Operation> operations = new LinkedHashMap<>();
             Map<PathItem.HttpMethod, Operation> operationMap = pathEntry.getValue().readOperationsMap();
             if (operationMap.isEmpty()) {
                 continue;
@@ -397,24 +386,15 @@ public class BallerinaClientGenerator {
         List<StatementNode> assignmentNodes = new ArrayList<>();
 
         assignmentNodes.add(authConfigGeneratorImp.getHttpClientConfigVariableNode());
-        assignmentNodes.add(authConfigGeneratorImp.getClientConfigDoStatementNode());
 
         // If both apiKey and httpOrOAuth is supported
         // todo : After revamping
         if (authConfigGeneratorImp.isApiKey() && authConfigGeneratorImp.isHttpOROAuth()) {
             assignmentNodes.add(authConfigGeneratorImp.handleInitForMixOfApiKeyAndHTTPOrOAuth());
         }
-        // create initialization statement of http:Client class instance
-        assignmentNodes.add(authConfigGeneratorImp.getClientInitializationNode());
-        // create {@code self.clientEp = httpEp;} assignment node
-        FieldAccessExpressionNode varRef = createFieldAccessExpressionNode(
-                createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
-                createSimpleNameReferenceNode(createIdentifierToken("clientEp")));
-        SimpleNameReferenceNode expr = createSimpleNameReferenceNode(createIdentifierToken("httpEp"));
-        AssignmentStatementNode httpClientAssignmentStatementNode = createAssignmentStatementNode(varRef,
-                createToken(EQUAL_TOKEN), expr, createToken(SEMICOLON_TOKEN));
-        assignmentNodes.add(httpClientAssignmentStatementNode);
 
+        // create initialization statement of self.clientEp class instance
+        assignmentNodes.add(authConfigGeneratorImp.getClientInitializationNode());
 
         // Get API key assignment node if authentication mechanism type is only `apiKey`
         if (authConfigGeneratorImp.isApiKey() && !authConfigGeneratorImp.isHttpOROAuth()) {
@@ -422,13 +402,14 @@ public class BallerinaClientGenerator {
         }
         if (authConfigGeneratorImp.isApiKey()) {
             List<String> apiKeyNames = new ArrayList<>();
-            apiKeyNames.addAll(authConfigGeneratorImp.getHeaderApiKeyNameList().values());
-            apiKeyNames.addAll(authConfigGeneratorImp.getQueryApiKeyNameList().values());
+            authConfigGeneratorImp.getHeaderApiKeyNameMap().values().forEach(apiKeyNamePair -> {
+                apiKeyNames.add(apiKeyNamePair.displayName());
+            });
+            authConfigGeneratorImp.getQueryApiKeyNameMap().values().forEach(apiKeyNamePair -> {
+                apiKeyNames.add(apiKeyNamePair.displayName());
+            });
             setApiKeyNameList(apiKeyNames);
         }
-        ReturnStatementNode returnStatementNode = createReturnStatementNode(createToken(
-                RETURN_KEYWORD), null, createToken(SEMICOLON_TOKEN));
-        assignmentNodes.add(returnStatementNode);
         NodeList<StatementNode> statementList = createNodeList(assignmentNodes);
         return createFunctionBodyBlockNode(createToken(OPEN_BRACE_TOKEN),
                 null, statementList, createToken(CLOSE_BRACE_TOKEN), null);

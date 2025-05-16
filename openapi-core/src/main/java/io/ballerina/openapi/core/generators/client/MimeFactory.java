@@ -69,13 +69,13 @@ public class MimeFactory {
                 || requestBodySchema.getProperties() != null)) {
             String mediaType = mediaTypeEntry.getKey();
             if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
-                return new JsonType();
+                return new JsonType(imports);
             } else if (mediaType.startsWith(TEXT_PREFIX) || mediaType.contains(PDF) || mediaType.startsWith(IMAGE)) {
                 return new CustomType();
             } else if (mediaType.matches(".*/xml")  || mediaType.matches("application/.*\\+xml")) {
                 return new XmlType(imports);
             } else if (mediaType.equals(APPLICATION_FORM_URLENCODED)) {
-                return new UrlEncodedType(ballerinaUtilGenerator);
+                return new UrlEncodedType(ballerinaUtilGenerator, imports);
             } else if (mediaType.equals(APPLICATION_OCTET_STREAM) ||
                     mediaType.matches("application/.*\\+octet-stream")) {
                 return new OctetStreamType();

@@ -1,4 +1,4 @@
 [package]
 org= "ballerina"
 name= "openapi"
-version= "@toml.version@"
+version= "2.3.1"

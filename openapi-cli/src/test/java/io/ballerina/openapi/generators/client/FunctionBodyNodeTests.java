@@ -104,7 +104,7 @@ public class FunctionBodyNodeTests {
                 {"diagnostic_files/xml_payload_with_ref.yaml", "/pets", false, false, false,
                         "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
-                        "json jsonBody = payload.toJson();" +
+                        "json jsonBody = jsondata:toJson(payload);" +
                         "xml? xmlBody = check xmldata:fromJson(jsonBody);" +
                         "request.setPayload(xmlBody, \"application/xml\");" +
                         "return self.clientEp->post(resourcePath, request);}"},
@@ -114,7 +114,7 @@ public class FunctionBodyNodeTests {
                 {"client/swagger/text_request_payload.yaml", "/pets", false, false, false,
                         "{string resourcePath = string `/pets`;" +
                         "http:Request request = new;" +
-                        "json jsonBody = payload.toJson();" +
+                        "json jsonBody = jsondata:toJson(payload);" +
                         "request.setPayload(jsonBody, \"text/json\");" +
                         "return self.clientEp->post(resourcePath, request);}"},
                 {"client/swagger/pdf_payload.yaml", "/pets", false, false, false,
@@ -134,7 +134,8 @@ public class FunctionBodyNodeTests {
                         "X\\-Custom\\-Header}}, \"address\": {headers:{\"X-Address-Header\":X\\-Address\\-Header}}, " +
                         "\"name\":" +
                         "{contentType:\"text/plain\"}};\n" +
-                        "mime:Entity[] bodyParts = check createBodyParts(payload, encodingMap);\n" +
+                        "mime:Entity[] bodyParts = check createBodyParts(checkjsondata:toJson(payload).ensureType(), " +
+                                "encodingMap);\n" +
                         "request.setBodyParts(bodyParts);\n" +
                         " return  self.clientEp->post(resourcePath, request);\n}"},
                 {"client/swagger/empty_object_responnse.yaml", "/pets", false, false, false,

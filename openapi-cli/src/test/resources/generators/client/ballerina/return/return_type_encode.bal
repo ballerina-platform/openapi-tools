@@ -11,32 +11,9 @@ public isolated client class Client {
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
     public isolated function init(ApiKeysConfig apiKeyConfig, ConnectionConfig config =  {}, string serviceUrl = "https://api.uber.com/v1") returns error? {
-        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
-        do {
-            if config.http1Settings is ClientHttp1Settings {
-                ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
-                httpClientConfig.http1Settings = {...settings};
-            }
-            if config.http2Settings is http:ClientHttp2Settings {
-                httpClientConfig.http2Settings = check config.http2Settings.ensureType(http:ClientHttp2Settings);
-            }
-            if config.cache is http:CacheConfig {
-                httpClientConfig.cache = check config.cache.ensureType(http:CacheConfig);
-            }
-            if config.responseLimits is http:ResponseLimitConfigs {
-                httpClientConfig.responseLimits = check config.responseLimits.ensureType(http:ResponseLimitConfigs);
-            }
-            if config.secureSocket is http:ClientSecureSocket {
-                httpClientConfig.secureSocket = check config.secureSocket.ensureType(http:ClientSecureSocket);
-            }
-            if config.proxy is http:ProxyConfig {
-                httpClientConfig.proxy = check config.proxy.ensureType(http:ProxyConfig);
-            }
-        }
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
-        self.clientEp = httpEp;
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, http1Settings: config.http1Settings, http2Settings: config.http2Settings, timeout: config.timeout, forwarded: config.forwarded, followRedirects: config.followRedirects, poolConfig: config.poolConfig, cache: config.cache, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, cookieConfig: config.cookieConfig, responseLimits: config.responseLimits, secureSocket: config.secureSocket, proxy: config.proxy, socketConfig: config.socketConfig, validation: config.validation, laxDataBinding: config.laxDataBinding};
+        self.clientEp = check new (serviceUrl, httpClientConfig);
         self.apiKeyConfig = apiKeyConfig.cloneReadOnly();
-        return;
     }
 
     # Product Types
@@ -57,11 +34,11 @@ public isolated client class Client {
     # + headers - Headers to be sent with the request
     # + queries - Queries to be sent with the request
     # + return - An array of products
-    resource isolated function post products/[string country](map<string|string[]> headers = {}, *PostProductsCountryQueries queries) returns xml|error {
+    resource isolated function put products/[string country](map<string|string[]> headers = {}, *PutProductsCountryQueries queries) returns Product[]|error {
         string resourcePath = string `/products/${getEncodedUri(country)}`;
         resourcePath = resourcePath + check getPathForQueryParam(queries);
         http:Request request = new;
-        return self.clientEp->post(resourcePath, request, headers);
+        return self.clientEp->put(resourcePath, request, headers);
     }
 
     # Product Types
@@ -70,10 +47,10 @@ public isolated client class Client {
     # + headers - Headers to be sent with the request
     # + queries - Queries to be sent with the request
     # + return - An array of products
-    resource isolated function put products/[string country](map<string|string[]> headers = {}, *PutProductsCountryQueries queries) returns Product[]|error {
+    resource isolated function post products/[string country](map<string|string[]> headers = {}, *PostProductsCountryQueries queries) returns xml|error {
         string resourcePath = string `/products/${getEncodedUri(country)}`;
         resourcePath = resourcePath + check getPathForQueryParam(queries);
         http:Request request = new;
-        return self.clientEp->put(resourcePath, request, headers);
+        return self.clientEp->post(resourcePath, request, headers);
     }
 }

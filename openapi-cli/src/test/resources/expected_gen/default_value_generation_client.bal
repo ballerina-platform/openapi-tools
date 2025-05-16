@@ -12,31 +12,8 @@ public isolated client class Client {
     # + serviceUrl - URL of the target service
     # + return - An error if connector initialization failed
     public isolated function init(ConnectionConfig config =  {}, string serviceUrl = "http://localhost:8080/payloadV") returns error? {
-        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, timeout: config.timeout, forwarded: config.forwarded, poolConfig: config.poolConfig, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, validation: config.validation};
-        do {
-            if config.http1Settings is ClientHttp1Settings {
-                ClientHttp1Settings settings = check config.http1Settings.ensureType(ClientHttp1Settings);
-                httpClientConfig.http1Settings = {...settings};
-            }
-            if config.http2Settings is http:ClientHttp2Settings {
-                httpClientConfig.http2Settings = check config.http2Settings.ensureType(http:ClientHttp2Settings);
-            }
-            if config.cache is http:CacheConfig {
-                httpClientConfig.cache = check config.cache.ensureType(http:CacheConfig);
-            }
-            if config.responseLimits is http:ResponseLimitConfigs {
-                httpClientConfig.responseLimits = check config.responseLimits.ensureType(http:ResponseLimitConfigs);
-            }
-            if config.secureSocket is http:ClientSecureSocket {
-                httpClientConfig.secureSocket = check config.secureSocket.ensureType(http:ClientSecureSocket);
-            }
-            if config.proxy is http:ProxyConfig {
-                httpClientConfig.proxy = check config.proxy.ensureType(http:ProxyConfig);
-            }
-        }
-        http:Client httpEp = check new (serviceUrl, httpClientConfig);
-        self.clientEp = httpEp;
-        return;
+        http:ClientConfiguration httpClientConfig = {httpVersion: config.httpVersion, http1Settings: config.http1Settings, http2Settings: config.http2Settings, timeout: config.timeout, forwarded: config.forwarded, followRedirects: config.followRedirects, poolConfig: config.poolConfig, cache: config.cache, compression: config.compression, circuitBreaker: config.circuitBreaker, retryConfig: config.retryConfig, cookieConfig: config.cookieConfig, responseLimits: config.responseLimits, secureSocket: config.secureSocket, proxy: config.proxy, socketConfig: config.socketConfig, validation: config.validation, laxDataBinding: config.laxDataBinding};
+        self.clientEp = check new (serviceUrl, httpClientConfig);
     }
 
     # + headers - Headers to be sent with the request
@@ -248,16 +225,6 @@ isolated function getPathForQueryParam(map<anydata> queryParam, map<Encoding> en
     return restOfPath;
 }
 
-# Provides settings related to HTTP/1.x protocol.
-public type ClientHttp1Settings record {|
-    # Specifies whether to reuse a connection for multiple requests
-    http:KeepAlive keepAlive = http:KEEPALIVE_AUTO;
-    # The chunking behaviour of the request
-    http:Chunking chunking = http:CHUNKING_AUTO;
-    # Proxy server related options
-    ProxyConfig proxy?;
-|};
-
 public type Album record {|
     int iid = -1;
     string title;
@@ -280,48 +247,41 @@ public type Genre record {|
     int iid;
 |};
 
-# Proxy server configurations to be used with the HTTP client endpoint.
-public type ProxyConfig record {|
-    # Host name of the proxy server
-    string host = "";
-    # Proxy server port
-    int port = 0;
-    # Proxy server username
-    string userName = "";
-    # Proxy server password
-    @display {label: "", kind: "password"}
-    string password = "";
-|};
-
 # Provides a set of configurations for controlling the behaviours when communicating with a remote HTTP endpoint.
 @display {label: "Connection Config"}
 public type ConnectionConfig record {|
     # The HTTP version understood by the client
     http:HttpVersion httpVersion = http:HTTP_2_0;
     # Configurations related to HTTP/1.x protocol
-    ClientHttp1Settings http1Settings?;
+    http:ClientHttp1Settings http1Settings = {};
     # Configurations related to HTTP/2 protocol
-    http:ClientHttp2Settings http2Settings?;
+    http:ClientHttp2Settings http2Settings = {};
     # The maximum time to wait (in seconds) for a response before closing the connection
-    decimal timeout = 60;
+    decimal timeout = 30;
     # The choice of setting `forwarded`/`x-forwarded` header
     string forwarded = "disable";
+    # Configurations associated with Redirection
+    http:FollowRedirects followRedirects?;
     # Configurations associated with request pooling
     http:PoolConfiguration poolConfig?;
     # HTTP caching related configurations
-    http:CacheConfig cache?;
+    http:CacheConfig cache = {};
     # Specifies the way of handling compression (`accept-encoding`) header
     http:Compression compression = http:COMPRESSION_AUTO;
     # Configurations associated with the behaviour of the Circuit Breaker
     http:CircuitBreakerConfig circuitBreaker?;
     # Configurations associated with retrying
     http:RetryConfig retryConfig?;
+    # Configurations associated with cookies
+    http:CookieConfig cookieConfig?;
     # Configurations associated with inbound response size limits
-    http:ResponseLimitConfigs responseLimits?;
+    http:ResponseLimitConfigs responseLimits = {};
     # SSL/TLS-related options
     http:ClientSecureSocket secureSocket?;
     # Proxy server related options
     http:ProxyConfig proxy?;
+    # Provides settings related to client socket configuration
+    http:ClientSocketConfig socketConfig = {};
     # Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default
     boolean validation = true;
     # Enables relaxed data binding on the client side. When enabled, `nil` values are treated as optional,

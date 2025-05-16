@@ -583,6 +583,8 @@ public class GeneratorUtils {
             return SyntaxKind.BYTE_KEYWORD.stringValue() + SQUARE_BRACKETS;
         } else if (mediaType.equals("application/x-www-form-urlencoded")) {
             return "map<string>";
+        } else if (mediaType.equals(MULTIPART_FORM_DATA) && isRequest) {
+            return "record{}";
         } else {
             return isRequest ? HTTP_REQUEST : HTTP_RESPONSE;
         }
@@ -795,24 +797,41 @@ public class GeneratorUtils {
     }
 
     /**
-     * Normalized OpenAPI specification with adding proper naming to schema.
+     * Normalized OpenAPI specification.
      *
      * @param openAPI - openAPI specification
+     * @param validateOpIds - validate operation ids
+     * @param isSanitized - sanitise OpenAPI specification
      * @return - openAPI specification
-     * @throws IOException
-     * @throws BallerinaOpenApiException
+     * @throws BallerinaOpenApiException - Ballerina OpenAPI Exception
      */
     public static OpenAPI normalizeOpenAPI(OpenAPI openAPI, boolean validateOpIds, boolean isSanitized)
             throws BallerinaOpenApiException {
+        return normalizeOpenAPI(openAPI, validateOpIds, isSanitized, false);
+    }
+
+    /**
+     * Normalized OpenAPI specification.
+     *
+     * @param openAPI - openAPI specification
+     * @param validateOpIds - validate operation ids
+     * @param isSanitized - sanitise OpenAPI specification
+     * @param flatten - flatten OpenAPI specification
+     * @return - openAPI specification
+     * @throws BallerinaOpenApiException - Ballerina OpenAPI Exception
+     */
+    public static OpenAPI normalizeOpenAPI(OpenAPI openAPI, boolean validateOpIds, boolean isSanitized,
+                                           boolean flatten) throws BallerinaOpenApiException {
         io.swagger.v3.oas.models.Paths openAPIPaths = openAPI.getPaths();
         if (validateOpIds) {
             validateOperationIds(openAPIPaths.entrySet());
         }
         validateRequestBody(openAPIPaths.entrySet());
         if (isSanitized) {
-            OASModifier oasSanitizer = new OASModifier();
-            Map<String, String> proposedNameMapping = oasSanitizer.getProposedNameMapping(openAPI);
-            return oasSanitizer.modifyWithBallerinaConventions(openAPI, proposedNameMapping);
+            openAPI = new OASModifier().modify(openAPI);
+        }
+        if (flatten) {
+            new InlineModelResolver(true, true).flatten(openAPI);
         }
         return openAPI;
     }

@@ -32,6 +32,43 @@ public class GeneratorConstants {
 
     public static final String X_BALLERINA_NAME = "x-ballerina-name";
     public static final String X_PARAM_TYPE = "x-param-type";
+    public static final String HTTP_VERSION_FIELD = "httpVersion";
+    public static final String HTTP_1_SETTINGS_FIELD = "http1Settings";
+    public static final String HTTP_2_SETTINGS_FIELD = "http2Settings";
+    public static final String TIMEOUT_FIELD = "timeout";
+    public static final String FORWARDED_FIELD = "forwarded";
+    public static final String FOLLOW_REDIRECTS_FIELD = "followRedirects";
+    public static final String POOL_CONFIG_FIELD = "poolConfig";
+    public static final String CACHE_FIELD = "cache";
+    public static final String COMPRESSION_FIELD = "compression";
+    public static final String CIRCUIT_BREAKER_FIELD = "circuitBreaker";
+    public static final String RETRY_CONFIG_FIELD = "retryConfig";
+    public static final String COOKIE_CONFIG_FIELD = "cookieConfig";
+    public static final String RESPONSE_LIMITS_FIELD = "responseLimits";
+    public static final String SECURE_SOCKET_FIELD = "secureSocket";
+    public static final String PROXY_FIELD = "proxy";
+    public static final String SOCKET_CONFIG_FIELD = "socketConfig";
+    public static final String VALIDATION_FIELD = "validation";
+    public static final String LAX_DATA_BINDING_FIELD = "laxDataBinding";
+    public static final List<String> CLIENT_CONFIG_FIELD_LIST = List.of(HTTP_VERSION_FIELD, HTTP_1_SETTINGS_FIELD,
+            HTTP_2_SETTINGS_FIELD, TIMEOUT_FIELD, FORWARDED_FIELD, FOLLOW_REDIRECTS_FIELD, POOL_CONFIG_FIELD,
+            CACHE_FIELD, COMPRESSION_FIELD, CIRCUIT_BREAKER_FIELD, RETRY_CONFIG_FIELD, COOKIE_CONFIG_FIELD,
+            RESPONSE_LIMITS_FIELD, SECURE_SOCKET_FIELD, PROXY_FIELD, SOCKET_CONFIG_FIELD, VALIDATION_FIELD,
+            LAX_DATA_BINDING_FIELD);
+    public static final String HTTP_CLIENT_CONFIGURATION = "http:ClientConfiguration";
+    public static final String HTTP_CLIENT_HTTP_1_SETTINGS = "http:ClientHttp1Settings";
+    public static final String HTTP_CLIENT_HTTP_2_SETTINGS = "http:ClientHttp2Settings";
+    public static final String DEFAULT_RECORD = "{}";
+    public static final String DEFAULT_TIMEOUT = "30";
+    public static final String HTTP_CACHE_CONFIG = "http:CacheConfig";
+    public static final String HTTP_COMPRESSION = "http:Compression";
+    public static final String HTTP_CIRCUIT_BREAKER_CONFIG = "http:CircuitBreakerConfig";
+    public static final String HTTP_RETRY_CONFIG = "http:RetryConfig";
+    public static final String HTTP_COOKIE_CONFIG = "http:CookieConfig";
+    public static final String HTTP_RESPONSE_LIMIT_CONFIGS = "http:ResponseLimitConfigs";
+    public static final String HTTP_CLIENT_SECURE_SOCKET = "http:ClientSecureSocket";
+    public static final String HTTP_PROXY_CONFIG = "http:ProxyConfig";
+    public static final String HTTP_CLIENT_SOCKET_CONFIG = "http:ClientSocketConfig";
 
     /**
      * Enum to select the code generation mode.
@@ -175,7 +212,6 @@ public class GeneratorConstants {
     public static final String RESPONSE_LIMIT = "http:ResponseLimitConfigs";
     public static final String RESPONSE_LIMIT_FIELD = "responseLimits";
     public static final String SECURE_SOCKET = "http:ClientSecureSocket";
-    public static final String SECURE_SOCKET_FIELD = "secureSocket";
     public static final String PROXY = "http:ProxyConfig";
 
     public static final String KEEP_ALIVE = "keepAlive";
