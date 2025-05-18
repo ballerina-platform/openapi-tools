@@ -332,7 +332,7 @@ public class DocCommentsGeneratorUtil {
             return Optional.empty();
         }
         switch (refSection) {
-            case "components" -> {
+            case "schemas" -> {
                 if (Objects.nonNull(components.getSchemas()) && components.getSchemas().containsKey(refName)) {
                     return getSchemaDescription(components.getSchemas().get(refName), components);
                 }
