@@ -1355,6 +1355,7 @@ public type IssueFieldOption record {|
     string value;
     # The properties of the object, as arbitrary key-value pairs. These properties can be searched using JQL, if the extractions (see [Issue Field Option Property Index](https://developer.atlassian.com/cloud/jira/platform/modules/issue-field-option-property-index/)) are defined in the descriptor for the issue field module.
     record {} properties?;
+    # Details of the projects the option is available in.
     IssueFieldOptionConfiguration config?;
 |};
 
@@ -1390,6 +1391,7 @@ public type ChangedWorklog record {|
 
 public type BulkOperationErrorResult record {|
     int:Signed32 status?;
+    # Error messages from an operation.
     ErrorCollection elementErrors?;
     int:Signed32 failedElementNumber?;
 |};
@@ -1408,6 +1410,7 @@ public type ConnectWorkflowTransitionRule record {|
     string id;
     # The key of the rule, as defined in the Connect app descriptor.
     string 'key;
+    # A rule configuration.
     RuleConfiguration configuration;
     WorkflowTransition transition?;
 |};
@@ -1893,6 +1896,7 @@ public type WorkflowTransition record {|
 
 # Details of any errors encountered while updating workflow transition rules for a workflow.
 public type WorkflowTransitionRulesUpdateErrorDetails record {|
+    # Properties that identify a workflow.
     WorkflowId workflowId;
     # A list of transition rule update errors, indexed by the transition rule ID. Any transition rule that appears here wasn't updated.
     record {|string[]...;|} ruleUpdateErrors;
@@ -1939,6 +1943,7 @@ public type IncludedFields record {|
 
 public type NestedResponse record {|
     int:Signed32 status?;
+    # Error messages from an operation.
     ErrorCollection errorCollection?;
 |};
 
@@ -2448,6 +2453,7 @@ public type Field record {|
     string id;
     # The name of the field.
     string name;
+    # The schema of a field.
     JsonTypeBean schema;
     # The description of the field.
     string description?;
@@ -2461,6 +2467,7 @@ public type Field record {|
     int screensCount?;
     # Number of contexts where the field is used.
     int contextsCount?;
+    # Information about the most recent use of a field.
     FieldLastUsed lastUsed?;
 |};
 
@@ -3030,6 +3037,7 @@ public type PageBeanChangelog record {|
 
 # A clause that asserts whether a field was changed. For example, `status CHANGED AFTER startOfMonth(-1M)`.See [CHANGED](https://confluence.atlassian.com/x/dgiiLQ#Advancedsearching-operatorsreference-CHANGEDCHANGED) for more information about the CHANGED operator.
 public type FieldChangedClause record {
+    # A field used in a JQL query. See [Advanced searching - fields reference](https://confluence.atlassian.com/x/dAiiLQ) for more information about fields in JQL queries.
     JqlQueryField 'field;
     # The operator applied to the field.
     "changed" operator;
@@ -3328,6 +3336,7 @@ public type WorkflowStatus record {|
     string id;
     # The name of the status in the workflow.
     string name;
+    # Properties of a workflow status.
     WorkflowStatusProperties properties?;
 |};
 
@@ -3376,7 +3385,9 @@ public type Transition record {|
     string to;
     # The type of the transition.
     "global"|"initial"|"directed" 'type;
+    # ID of a screen.
     ScreenID screen?;
+    # A collection of transition rules.
     WorkflowRules rules?;
 |};
 
@@ -3402,6 +3413,7 @@ public type JiraExpressionAnalysis record {|
     boolean valid;
     # EXPERIMENTAL. The inferred type of the expression.
     string 'type?;
+    # Details about the complexity of the analysed Jira expression.
     JiraExpressionComplexity complexity?;
 |};
 
@@ -3634,7 +3646,9 @@ public type CrateWorkflowStatusDetails record {|
 
 # List of users and groups found in a search.
 public type FoundUsersAndGroups record {|
+    # The list of users found in a search, including header text (Showing X of Y matching users) and total of matched users.
     FoundUsers users?;
+    # The list of groups found in a search, including header text (Showing X of Y matching groups) and total of matched groups.
     FoundGroups groups?;
 |};
 
@@ -3763,9 +3777,11 @@ public type ProjectEmailAddress record {|
 
 # A clause that asserts the current value of a field. For example, `summary ~ test`.
 public type FieldValueClause record {
+    # A field used in a JQL query. See [Advanced searching - fields reference](https://confluence.atlassian.com/x/dAiiLQ) for more information about fields in JQL queries.
     JqlQueryField 'field;
     # The operator between the field and operand.
     "="|"!="|">"|"<"|">="|"<="|"in"|"not in"|"~"|"~="|"is"|"is not" operator;
+    # Details of an operand in a JQL clause.
     JqlQueryClauseOperand operand;
 };
 
@@ -3999,9 +4015,11 @@ public type FoundUsers record {|
 
 # A clause that asserts a previous value of a field. For example, `status WAS "Resolved" BY currentUser() BEFORE "2019/02/02"`. See [WAS](https://confluence.atlassian.com/x/dgiiLQ#Advancedsearching-operatorsreference-WASWAS) for more information about the WAS operator.
 public type FieldWasClause record {
+    # A field used in a JQL query. See [Advanced searching - fields reference](https://confluence.atlassian.com/x/dAiiLQ) for more information about fields in JQL queries.
     JqlQueryField 'field;
     # The operator between the field and operand.
     "was"|"was in"|"was not in"|"was not" operator;
+    # Details of an operand in a JQL clause.
     JqlQueryClauseOperand operand;
     # The list of time predicates.
     JqlQueryClauseTimePredicate[] predicates;
@@ -4032,6 +4050,7 @@ public type AuditRecordBean record {|
     string eventSource?;
     # The description of the audit record.
     string description?;
+    # Details of an item associated with the changed record.
     AssociatedItemBean objectItem?;
     # The list of values changed in the record event.
     ChangedValueBean[] changedValues?;
@@ -4142,6 +4161,7 @@ public type IssueFieldOptionCreateBean record {
     string value;
     # The properties of the option as arbitrary key-value pairs. These properties can be searched using JQL, if the extractions (see https://developer.atlassian.com/cloud/jira/platform/modules/issue-field-option-property-index/) are defined in the descriptor for the issue field module.
     record {} properties?;
+    # Details of the projects the option is available in.
     IssueFieldOptionConfiguration config?;
 };
 
@@ -4242,6 +4262,7 @@ public type SimpleErrorCollection record {|
 
 # Details about a workflow.
 public type Workflow record {|
+    # Properties that identify a published workflow.
     PublishedWorkflowId id;
     # The description of the workflow.
     string description;
@@ -4409,9 +4430,16 @@ public type ProjectRoleUser record {|
 |};
 
 public type LinkIssueRequestJsonBean record {|
+    # This object is used as follows:
+    #
+    #  *  In the [ issueLink](#api-rest-api-2-issueLink-post) resource it defines and reports on the type of link between the issues. Find a list of issue link types with [Get issue link types](#api-rest-api-2-issueLinkType-get).
+    #  *  In the [ issueLinkType](#api-rest-api-2-issueLinkType-post) resource it defines and reports on issue link types.
     IssueLinkType 'type;
+    # The ID or key of a linked issue.
     LinkedIssue inwardIssue;
+    # The ID or key of a linked issue.
     LinkedIssue outwardIssue;
+    # A comment.
     Comment comment?;
 |};
 
@@ -4517,7 +4545,9 @@ public type CreateUpdateRoleRequestBean record {|
 
 # A parsed JQL query.
 public type JqlQuery record {|
+    # A JQL query clause.
     JqlQueryClause 'where?;
+    # Details of the order-by JQL clause.
     JqlQueryOrderByClause orderBy?;
 |};
 
@@ -4550,6 +4580,7 @@ public type ChangeDetails record {|
 
 # An element of the order-by JQL clause.
 public type JqlQueryOrderByClauseElement record {|
+    # A field used in a JQL query. See [Advanced searching - fields reference](https://confluence.atlassian.com/x/dAiiLQ) for more information about fields in JQL queries.
     JqlQueryField 'field;
     # The direction in which to order the results.
     "asc"|"desc" direction?;
@@ -4937,6 +4968,7 @@ public type DashboardOk record {|
 public type JqlQueryClauseTimePredicate record {
     # The operator between the field and the operand.
     "before"|"after"|"from"|"to"|"on"|"during"|"by" operator;
+    # Details of an operand in a JQL clause.
     JqlQueryClauseOperand operand;
 };
 
@@ -5024,6 +5056,7 @@ public type CustomFieldCreatedContextOptionsList record {|
 public type WorkflowRules record {|
     # The workflow conditions.
     WorkflowTransitionRule[] conditions;
+    # The workflow conditions tree.
     WorkflowConditionBean conditionsTree?;
     # The workflow validators.
     WorkflowTransitionRule[] validators;
@@ -5707,6 +5740,7 @@ public type AttachmentArchiveMetadataReadable record {|
 
 # Project list with assigned field configuration schema.
 public type FieldConfigurationSchemeProjects record {|
+    # Details of a field configuration scheme.
     FieldConfigurationScheme fieldConfigurationScheme?;
     # The IDs of projects using the field configuration scheme.
     string[] projectIds;
@@ -5995,6 +6029,7 @@ public type EntityProperty record {|
 
 # Meta data describing the `issues` context variable.
 public type IssuesMetaBean record {|
+    # The description of the page of issues loaded by the provided JQL query.
     IssuesJqlMetaDataBean jql?;
 |};
 
@@ -6146,6 +6181,7 @@ public type PageBeanContextForProjectAndIssueTypeOk record {|
 
 # A workflow with transition rules.
 public type WorkflowTransitionRules record {|
+    # Properties that identify a workflow.
     WorkflowId workflowId;
     # The list of post functions within the workflow.
     ConnectWorkflowTransitionRule[] postFunctions;
@@ -6182,6 +6218,7 @@ public type ScreenableField record {|
 
 # Details about a notification scheme event.
 public type NotificationSchemeEvent record {|
+    # Details about a notification event.
     NotificationEvent event?;
     EventNotification[] notifications?;
 |};
@@ -6457,6 +6494,7 @@ public type Fields record {|
     UserDetails assignee?;
     # The time tracking of the linked issue.
     TimeTrackingDetails timetracking?;
+    # Details about an issue type.
     IssueTypeDetails issuetype?;
     # The type of the linked issue.
     IssueTypeDetails issueType?;
@@ -6597,6 +6635,7 @@ public type Screen record {|
 public type LinkGroup record {|
     string id?;
     string styleClass?;
+    # Details about the operations available in this version.
     SimpleLink header?;
     int:Signed32 weight?;
     SimpleLink[] links?;
