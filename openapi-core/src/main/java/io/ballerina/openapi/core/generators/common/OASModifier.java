@@ -61,6 +61,7 @@ import java.util.stream.Collectors;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PATH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
 /**
@@ -314,6 +315,7 @@ public class OASModifier {
             throw new BallerinaOpenApiException("Failed to align the OpenAPI specification for Ballerina. Please " +
                     "consider generating the client/service without the sanitization option.");
         }
+        removeDefaultServers(openAPI);
         return openAPI;
     }
 
@@ -1012,5 +1014,12 @@ public class OASModifier {
             nonParameterizedPath.add(part);
         }
         return nonParameterizedPath.toString();
+    }
+
+    private static void removeDefaultServers(OpenAPI openAPI) {
+        List<Server> servers = openAPI.getServers();
+        if (Objects.nonNull(servers) && servers.size() == 1 && servers.getFirst().equals(new Server().url(SLASH))) {
+            openAPI.setServers(null);
+        }
     }
 }

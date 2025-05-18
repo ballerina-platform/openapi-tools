@@ -25,6 +25,7 @@ import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import picocli.CommandLine;
@@ -43,6 +44,7 @@ import java.util.Optional;
 import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.YML_EXTENSION;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE;
 import static io.ballerina.openapi.service.mapper.utils.CodegenUtils.resolveContractFileName;
 
@@ -228,6 +230,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
         }
 
         filterOpenAPIOperations(openAPI);
+        removeDefaultServers(openAPI);
         return Optional.of(openAPI);
     }
 
@@ -345,5 +348,12 @@ public abstract class SubCmdBase implements BLauncherCmd {
             }
         });
         pathsToRemove.forEach(openAPI.getPaths()::remove);
+    }
+
+    private static void removeDefaultServers(OpenAPI openAPI) {
+        List<Server> servers = openAPI.getServers();
+        if (Objects.nonNull(servers) && servers.size() == 1 && servers.getFirst().equals(new Server().url(SLASH))) {
+            openAPI.setServers(null);
+        }
     }
 }
