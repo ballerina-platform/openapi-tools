@@ -117,9 +117,9 @@ public class InlineModelResolver {
                         String modelName = resolveModelName(model.getTitle(), genericName);
                         String existing = matchGenerated(model);
                         if (existing != null) {
-                            mediaType.setSchema(createSchemaWithDescription(model, existing));
+                            mediaType.setSchema(new Schema().$ref(existing));
                         } else {
-                            mediaType.setSchema(createSchemaWithDescription(model, modelName));
+                            mediaType.setSchema(new Schema().$ref(modelName));
                             addGenerated(modelName, model);
                             openAPI.getComponents().addSchemas(modelName, model);
                         }
@@ -176,9 +176,9 @@ public class InlineModelResolver {
                             String modelName = resolveModelName(model.getTitle(), parameter.getName());
                             String existing = matchGenerated(model);
                             if (existing != null) {
-                                parameter.setSchema(createSchemaWithDescription(model, existing));
+                                parameter.setSchema(new Schema().$ref(existing));
                             } else {
-                                parameter.setSchema(createSchemaWithDescription(model, modelName));
+                                parameter.setSchema(new Schema().$ref(modelName));
                                 addGenerated(modelName, model);
                                 openAPI.getComponents().addSchemas(modelName, model);
                             }
@@ -186,7 +186,7 @@ public class InlineModelResolver {
                     }
                 } else if (model instanceof ComposedSchema) {
                     String modelName = resolveModelName(model.getTitle(), parameter.getName());
-                    parameter.setSchema(createSchemaWithDescription(model, modelName));
+                    parameter.setSchema(new Schema().$ref(modelName));
                     addGenerated(modelName, model);
                     openAPI.getComponents().addSchemas(modelName, model);
                 } else if (model instanceof ArraySchema am) {
@@ -500,9 +500,9 @@ public class InlineModelResolver {
                 Schema model = createModelFromProperty(property, modelName);
                 String existing = matchGenerated(model);
                 if (existing != null) {
-                    propsToUpdate.put(key, createSchemaWithDescription(property, existing));
+                    propsToUpdate.put(key, new Schema().$ref(existing));
                 } else {
-                    propsToUpdate.put(key, createSchemaWithDescription(property, modelName));
+                    propsToUpdate.put(key, new Schema().$ref(modelName));
                     modelsToAdd.put(modelName, model);
                     addGenerated(modelName, model);
                     openAPI.getComponents().addSchemas(modelName, model);
@@ -730,8 +730,7 @@ public class InlineModelResolver {
      * @param property Property
      */
     public Schema makeRefProperty(String ref, Schema property) {
-        Schema newProperty = createSchemaWithDescription(property, ref);
-
+        Schema newProperty = new Schema().$ref(ref);
         this.copyVendorExtensions(property, newProperty);
         return newProperty;
     }
@@ -766,12 +765,5 @@ public class InlineModelResolver {
 
     public void setSkipMatches(boolean skipMatches) {
         this.skipMatches = skipMatches;
-    }
-
-    public Schema createSchemaWithDescription(Schema source, String newRef) {
-        Schema newSchema = new Schema().$ref(newRef);
-        return Objects.nonNull(source.getDescription()) ?
-                new ComposedSchema().allOf(List.of(newSchema)).description(source.getDescription()) :
-                newSchema;
     }
 }
