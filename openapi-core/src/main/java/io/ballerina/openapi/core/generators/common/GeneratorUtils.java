@@ -473,6 +473,15 @@ public class GeneratorUtils {
         }
     }
 
+    public static String extractReferenceSection(String referenceVariable) throws InvalidReferenceException {
+        if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
+            String[] refArray = referenceVariable.split("/");
+            return refArray[refArray.length - 2];
+        } else {
+            throw new InvalidReferenceException(referenceVariable);
+        }
+    }
+
     public static Optional<String> getBallerinaNameExtension(Parameter parameter) {
         if (Objects.isNull(parameter) || Objects.isNull(parameter.getExtensions())) {
             return Optional.empty();

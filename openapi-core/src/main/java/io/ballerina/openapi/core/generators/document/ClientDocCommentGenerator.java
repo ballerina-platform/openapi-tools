@@ -79,6 +79,9 @@ import static io.ballerina.openapi.core.generators.document.DocCommentsGenerator
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDeprecatedAnnotation;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDeprecatedAnnotationDetails;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDisplayAnnotation;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.getParameterDescription;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.getRequestBodyDescription;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.getResponseDescription;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.updatedAnnotationInParameterNode;
 
 public class ClientDocCommentGenerator implements DocCommentsGenerator {
@@ -200,7 +203,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
 
                 HashMap<String, ParameterNode> collection = getParameterNodeHashMap(parameters);
                 //todo parameter reference
-                updateParameterNodes(docs, operation, updatedParamsRequired, updatedParamsDefault,
+                updateParameterNodes(docs, openAPI, operation, updatedParamsRequired, updatedParamsDefault,
                         collection);
                 if (collection.size() > 0) {
                     collection.forEach((keyParam, value) -> {
@@ -243,9 +246,10 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                 Iterator<ApiResponse> iteratorRes = values.iterator();
                 if (iteratorRes.hasNext()) {
                     ApiResponse response = iteratorRes.next();
-                    if (response.getDescription() != null && !response.getDescription().isBlank()) {
+                    Optional<String> responseDescription = getResponseDescription(response, openAPI.getComponents());
+                    if (responseDescription.isPresent()) {
                         MarkdownParameterDocumentationLineNode returnDoc = createAPIParamDoc("return",
-                                response.getDescription());
+                                responseDescription.get());
                         docs.add(returnDoc);
                     }
                 }
@@ -298,14 +302,15 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             paramName[0] = "http:Request";
         }
 
-        if (requestBody.getDescription() != null) {
-            String description = requestBody.getDescription().split("\n")[0];
+        Optional<String> requestBodyDescription = getRequestBodyDescription(requestBody, openAPI.getComponents());
+        if (requestBodyDescription.isPresent()) {
+            String description = requestBodyDescription.get().split("\n")[0];
             docs.add(createAPIParamDoc(paramName[0].equals("http:Request") ? "request" : "payload", description));
         }
     }
 
-    private static void updateParameterNodes(List<Node> docs, Operation operation, List<Node> updatedParamsRequired,
-                                             List<Node> updatedParamsDefault,
+    private static void updateParameterNodes(List<Node> docs, OpenAPI openAPI, Operation operation,
+                                             List<Node> updatedParamsRequired, List<Node> updatedParamsDefault,
                                              HashMap<String, ParameterNode> collection) {
         List<Node> deprecatedParamDocComments = new ArrayList<>();
         boolean hasQueryParams = operation.getParameters().stream().anyMatch(
@@ -325,7 +330,6 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
             }
 
             List<AnnotationNode> paramAnnot = new ArrayList<>();
-            String parameterDescription;
             String parameterName = escapeIdentifier(parameter.getName());
 
             // add deprecated annotation
@@ -341,10 +345,8 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                     paramAnnot, parameterNode);
             collection.remove(parameterName);
 
-            if (parameter.getDescription() != null) {
-                parameterDescription = parameter.getDescription();
-                docs.add(createAPIParamDocFromString(parameterName, parameterDescription));
-            }
+            getParameterDescription(parameter, openAPI.getComponents())
+                    .ifPresent(s -> docs.add(createAPIParamDocFromString(parameterName, s)));
         });
         docs.add(createAPIParamDoc(HEADERS, "Headers to be sent with the request"));
         if (hasQueryParams) {

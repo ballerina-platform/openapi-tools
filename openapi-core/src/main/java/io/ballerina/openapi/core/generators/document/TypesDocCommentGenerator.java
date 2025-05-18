@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createNodeList;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.getSchemaDescription;
 
 public class TypesDocCommentGenerator implements DocCommentsGenerator {
     OpenAPI openAPI;
@@ -104,7 +105,7 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                         schema.setProperties(properties);
                     }
 
-                    updateRecordFields(schema, updatedFields, fields);
+                    updateRecordFields(schema, updatedFields, fields, openAPI);
 
                     typeDef = typeDef.modify(typeDef.metadata().orElse(null),
                             typeDef.visibilityQualifier().get(),
@@ -119,8 +120,9 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                             typeDef.semicolonToken());
                 }
                 Optional<MetadataNode> metadata = typeDef.metadata();
-                if (schema.getDescription() != null || schema.getDeprecated() != null) {
-                    MetadataNode metadataNode = updateMetadataNode(metadata, schema);
+                Optional<String> schemaDescription = getSchemaDescription(schema, openAPI.getComponents());
+                if (schemaDescription.isPresent()) {
+                    MetadataNode metadataNode = updateMetadataNode(metadata, schema, schemaDescription.get());
                     typeDef = typeDef.modify(metadataNode,
                             typeDef.visibilityQualifier().get(),
                             typeDef.typeKeyword(),
@@ -140,7 +142,8 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
         return syntaxTree.modifyWith(modulePartNode);
     }
 
-    private static void updateRecordFields(Schema<?> schema, List<Node> updatedFields, NodeList<Node> fields) {
+    private static void updateRecordFields(Schema<?> schema, List<Node> updatedFields, NodeList<Node> fields,
+                                           OpenAPI openAPI) {
         if (schema.getProperties() != null) {
             for (Node field : fields) {
                 boolean isUpdated = false;
@@ -149,9 +152,11 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                     Schema<?> value = entry.getValue();
                     if (field instanceof RecordFieldNode recordFieldNode) {
                         if (recordFieldNode.fieldName().text().trim().equals(key)) {
-                            if (value.getDescription() != null) {
+                            Optional<String> valueDescription = getSchemaDescription(value, openAPI.getComponents());
+                            if (valueDescription.isPresent()) {
                                 Optional<MetadataNode> metadata = recordFieldNode.metadata();
-                                MetadataNode metadataNode = updateMetadataNode(metadata, value);
+                                MetadataNode metadataNode = updateMetadataNode(metadata, value,
+                                        valueDescription.get());
                                 recordFieldNode = recordFieldNode.modify(metadataNode,
                                         recordFieldNode.readonlyKeyword().orElse(null),
                                         recordFieldNode.typeName(),
@@ -166,10 +171,12 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                     } else if (field instanceof RecordFieldWithDefaultValueNode
                             recordFieldWithDefaultValueNode) {
                         if (recordFieldWithDefaultValueNode.fieldName().text().trim().equals(key)) {
-                            if (value.getDescription() != null) {
+                            Optional<String> valueDescription = getSchemaDescription(value, openAPI.getComponents());
+                            if (valueDescription.isPresent()) {
                                 Optional<MetadataNode> metadata = recordFieldWithDefaultValueNode
                                         .metadata();
-                                MetadataNode metadataNode = updateMetadataNode(metadata, value);
+                                MetadataNode metadataNode = updateMetadataNode(metadata, value,
+                                        valueDescription.get());
                                 recordFieldWithDefaultValueNode = recordFieldWithDefaultValueNode
                                         .modify(metadataNode,
                                                 recordFieldWithDefaultValueNode.readonlyKeyword().orElse(null),
@@ -200,13 +207,11 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
                 .orElse(GeneratorUtils.escapeIdentifier(entry.getKey()));
     }
 
-    private static MetadataNode updateMetadataNode(Optional<MetadataNode> metadata, Schema<?> schema) {
+    private static MetadataNode updateMetadataNode(Optional<MetadataNode> metadata, Schema<?> schema,
+                                                   String schemaDescription) {
         List<Node> schemaDoc = new ArrayList<>();
         List<AnnotationNode> typeAnnotations = new ArrayList<>();
-        if (schema.getDescription() != null) {
-            schemaDoc.addAll(DocCommentsGeneratorUtil
-                    .createAPIDescriptionDoc(schema.getDescription(), false));
-        }
+        schemaDoc.addAll(DocCommentsGeneratorUtil.createAPIDescriptionDoc(schemaDescription, false));
         if (schema.getDeprecated() != null) {
             DocCommentsGeneratorUtil.extractDeprecatedAnnotation(schema.getExtensions(),
                     schemaDoc, typeAnnotations);
