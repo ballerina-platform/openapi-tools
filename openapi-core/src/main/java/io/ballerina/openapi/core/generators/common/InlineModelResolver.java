@@ -31,7 +31,6 @@ import io.swagger.v3.oas.models.media.XML;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.parser.models.RefType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -464,7 +463,7 @@ public class InlineModelResolver {
                 concatenated = concatenated.concat(uniqueKey);
             }
         }
-        key = concatenated.replaceAll("[^a-z_.A-Z0-9 ]", "");
+        key = concatenated.replaceAll("[^a-z_A-Z0-9 ]", "");
         // should not be
         // assigned. Also declare
         // the methods parameters
@@ -501,10 +500,9 @@ public class InlineModelResolver {
                 Schema model = createModelFromProperty(property, modelName);
                 String existing = matchGenerated(model);
                 if (existing != null) {
-                    propsToUpdate.put(key, createAllOfWrappedSchemaForProperty(property, existing));
+                    propsToUpdate.put(key, new Schema().$ref(existing));
                 } else {
-                    propsToUpdate.put(key, createAllOfWrappedSchemaForProperty(property,
-                            RefType.SCHEMAS.getInternalPrefix() + modelName));
+                    propsToUpdate.put(key, new Schema().$ref(modelName));
                     modelsToAdd.put(modelName, model);
                     addGenerated(modelName, model);
                     openAPI.getComponents().addSchemas(modelName, model);
@@ -548,9 +546,9 @@ public class InlineModelResolver {
                         Schema innerModel = createModelFromProperty(inner, modelName);
                         String existing = matchGenerated(innerModel);
                         if (existing != null) {
-                            property.setAdditionalProperties(createAllOfWrappedSchemaForProperty(inner, existing));
+                            property.setAdditionalProperties(new Schema<>().$ref(existing));
                         } else {
-                            property.setAdditionalProperties(createAllOfWrappedSchemaForProperty(inner, modelName));
+                            property.setAdditionalProperties(new Schema<>().$ref(modelName));
                             addGenerated(modelName, innerModel);
                             openAPI.getComponents().addSchemas(modelName, innerModel);
                         }
@@ -733,7 +731,6 @@ public class InlineModelResolver {
      */
     public Schema makeRefProperty(String ref, Schema property) {
         Schema newProperty = new Schema().$ref(ref);
-
         this.copyVendorExtensions(property, newProperty);
         return newProperty;
     }
@@ -768,11 +765,5 @@ public class InlineModelResolver {
 
     public void setSkipMatches(boolean skipMatches) {
         this.skipMatches = skipMatches;
-    }
-
-    public Schema createAllOfWrappedSchemaForProperty(Schema source, String newRef) {
-        return Objects.nonNull(source.getDescription()) ?
-                new ComposedSchema().$ref(newRef).description(source.getDescription()) :
-                new Schema().$ref(newRef);
     }
 }

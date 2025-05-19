@@ -72,6 +72,9 @@ import static io.ballerina.openapi.core.generators.document.DocCommentsGenerator
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.createAPIParamDocFromString;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDeprecatedAnnotationDetails;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.extractDisplayAnnotation;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.getParameterDescription;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.getRequestBodyDescription;
+import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.getResponseDescription;
 import static io.ballerina.openapi.core.generators.document.DocCommentsGeneratorUtil.updatedAnnotationInParameterNode;
 
 public class ServiceDocCommentGenerator implements DocCommentsGenerator {
@@ -193,7 +196,8 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
 
                 HashMap<String, ParameterNode> collection = getParameterNodeHashMap(parameters);
                 //todo parameter reference
-                updateParameterNodes(docs, operation, updatedParamsRequired, updatedParamsDefault, collection);
+                updateParameterNodes(docs, openAPI, operation, updatedParamsRequired, updatedParamsDefault,
+                        collection);
                 updatedParamsRequired.addAll(updatedParamsDefault);
                 if (!updatedParamsRequired.isEmpty()) {
                     updatedParamsRequired.remove(updatedParamsRequired.size() - 1);
@@ -219,24 +223,26 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                     docs.add(returnDoc);
                     for (Map.Entry<String, ApiResponse> response : entrySet) {
                         String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
-                        if (response.getValue().getDescription() != null &&
-                                !response.getValue().getDescription().isBlank()) {
+                        Optional<String> responseDescription = getResponseDescription(response.getValue(),
+                                openAPI.getComponents());
+                        if (responseDescription.isPresent()) {
                             if (code == null) {
                                 code = "Response";
                             }
                             MarkdownCodeLineNode returnDocLine = createMarkdownCodeLineNode(
                                     createToken(SyntaxKind.HASH_TOKEN), createIdentifierToken(String
-                                            .format("http:%s (%s)", code, response.getValue().getDescription()
+                                            .format("http:%s (%s)", code, responseDescription.get()
                                                     .replaceAll("\n", "\n# "))));
                             docs.add(returnDocLine);
                         }
                     }
                 } else if (entrySet.size() == 1) {
                     Map.Entry<String, ApiResponse> response = responses.entrySet().iterator().next();
-                    if (response.getValue().getDescription() != null &&
-                            !response.getValue().getDescription().isBlank()) {
+                    Optional<String> responseDescription = getResponseDescription(response.getValue(),
+                            openAPI.getComponents());
+                    if (responseDescription.isPresent()) {
                         MarkdownParameterDocumentationLineNode returnDoc = createAPIParamDoc("return",
-                                response.getValue().getDescription());
+                                responseDescription.get());
                         docs.add(returnDoc);
                     }
                 }
@@ -285,19 +291,19 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
             paramName[0] = "http:Request";
         }
 
-        if (requestBody.getDescription() != null) {
-            String description = requestBody.getDescription().split("\n")[0];
+        Optional<String> requestBodyDescription = getRequestBodyDescription(requestBody, openAPI.getComponents());
+        if (requestBodyDescription.isPresent()) {
+            String description = requestBodyDescription.get().split("\n")[0];
             docs.add(createAPIParamDoc(paramName[0].equals("http:Request") ? "request" : "payload", description));
         }
     }
 
-    private static void updateParameterNodes(List<Node> docs, Operation operation, List<Node> updatedParamsRequired,
-                                             List<Node> updatedParamsDefault, HashMap<String,
-            ParameterNode> collection) {
+    private static void updateParameterNodes(List<Node> docs, OpenAPI openAPI, Operation operation,
+                                             List<Node> updatedParamsRequired, List<Node> updatedParamsDefault,
+                                             HashMap<String, ParameterNode> collection) {
         List<Node> deprecatedParamDocComments = new ArrayList<>();
         operation.getParameters().forEach(parameter -> {
             List<AnnotationNode> paramAnnot = new ArrayList<>();
-            String parameterDescription;
             String parameterName = parameter.getName();
             if (parameter.getIn() != null && (parameter.getIn().equals("path") || parameter.getIn().equals("header") ||
                     (parameter.getIn().equals("query")))) {
@@ -318,9 +324,9 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                 updatedAnnotationInParameterNode(updatedParamsRequired, updatedParamsDefault,
                         paramAnnot, parameterNode);
             }
-            if (parameter.getDescription() != null) {
-                parameterDescription = parameter.getDescription();
-                docs.add(createAPIParamDocFromString(parameterName, parameterDescription));
+            Optional<String> parameterDescription = getParameterDescription(parameter, openAPI.getComponents());
+            if (parameterDescription.isPresent()) {
+                docs.add(createAPIParamDocFromString(parameterName, parameterDescription.get()));
             }
         });
     }

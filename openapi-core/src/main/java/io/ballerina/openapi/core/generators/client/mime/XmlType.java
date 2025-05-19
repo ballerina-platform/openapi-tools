@@ -27,9 +27,9 @@ import io.swagger.v3.oas.models.media.MediaType;
 import java.util.List;
 import java.util.Map;
 
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.JSON_DATA;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.XML_DATA;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
-import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
 
 /**
  * Defines the payload structure of xml mime type.

@@ -473,6 +473,15 @@ public class GeneratorUtils {
         }
     }
 
+    public static String extractReferenceSection(String referenceVariable) throws InvalidReferenceException {
+        if (referenceVariable.startsWith("#") && referenceVariable.contains("/")) {
+            String[] refArray = referenceVariable.split("/");
+            return refArray[refArray.length - 2];
+        } else {
+            throw new InvalidReferenceException(referenceVariable);
+        }
+    }
+
     public static Optional<String> getBallerinaNameExtension(Parameter parameter) {
         if (Objects.isNull(parameter) || Objects.isNull(parameter.getExtensions())) {
             return Optional.empty();
@@ -786,14 +795,32 @@ public class GeneratorUtils {
      * Normalized OpenAPI specification with adding proper naming to schema.
      *
      * @param openAPIPath - openAPI file path
+     * @param validateOpIds - validate  operation ids
+     * @param isSanitized - sanitize schema names
      * @return - openAPI specification
-     * @throws IOException
-     * @throws BallerinaOpenApiException
+     * @throws IOException - IOException
+     * @throws BallerinaOpenApiException - Ballerina OpenAPI Exception
      */
     public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean validateOpIds, boolean isSanitized) throws
             IOException, BallerinaOpenApiException {
+        return normalizeOpenAPI(openAPIPath, validateOpIds, isSanitized, false);
+    }
+
+    /**
+     * Normalized OpenAPI specification with adding proper naming to schema.
+     *
+     * @param openAPIPath - openAPI file path
+     * @param validateOpIds - validate  operation ids
+     * @param isSanitized - sanitize schema names
+     * @param isFlatten - flatten  OpenAPI specification
+     * @return - openAPI specification
+     * @throws IOException - IOException
+     * @throws BallerinaOpenApiException - Ballerina OpenAPI Exception
+     */
+    public static OpenAPI normalizeOpenAPI(Path openAPIPath, boolean validateOpIds, boolean isSanitized,
+                                           boolean isFlatten) throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = getOpenAPIFromOpenAPIV3Parser(openAPIPath);
-        return normalizeOpenAPI(openAPI, validateOpIds, isSanitized);
+        return normalizeOpenAPI(openAPI, validateOpIds, isSanitized, isFlatten);
     }
 
     /**
@@ -827,11 +854,11 @@ public class GeneratorUtils {
             validateOperationIds(openAPIPaths.entrySet());
         }
         validateRequestBody(openAPIPaths.entrySet());
+        if (flatten) {
+            new InlineModelResolver(true, false).flatten(openAPI);
+        }
         if (isSanitized) {
             openAPI = new OASModifier().modify(openAPI);
-        }
-        if (flatten) {
-            new InlineModelResolver(true, true).flatten(openAPI);
         }
         return openAPI;
     }

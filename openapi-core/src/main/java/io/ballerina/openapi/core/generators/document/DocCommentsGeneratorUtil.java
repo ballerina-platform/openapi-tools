@@ -38,12 +38,20 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
+import io.ballerina.runtime.api.utils.IdentifierUtils;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyMinutiaeList;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyNodeList;
@@ -254,4 +262,106 @@ public class DocCommentsGeneratorUtil {
         }
     }
 
+    public static Optional<String> getSchemaDescription(Schema<?> schema, Components components) {
+        if (Objects.nonNull(schema.getDescription()) && !schema.getDescription().isBlank()) {
+            return Optional.of(schema.getDescription());
+        }
+        if (Objects.isNull(schema.get$ref())) {
+            return Optional.empty();
+        }
+        try {
+            String refName = GeneratorUtils.extractReferenceType(schema.get$ref());
+            String refSection = GeneratorUtils.extractReferenceSection(schema.get$ref());
+            return getDescriptionFromReference(refName, refSection, components);
+        } catch (InvalidReferenceException exp) {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<String> getParameterDescription(Parameter parameter, Components components) {
+        if (Objects.nonNull(parameter.getDescription()) && !parameter.getDescription().isBlank()) {
+            return Optional.of(parameter.getDescription());
+        }
+        if (Objects.isNull(parameter.get$ref())) {
+            return Optional.empty();
+        }
+        try {
+            String refName = GeneratorUtils.extractReferenceType(parameter.get$ref());
+            String refSection = GeneratorUtils.extractReferenceSection(parameter.get$ref());
+            return getDescriptionFromReference(refName, refSection, components);
+        } catch (InvalidReferenceException exp) {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<String> getResponseDescription(ApiResponse response, Components components) {
+        if (Objects.nonNull(response.getDescription()) && !response.getDescription().isBlank()) {
+            return Optional.of(response.getDescription());
+        }
+        if (Objects.isNull(response.get$ref())) {
+            return Optional.empty();
+        }
+        try {
+            String refName = GeneratorUtils.extractReferenceType(response.get$ref());
+            String refSection = GeneratorUtils.extractReferenceSection(response.get$ref());
+            return getDescriptionFromReference(refName, refSection, components);
+        } catch (InvalidReferenceException exp) {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<String> getRequestBodyDescription(RequestBody requestBody, Components components) {
+        if (Objects.nonNull(requestBody.getDescription()) && !requestBody.getDescription().isBlank()) {
+            return Optional.of(requestBody.getDescription());
+        }
+        if (Objects.isNull(requestBody.get$ref())) {
+            return Optional.empty();
+        }
+        try {
+            String refName = GeneratorUtils.extractReferenceType(requestBody.get$ref());
+            String refSection = GeneratorUtils.extractReferenceSection(requestBody.get$ref());
+            return getDescriptionFromReference(refName, refSection, components);
+        } catch (InvalidReferenceException exp) {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<String> getDescriptionFromReference(String refName, String refSection,
+                                                                Components components)
+            throws InvalidReferenceException {
+        if (Objects.isNull(components)) {
+            return Optional.empty();
+        }
+        switch (refSection) {
+            case "schemas" -> {
+                if (Objects.nonNull(components.getSchemas()) && components.getSchemas().containsKey(refName)) {
+                    return getSchemaDescription(components.getSchemas().get(refName), components);
+                }
+            }
+            case "parameters" -> {
+                if (Objects.nonNull(components.getParameters()) &&
+                        components.getParameters().containsKey(refName)) {
+                    return getParameterDescription(components.getParameters().get(refName), components);
+                }
+            }
+            case "responses" -> {
+                if (Objects.nonNull(components.getResponses()) &&
+                        components.getResponses().containsKey(refName)) {
+                    return getResponseDescription(components.getResponses().get(refName), components);
+                }
+            }
+            case "requestBodies" -> {
+                if (Objects.nonNull(components.getRequestBodies()) &&
+                        components.getRequestBodies().containsKey(refName)) {
+                    return getRequestBodyDescription(components.getRequestBodies().get(refName), components);
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static String unescapeIdentifier(String parameterName) {
+        String unescapedParamName = IdentifierUtils.unescapeBallerina(parameterName);
+        return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
+    }
 }
