@@ -7,9 +7,6 @@
     },
     "version" : "1.0.0"
   },
-  "servers" : [ {
-    "url" : "/"
-  } ],
   "paths" : {
     "/pets" : {
       "get" : {
