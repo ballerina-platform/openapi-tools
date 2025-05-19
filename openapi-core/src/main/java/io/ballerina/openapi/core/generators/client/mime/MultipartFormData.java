@@ -63,10 +63,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.COMMA_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.JSON_DATA;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.MIME;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
-import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
 
 /**
  * Defines the payload structure of multipart form-data mime type.

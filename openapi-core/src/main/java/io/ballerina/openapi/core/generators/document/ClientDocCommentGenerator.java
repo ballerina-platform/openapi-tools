@@ -41,7 +41,6 @@ import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
-import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -120,7 +119,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                             NodeList<Node> nodes = funcDef.relativeResourcePath();
                             StringBuilder path = new StringBuilder();
                             for (Node node: nodes) {
-                                path.append(MapperCommonUtils.unescapeIdentifier(node.toString()
+                                path.append(DocCommentsGeneratorUtil.unescapeIdentifier(node.toString()
                                         .replace("\"", "")));
                             }
                             String key = replaceContentWithinBrackets(path.toString(), "XXX") + "_" +

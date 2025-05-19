@@ -39,6 +39,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.InvalidReferenceException;
+import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -357,5 +358,10 @@ public class DocCommentsGeneratorUtil {
             }
         }
         return Optional.empty();
+    }
+
+    public static String unescapeIdentifier(String parameterName) {
+        String unescapedParamName = IdentifierUtils.unescapeBallerina(parameterName);
+        return unescapedParamName.replaceAll("\\\\", "").replaceAll("'", "");
     }
 }

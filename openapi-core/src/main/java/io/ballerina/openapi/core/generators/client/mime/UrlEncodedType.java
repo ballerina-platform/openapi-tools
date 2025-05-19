@@ -49,10 +49,10 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.EQUAL_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.ENCODING;
+import static io.ballerina.openapi.core.generators.common.GeneratorConstants.JSON_DATA;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.STRING;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.addImport;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.createEncodingMap;
-import static io.ballerina.openapi.service.mapper.Constants.JSON_DATA;
 
 /**
  * Defines the payload structure of "application/x-www-form-urlencoded" mime type.
