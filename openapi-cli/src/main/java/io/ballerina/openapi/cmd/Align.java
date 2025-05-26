@@ -86,7 +86,7 @@ public class Align extends SubCmdBase {
 
     private List<String> getValidatedAlignmentTypes(String alignmentTypes) {
         if (Objects.isNull(alignmentTypes) || alignmentTypes.isEmpty()) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         String[] alignmentTypesList = alignmentTypes.split(COMMA);
         List<String> validatedAlignmentTypes = new ArrayList<>();
