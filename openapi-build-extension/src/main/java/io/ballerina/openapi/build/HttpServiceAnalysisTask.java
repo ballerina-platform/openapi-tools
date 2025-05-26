@@ -33,6 +33,9 @@ import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.openapi.service.mapper.model.ServiceDeclaration;
 import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.projects.BuildOptions;
+import io.ballerina.projects.DocumentId;
+import io.ballerina.projects.Module;
+import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.plugins.AnalysisTask;
@@ -78,6 +81,16 @@ public class HttpServiceAnalysisTask implements AnalysisTask<SyntaxNodeAnalysisC
 
     @Override
     public void perform(SyntaxNodeAnalysisContext context) {
+        ModuleId moduleId = context.moduleId();
+        DocumentId documentId = context.documentId();
+        Module currentModule = context.currentPackage() != null ? context.currentPackage().module(moduleId) : null;
+
+        if (moduleId != null && documentId != null && currentModule != null &&
+                currentModule.testDocumentIds() != null &&
+                currentModule.testDocumentIds().contains(documentId)) {
+            // Skip test documents
+            return;
+        }
         SemanticModel semanticModel = context.semanticModel();
         SyntaxTree syntaxTree = context.syntaxTree();
         Package currentPackage = context.currentPackage();
