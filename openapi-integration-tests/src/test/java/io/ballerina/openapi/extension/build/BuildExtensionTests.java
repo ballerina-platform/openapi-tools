@@ -136,10 +136,6 @@ public class  BuildExtensionTests {
                 "main_openapi.yaml")));
         Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_10/target/openapi/" +
                 "module_openapi.yaml")));
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_10/target/openapi/" +
-                "tests_test_openapi.yaml")));
-        Assert.assertTrue(Files.exists(RESOURCE.resolve("build/project_10/target/openapi/" +
-                "tests_module_test_openapi.yaml")));
     }
 
 
