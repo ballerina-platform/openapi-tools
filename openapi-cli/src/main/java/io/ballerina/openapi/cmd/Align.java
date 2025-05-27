@@ -24,7 +24,7 @@ import picocli.CommandLine;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class Align extends SubCmdBase {
     public static final String DOC = "doc";
     public static final String BASEPATH = "basepath";
     public static final List<String> DEFAULT_ALIGNMENT_TYPES = List.of(NAME, DOC, BASEPATH);
-    private List<String> alignmentTypes = Arrays.asList(NAME, DOC, BASEPATH);
+    private List<String> alignmentTypes = new ArrayList<>(List.of(NAME, DOC, BASEPATH));;
 
     @CommandLine.Option(names = {"--include"}, description = "Alignment types to be included. " +
             "The available options are: name, doc, basepath.")
@@ -85,7 +85,7 @@ public class Align extends SubCmdBase {
 
     private List<String> getValidatedAlignmentTypes(String alignmentTypes) {
         if (Objects.isNull(alignmentTypes) || alignmentTypes.isEmpty()) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         String[] alignmentTypesList = alignmentTypes.split(COMMA);
         List<String> validatedAlignmentTypes = new ArrayList<>();
