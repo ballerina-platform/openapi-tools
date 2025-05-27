@@ -33,6 +33,7 @@ apply from: "$rootDir/gradle/javaProject.gradle"
 
 ext.clientNativeVersion = project.clientNativeVersion
 ext.clientNativePublish = project.clientNativePublish
+ext.ballerinaToOpenAPIPublish = project.ballerinaToOpenAPIPublish
 ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.testngVersion = project.testngVersion
 ext.commonsLang3Version = project.commonsLang3Version
