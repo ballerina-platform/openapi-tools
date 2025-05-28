@@ -165,4 +165,11 @@ publishing {
     }
 }
 
+tasks.withType(PublishToMavenRepository) {
+    onlyIf {
+        (ballerinaToOpenAPIPublish.endsWith('-SNAPSHOT') || ballerinaToOpenAPIPublish.toBoolean()) &&
+                (repository == publishing.repositories.GitHub && publication == publishing.publications.GitHub)
+    }
+}
+
 publish.dependsOn build
