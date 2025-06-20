@@ -185,19 +185,25 @@ public class ServersMapperImpl implements ServersMapper {
 
     //Assign host and port values
     private static Server generateServer(String serviceBasePath, Optional<ParenthesizedArgList> list) {
-
         String port = null;
         String host = null;
         ServerVariables serverVariables = new ServerVariables();
         Server server = new Server();
 
         if (list.isPresent()) {
-            SeparatedNodeList<FunctionArgumentNode> arg = (list.get()).arguments();
-            port = getValidPort(arg.get(0).toString());
-            if (arg.size() > 1 && (arg.get(1) instanceof NamedArgumentNode)) {
-                ExpressionNode bLangRecordLiteral = ((NamedArgumentNode) arg.get(1)).expression();
-                if (bLangRecordLiteral instanceof MappingConstructorExpressionNode) {
-                    host = extractHost((MappingConstructorExpressionNode) bLangRecordLiteral);
+            SeparatedNodeList<FunctionArgumentNode> args = list.get().arguments();
+            for (FunctionArgumentNode arg : args) {
+                if (arg instanceof NamedArgumentNode namedArg) {
+                    ExpressionNode expr = namedArg.expression();
+                    if (namedArg.argumentName().toString().trim().equals("port")) {
+                        port = expr.toString();
+                    } else if (namedArg.argumentName().toString().trim().equals("host")) {
+                        host = expr.toString().replaceAll("^\"|\"$", "");
+                    } else if (expr instanceof MappingConstructorExpressionNode recordLiteral) {
+                        host = extractHost(recordLiteral);
+                    }
+                } else if (port == null) {
+                        port = arg.toString().trim();
                 }
             }
         }
