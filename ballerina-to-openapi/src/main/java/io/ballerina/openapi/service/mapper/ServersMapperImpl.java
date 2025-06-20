@@ -196,7 +196,7 @@ public class ServersMapperImpl implements ServersMapper {
                 if (arg instanceof NamedArgumentNode namedArg) {
                     ExpressionNode expr = namedArg.expression();
                     if (namedArg.argumentName().toString().trim().equals("port")) {
-                        port = expr.toString();
+                        port = getValidPort(expr.toString());
                     } else if (namedArg.argumentName().toString().trim().equals("host")) {
                         host = expr.toString().replaceAll("^\"|\"$", "");
                     } else if (expr instanceof MappingConstructorExpressionNode recordLiteral) {
