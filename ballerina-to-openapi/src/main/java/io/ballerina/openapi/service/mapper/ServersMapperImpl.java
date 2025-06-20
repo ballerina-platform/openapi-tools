@@ -191,8 +191,7 @@ public class ServersMapperImpl implements ServersMapper {
         Server server = new Server();
 
         if (list.isPresent()) {
-            SeparatedNodeList<FunctionArgumentNode> args = list.get().arguments();
-            for (FunctionArgumentNode arg : args) {
+            for (FunctionArgumentNode arg : list.get().arguments()) {
                 if (arg instanceof NamedArgumentNode namedArg) {
                     ExpressionNode expr = namedArg.expression();
                     if (namedArg.argumentName().toString().trim().equals("port")) {

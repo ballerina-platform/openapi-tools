@@ -93,26 +93,26 @@ public class ListenerTests {
 
     @Test(description = "Generate OpenAPI spec for listener with named port arguments")
     public void testListenerWithNamedPort() throws IOException {
-        Path ballerinaFilePAth = RES_DIR.resolve("listeners/listener_named_port.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePAth, "listeners/listener_named_port.yaml");
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_named_port.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_named_port.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
     public void testListenerWithPositionalPort() throws IOException {
-        Path ballerinaFilePAth = RES_DIR.resolve("listeners/listener_positional_port.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePAth, "listeners/listener_positional_port.yaml");
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_positional_port.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_positional_port.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
     public void testListenerWithNamedPortAndHost() throws IOException {
-        Path ballerinaFilePAth = RES_DIR.resolve("listeners/listener_named_port_and_host.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePAth, "listeners/listener_named_port_and_host.yaml");
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_named_port_and_host.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_named_port_and_host.yaml");
     }
 
     @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
     public void testListenerWithNamedPortAndHostInConfig() throws IOException {
-        Path ballerinaFilePAth = RES_DIR.resolve("listeners/listener_named_port_host_config.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePAth, "listeners/listener_named_port_host_config.yaml");
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_named_port_host_config.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_named_port_host_config.yaml");
     }
 
     @AfterMethod
