@@ -28,6 +28,7 @@ import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
+import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
@@ -191,28 +192,51 @@ public class ServersMapperImpl implements ServersMapper {
         Server server = new Server();
 
         if (list.isPresent()) {
-            for (FunctionArgumentNode arg : list.get().arguments()) {
-                if (arg instanceof NamedArgumentNode namedArg) {
-                    ExpressionNode expr = namedArg.expression();
-                    if (namedArg.argumentName().toString().trim().equals("port")) {
-                        port = getValidPort(expr.toString());
-                    } else if (namedArg.argumentName().toString().trim().equals("host")) {
-                        host = expr.toString().replaceAll("^\"|\"$", "");
-                    } else if (expr instanceof MappingConstructorExpressionNode recordLiteral) {
-                        host = extractHost(recordLiteral);
+            SeparatedNodeList<FunctionArgumentNode> arguments = list.get().arguments();
+            if (!arguments.stream().anyMatch(NamedArgumentNode.class::isInstance) && !arguments.isEmpty()) {
+                port = getValidPort(arguments.get(0).toString());
+                if (arguments.size() > 1 && arguments.get(1) instanceof PositionalArgumentNode posArg &&
+                        posArg.expression() instanceof MappingConstructorExpressionNode config
+                        && hasHostField(config)) {
+                    host = extractHost(config);
+                }
+            } else {
+                for (FunctionArgumentNode arg : arguments) {
+                    if (arg instanceof NamedArgumentNode namedArg) {
+                        String name = namedArg.argumentName().toString().trim();
+                        ExpressionNode expr = namedArg.expression();
+                        switch (name) {
+                            case "port":
+                                port = getValidPort(expr.toString().trim());
+                                break;
+                            case "host":
+                                host = expr.toString().replaceAll("^\"|\"$", "");
+                                break;
+                            case "config":
+                                if (expr instanceof MappingConstructorExpressionNode config && hasHostField(config)) {
+                                    host = extractHost(config);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                } else if (port == null) {
-                        port = arg.toString().trim();
                 }
             }
         }
-        // Set default values to host and port if values are not defined
+
         setServerVariableValues(serviceBasePath, port, host, serverVariables, server);
         return server;
     }
 
     private static String getValidPort(String port) {
         return port.matches("\\d+") ? port : null;
+    }
+
+    private static boolean hasHostField(MappingConstructorExpressionNode config) {
+        return config.fields().stream()
+                .anyMatch(field -> field instanceof SpecificFieldNode specific &&
+                        "host".equals(specific.fieldName().toString().trim()));
     }
 
     /**
