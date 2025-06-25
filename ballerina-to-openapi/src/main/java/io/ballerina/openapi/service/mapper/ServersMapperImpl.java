@@ -224,7 +224,7 @@ public class ServersMapperImpl implements ServersMapper {
                 }
             }
         }
-
+        // Set default values to host and port if values are not defined
         setServerVariableValues(serviceBasePath, port, host, serverVariables, server);
         return server;
     }
