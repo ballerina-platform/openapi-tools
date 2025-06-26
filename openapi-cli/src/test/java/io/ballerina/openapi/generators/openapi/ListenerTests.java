@@ -133,6 +133,12 @@ public class ListenerTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario13.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
+    public void testPositionalPortAndNamedConfigWithHost() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario14.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario14.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);

@@ -193,33 +193,40 @@ public class ServersMapperImpl implements ServersMapper {
 
         if (list.isPresent()) {
             SeparatedNodeList<FunctionArgumentNode> arguments = list.get().arguments();
-            if (!arguments.stream().anyMatch(NamedArgumentNode.class::isInstance) && !arguments.isEmpty()) {
-                port = getValidPort(arguments.get(0).toString());
-                if (arguments.size() > 1 && arguments.get(1) instanceof PositionalArgumentNode posArg &&
-                        posArg.expression() instanceof MappingConstructorExpressionNode config
-                        && hasHostField(config)) {
+            int index = 0;
+            for (; index < arguments.size(); index++) {
+                FunctionArgumentNode arg = arguments.get(index);
+                if (arg instanceof NamedArgumentNode) {
+                    break;
+                }
+                if (index == 0) {
+                    port = getValidPort(arg.toString());
+                } else if (index == 1 && arg instanceof PositionalArgumentNode posArg &&
+                        posArg.expression() instanceof MappingConstructorExpressionNode config &&
+                        hasHostField(config)) {
                     host = extractHost(config);
                 }
-            } else {
-                for (FunctionArgumentNode arg : arguments) {
-                    if (arg instanceof NamedArgumentNode namedArg) {
-                        String name = namedArg.argumentName().toString().trim();
-                        ExpressionNode expr = namedArg.expression();
-                        switch (name) {
-                            case "port":
-                                port = getValidPort(expr.toString().trim());
-                                break;
-                            case "host":
-                                host = expr.toString().replaceAll("^\"|\"$", "");
-                                break;
-                            case "config":
-                                if (expr instanceof MappingConstructorExpressionNode config && hasHostField(config)) {
-                                    host = extractHost(config);
-                                }
-                                break;
-                            default:
-                                break;
-                        }
+            }
+            for (; index < arguments.size(); index++) {
+                FunctionArgumentNode arg = arguments.get(index);
+                if (arg instanceof NamedArgumentNode namedArg) {
+                    String name = namedArg.argumentName().toString().trim();
+                    ExpressionNode expr = namedArg.expression();
+                    switch (name) {
+                        case "port":
+                            port = getValidPort(expr.toString().trim());
+                            break;
+                        case "host":
+                            host = expr.toString().replaceAll("^\"|\"$", "");
+                            break;
+                        case "config":
+                            if (expr instanceof MappingConstructorExpressionNode config &&
+                                    hasHostField(config)) {
+                                host = extractHost(config);
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
             }
