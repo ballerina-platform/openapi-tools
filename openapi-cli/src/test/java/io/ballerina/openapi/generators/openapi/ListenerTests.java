@@ -91,6 +91,54 @@ public class ListenerTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/with_check_key_word.yaml");
     }
 
+    @Test(description = "Generate OpenAPI spec for listener with named port arguments")
+    public void testListenerWithNamedPort() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario07.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario07.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for listener with named port arguments")
+    public void testPositionalArgsWithEmptyListenerConfig() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario08.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario08.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
+    public void testListenerWithPositionalPort() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario09.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario09.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
+    public void testListenerWithNamedPortAndHostInConfig() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario10.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario10.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
+    public void testListenerWithNamedPortAndHost() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario11.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario11.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
+    public void testPositionalArgsWithPortAndHostConfig() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario12.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario12.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
+    public void testNamedArgsWithPortAndEmptyConfig() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario13.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario13.yaml");
+    }
+
+    @Test(description = "Generate OpenAPI spec for listener with positional port arguments")
+    public void testPositionalPortAndNamedConfigWithHost() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario14.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario14.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
