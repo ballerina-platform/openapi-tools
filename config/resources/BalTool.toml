@@ -1,2 +1,5 @@
 [tool]
 id = "openapi"
+
+[[dependency]]
+path = "../openapi-cli/build/libs/openapi-cli-@project.version@.jar"
