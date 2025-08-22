@@ -36,11 +36,3 @@ jar {
 clean {
     enabled = false
 }
-
-artifacts.add('default', file("$project.buildDir/checkstyle.xml")) {
-    builtBy('downloadCheckstyleRuleFiles')
-}
-
-artifacts.add('default', file("$project.buildDir/suppressions.xml")) {
-    builtBy('downloadCheckstyleRuleFiles')
-}

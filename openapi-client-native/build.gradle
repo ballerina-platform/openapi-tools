@@ -37,7 +37,7 @@ dependencies {
 }
 
 checkstyle {
-    toolVersion "${project.puppycrawlCheckstyleVersion}"
+    toolVersion "${project.checkstylePluginVersion}"
     configFile rootProject.file("config/checkstyle/build/checkstyle.xml")
     configProperties = ["suppressionFile" : file("${rootDir}/config/checkstyle/build/suppressions.xml")]
 }
@@ -47,8 +47,6 @@ tasks.withType(Checkstyle) {
     exclude excludePattern
 }
 
-checkstyleMain.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
-checkstyleTest.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
 
 spotbugsMain {
     def classLoader = plugins["com.github.spotbugs"].class.classLoader

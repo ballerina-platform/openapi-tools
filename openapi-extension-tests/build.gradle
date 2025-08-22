@@ -95,9 +95,9 @@ jacocoTestReport {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
-        html.destination = new File("${buildDir}/reports/jacoco/report.html")
-        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
+        html.outputLocation = file("${buildDir}/reports/jacoco/report.html")
+        csv.outputLocation = file("${buildDir}/reports/jacoco/report.csv")
     }
 }
 copyPackageBala.dependsOn copyDistribution

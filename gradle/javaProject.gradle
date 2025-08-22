@@ -15,25 +15,11 @@
  *
  */
 
-apply plugin: "java-library"
-apply plugin: "com.github.spotbugs"
-apply plugin: "checkstyle"
-apply plugin: "jacoco"
-
-repositories {
-    mavenLocal()
-    maven {
-        url = 'https://maven.wso2.org/nexus/content/repositories/releases/'
-    }
-
-    maven {
-        url = 'https://maven.wso2.org/nexus/content/groups/wso2-public/'
-    }
-
-    maven {
-        url = 'https://repo.maven.apache.org/maven2'
-    }
-}
+apply plugin: 'java-library'
+apply plugin: 'com.github.spotbugs'
+apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
+apply plugin: 'maven-publish'
 
 configurations {
     jacocoRuntime
@@ -42,6 +28,7 @@ configurations {
 dependencies {
     implementation "org.slf4j:slf4j-api:${slf4jVersion}"
     testImplementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    testImplementation "org.testng:testng:${testngVersion}"
 
     constraints {
         implementation "com.fasterxml.jackson.core:jackson-databind:2.15.3"
@@ -60,12 +47,10 @@ dependencies {
         implementation "org.ballerinalang:ballerina-tools-api:${ballerinaLangVersion}"
         implementation "org.ballerinalang:ballerina-runtime:${ballerinaLangVersion}"
         implementation "org.ballerinalang:language-server-commons:${ballerinaLangVersion}"
-        testImplementation "org.testng:testng:${testngVersion}"
     }
 
     jacocoRuntime "org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime"
-    checkstyle project(':checkstyle')
-    checkstyle "com.puppycrawl.tools:checkstyle:${project.puppycrawlCheckstyleVersion}"
+    checkstyle "com.puppycrawl.tools:checkstyle:${project.checkstylePluginVersion}"
 }
 
 sourceCompatibility = JavaVersion.VERSION_21
@@ -76,23 +61,10 @@ tasks.withType(Checkstyle) {
 }
 
 checkstyle {
-    toolVersion "${project.puppycrawlCheckstyleVersion}"
-    configFile rootProject.file("config/checkstyle/build/checkstyle.xml")
-    configProperties = ["suppressionFile" : file("${rootDir}/config/checkstyle/build/suppressions.xml")]
+    toolVersion "${project.checkstylePluginVersion}"
+    configFile rootProject.file("gradle/checkstyle/checkstyle.xml")
+    configProperties = ["suppressionFile" : file("${rootDir}/gradle/checkstyle/suppressions.xml")]
 }
-
-checkstyleMain.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
-checkstyleMain.dependsOn(":checkstyle:compileTestJava")
-checkstyleMain.dependsOn(":checkstyle:checkstyleMain")
-checkstyleMain.dependsOn(":checkstyle:checkstyleTest")
-checkstyleMain.dependsOn(":checkstyle:test")
-checkstyleMain.dependsOn(":checkstyle:processTestResources")
-
-checkstyleTest.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
-checkstyleTest.dependsOn(":checkstyle:compileTestJava")
-checkstyleTest.dependsOn(":checkstyle:checkstyleMain")
-checkstyleTest.dependsOn(":checkstyle:checkstyleTest")
-checkstyleTest.dependsOn(":checkstyle:test")
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -132,11 +104,6 @@ task validateSpotbugs() {
     }
 }
 
-checkstyle {
-    toolVersion '7.8.2'
-    configFile rootProject.file("config/checkstyle/build/checkstyle.xml")
-    configProperties = ["suppressionFile": rootProject.file("config/checkstyle/build/suppressions.xml")]
-}
 
 spotbugsMain {
     def classLoader = plugins["com.github.spotbugs"].class.classLoader
@@ -162,7 +129,13 @@ spotbugsTest {
 jacocoTestReport {
     reports {
         xml.required = true
+        html.required = true
+        csv.required = true
+        xml.outputLocation = file("${project.buildDir}/reports/jacoco/report.xml")
+        html.outputLocation = file("${project.buildDir}/reports/jacoco/report.html")
+        csv.outputLocation = file("${project.buildDir}/reports/jacoco/report.csv")
     }
 }
 
+test.finalizedBy jacocoTestReport
 spotbugsMain.finalizedBy validateSpotbugs

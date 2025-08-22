@@ -15,55 +15,18 @@
  *
  */
 plugins {
-    id "base"
+    id 'base'
     id 'maven-publish'
-    id "com.github.spotbugs" version "${spotbugsPluginVersion}"
-    id "com.github.johnrengelman.shadow" version "${shadowJarPluginVersion}"
-    id "de.undercouch.download" version "${downloadPluginVersion}"
-    id "net.researchgate.release" version "${releasePluginVersion}"
-    id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
-    id "org.sonarqube" version "4.0.0.2929"
+    id 'com.github.spotbugs'
+    id 'com.github.johnrengelman.shadow'
+    id 'de.undercouch.download'
+    id 'net.researchgate.release'
+    id 'org.javamodularity.moduleplugin' apply false
+    id 'org.sonarqube'
 }
 
-apply plugin: 'java'
-apply plugin: "com.github.spotbugs"
-apply plugin: 'jacoco'
 apply plugin: "org.javamodularity.moduleplugin"
 apply from: "$rootDir/gradle/javaProject.gradle"
-
-ext.clientNativeVersion = project.clientNativeVersion
-ext.clientNativePublish = project.clientNativePublish
-ext.ballerinaToOpenAPIPublish = project.ballerinaToOpenAPIPublish
-ext.ballerinaLangVersion = project.ballerinaLangVersion
-ext.testngVersion = project.testngVersion
-ext.commonsLang3Version = project.commonsLang3Version
-ext.commonsIoVersion = project.commonsIoVersion
-ext.netLingalaZip4jVersion = project.netLingalaZip4jVersion
-ext.slf4jVersion = project.slf4jVersion
-ext.commonsLang3Version = project.commonsLang3Version
-ext.commonsIoVersion = project.commonsIoVersion
-ext.commonsCodecVersion = project.commonsCodecVersion
-ext.netLingalaZip4jVersion = project.netLingalaZip4jVersion
-ext.stdlibIoVersion = project.stdlibIoVersion
-ext.stdlibLogVersion = project.stdlibLogVersion
-ext.stdlibMimeVersion = project.stdlibMimeVersion
-ext.stdlibAuthVersion = project.stdlibAuthVersion
-ext.stdlibCacheVersion = project.stdlibCacheVersion
-ext.stdlibTimeVersion = project.stdlibTimeVersion
-ext.stdlibCryptoVersion = project.stdlibCryptoVersion
-ext.stdlibTaskVersion = project.stdlibTaskVersion
-ext.stdlibFileVersion = project.stdlibFileVersion
-ext.stdlibHttpVersion = project.stdlibHttpVersion
-ext.stdlibUrlVersion = project.stdlibUrlVersion
-ext.stdlibDataXmldataVersion = project.stdlibDataXmldataVersion
-ext.stdlibGraphqlVersion = project.stdlibGraphqlVersion
-ext.stdlibGrpcVersion = project.stdlibGrpcVersion
-ext.stdlibWebsubVersion = project.stdlibWebsubVersion
-ext.stdlibConstraintVersion = project.stdlibConstraintVersion
-ext.stdlibWebsocketVersion = project.stdlibWebsocketVersion
-ext.stdlibDataJsonDataVersion = project.stdlibDataJsonDataVersion
-ext.jacocoVersion = project.jacocoVersion
-ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 
 allprojects {
     group = 'io.ballerina'
@@ -191,9 +154,9 @@ task codeCoverageReport(type: JacocoReport) {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
-        html.destination = new File("${buildDir}/reports/jacoco/report.html")
-        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
+        html.outputLocation = file("${buildDir}/reports/jacoco/report.html")
+        csv.outputLocation = file("${buildDir}/reports/jacoco/report.csv")
     }
 
     onlyIf = {

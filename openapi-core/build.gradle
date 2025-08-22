@@ -16,9 +16,11 @@
  * under the License.
  */
 
+plugins {
+    id 'com.github.johnrengelman.shadow'
+}
+
 apply from: "$rootDir/gradle/javaProject.gradle"
-apply plugin: "com.github.johnrengelman.shadow"
-apply plugin: "java-library"
 
 description = "Ballerina - OpenAPI Tooling - OpenAPI to Ballerina"
 
@@ -49,7 +51,6 @@ dependencies {
     implementation "org.ballerinalang:ballerina-tools-api"
     implementation "org.ballerinalang:ballerina-runtime"
     implementation "com.google.code.findbugs:jsr305"
-    testImplementation "org.testng:testng"
 
     balTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
