@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 pluginManagement {
     plugins {
         id 'com.github.spotbugs' version "${spotbugsPluginVersion}"
@@ -42,19 +43,21 @@ plugins {
 }
 
 rootProject.name = 'openapi-tools'
-include(':module-ballerina-openapi')
-include(':ballerina-to-openapi')
-include(':openapi-build-extension')
-include(':openapi-cli')
-include(':openapi-ls-extension')
-include(':openapi-validator')
-include(':openapi-bal-task-plugin')
-include(':openapi-extension-tests')
-include(':openapi-integration-tests')
-include(':openapi-core')
+
+include ':module-ballerina-openapi'
+include ':ballerina-to-openapi'
+include ':openapi-build-extension'
+include ':openapi-cli'
+include ':openapi-ls-extension'
+include ':openapi-validator'
+include ':openapi-bal-task-plugin'
+include ':openapi-extension-tests'
+include ':openapi-integration-tests'
+include ':openapi-core'
 include 'openapi-build-extension'
 include 'openapi-core'
 include 'openapi-client-native'
+include 'openapi-tool'
 //include(':openapi-tests')
 //include 'openapi-client-idl-plugin'
 

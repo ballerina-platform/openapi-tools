@@ -26,7 +26,6 @@ plugins {
 }
 
 apply plugin: "org.javamodularity.moduleplugin"
-apply from: "$rootDir/gradle/javaProject.gradle"
 
 allprojects {
     group = 'io.ballerina'
@@ -71,7 +70,10 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'java'
+    // Apply Java plugin only to Java modules, not pure Ballerina modules
+    if (project.name != 'openapi-tool') {
+        apply plugin: 'java'
+    }
     configurations {
         ballerinaStdLibs
     }
@@ -140,7 +142,7 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 task codeCoverageReport(type: JacocoReport) {
-    dependsOn = subprojects.test
+    dependsOn = subprojects.findAll { it.name != 'openapi-tool' }.test
     dependsOn(":test")
     dependsOn(":openapi-extension-tests:jacocoTestReport")
     dependsOn(":openapi-integration-tests:jacocoTestReport")
