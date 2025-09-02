@@ -32,6 +32,14 @@ jacoco {
     toolVersion = "${jacocoVersion}"
 }
 
+configurations {
+    jacocoAnt
+}
+
+dependencies {
+    jacocoAnt "org.jacoco:org.jacoco.ant:${jacocoVersion}"
+}
+
 allprojects {
     group = 'io.ballerina'
     version = project.version
@@ -148,7 +156,6 @@ tasks.withType(JavaCompile) {
 }
 task codeCoverageReport(type: JacocoReport) {
     dependsOn = subprojects.findAll { it.name != 'openapi-tool' }.test
-    dependsOn(":test")
     dependsOn(":openapi-extension-tests:jacocoTestReport")
     dependsOn(":openapi-integration-tests:jacocoTestReport")
     dependsOn(":openapi-cli:jacocoTestReport")
@@ -163,7 +170,7 @@ task codeCoverageReport(type: JacocoReport) {
         }
     }
 
-    jacocoClasspath = configurations.jacocoAgent
+    jacocoClasspath = configurations.jacocoAnt
     reports {
         xml.required = true
         html.required = true
