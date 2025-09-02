@@ -3,3 +3,9 @@ id = "openapi"
 
 [[dependency]]
 path = "../openapi-cli/build/libs/openapi-cli-@project.version@.jar"
+
+[[dependency]]
+path = "../openapi-core/build/libs/openapi-core-@project.version@.jar"
+
+[[dependency]]
+path = "../ballerina-to-openapi/build/libs/ballerina-to-openapi-@project.version@.jar"
