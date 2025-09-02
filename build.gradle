@@ -23,9 +23,14 @@ plugins {
     id 'net.researchgate.release'
     id 'org.javamodularity.moduleplugin' apply false
     id 'org.sonarqube'
+    id 'jacoco'
 }
 
 apply plugin: "org.javamodularity.moduleplugin"
+
+jacoco {
+    toolVersion = "${jacocoVersion}"
+}
 
 allprojects {
     group = 'io.ballerina'
@@ -146,12 +151,19 @@ task codeCoverageReport(type: JacocoReport) {
     dependsOn(":test")
     dependsOn(":openapi-extension-tests:jacocoTestReport")
     dependsOn(":openapi-integration-tests:jacocoTestReport")
+    dependsOn(":openapi-cli:jacocoTestReport")
+    dependsOn(":openapi-validator:jacocoTestReport")
+    dependsOn(":openapi-tool:build")
 
     executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
 
     subprojects.each {
-        sourceSets it.sourceSets.main
+        if (it.plugins.hasPlugin('jacoco')) {
+            sourceSets it.sourceSets.main
+        }
     }
+
+    jacocoClasspath = configurations.jacocoAgent
     reports {
         xml.required = true
         html.required = true
