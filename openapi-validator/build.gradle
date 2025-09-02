@@ -106,7 +106,7 @@ task copyStdlibs(type: Copy) {
 
 clean {
     delete "$project.projectDir/target"
-    delete "$project.projectDir/Ballerina.lock"
+    delete "$project.projectDir/build"
 }
 
 jar {
