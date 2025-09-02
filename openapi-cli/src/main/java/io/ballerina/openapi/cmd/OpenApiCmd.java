@@ -165,7 +165,8 @@ public class OpenApiCmd implements BLauncherCmd {
     public void execute() {
         if (isHelp()) {
             String commandUsageInfo;
-            String fileName = "cli-help/ballerina-" + getName() + ".help";
+            String fileName = new StringBuilder().append("cli-help/").append("ballerina-").append(getName())
+                    .append(".help").toString().replace("\\", "/");
             try (InputStream inputStream = OpenApiCmd.class.getClassLoader().getResourceAsStream(fileName)) {
                 if (inputStream == null) {
                     exitError(this.exitWhenFinish);
