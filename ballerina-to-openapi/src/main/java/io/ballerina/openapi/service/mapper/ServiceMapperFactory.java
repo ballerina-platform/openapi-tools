@@ -113,7 +113,7 @@ public class ServiceMapperFactory {
     }
 
     public ServersMapper getServersMapper(Set<ListenerDeclarationNode> endpoints, ServiceNode serviceNode) {
-        return new ServersMapperImpl(openAPI, endpoints, serviceNode);
+        return new ServersMapperImpl(openAPI, additionalData, endpoints, serviceNode);
     }
 
     public ResourceMapper getResourceMapper(List<ResourceFunction> resources) {
