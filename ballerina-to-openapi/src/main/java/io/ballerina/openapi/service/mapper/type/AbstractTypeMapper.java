@@ -56,10 +56,10 @@ public abstract class AbstractTypeMapper {
             return;
         }
         Schema schema = getReferenceSchema(components);
-        if (additionalData.enableBallerinaExt()) {
-            BallerinaTypeExtensioner.addExtension(schema, typeSymbol);
-        }
         if (Objects.nonNull(schema)) {
+            if (additionalData.enableBallerinaExt()) {
+                BallerinaTypeExtensioner.addExtension(schema, typeSymbol);
+            }
             components.addSchemas(name, schema);
         }
     }
