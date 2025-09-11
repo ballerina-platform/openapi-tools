@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.openapi;
 import io.ballerina.openapi.cmd.OASContractGenerator;
 import io.ballerina.openapi.service.mapper.ServersMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -137,6 +138,30 @@ public class ListenerTests {
     public void testPositionalPortAndNamedConfigWithHost() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_scenario14.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_scenario14.yaml");
+    }
+
+    @Test
+    public void testListenerPortWithVariable() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_variable.bal");
+        Path expectedFilePath = RES_DIR.resolve("expected_gen/listeners");
+        List<String> expectedYamlFiles = List.of("api_default_openapi.yaml", "api_v1_openapi.yaml",
+                "api_v2_openapi.yaml", "api_v3_openapi.yaml", "api_v4_openapi.yaml", "api_v5_openapi.yaml",
+                "api_v6_openapi.yaml", "api_v7_openapi.yaml", "api_v8_openapi.yaml", "api_v9_openapi.yaml",
+                "api_v10_openapi.yaml", "api_v11_openapi.yaml");
+        List<OpenAPIMapperDiagnostic> diagnostics = TestUtils.compareGeneratedFiles(ballerinaFilePath,
+                expectedFilePath, expectedYamlFiles);
+        Assert.assertEquals(diagnostics.size(), 13);
+        Assert.assertTrue(diagnostics.stream()
+                .allMatch(diagnostic -> diagnostic.getDiagnosticSeverity()
+                        .equals(DiagnosticSeverity.WARNING)));
+        List<String> diagnosticCodes = diagnostics.stream()
+                .map(OpenAPIMapperDiagnostic::getCode)
+                .toList();
+        List<String> expectedCodes = List.of("OAS_CONVERTOR_143", "OAS_CONVERTOR_141", "OAS_CONVERTOR_143",
+                "OAS_CONVERTOR_141", "OAS_CONVERTOR_143", "OAS_CONVERTOR_141", "OAS_CONVERTOR_143",
+                "OAS_CONVERTOR_141", "OAS_CONVERTOR_142", "OAS_CONVERTOR_141", "OAS_CONVERTOR_146",
+                "OAS_CONVERTOR_141", "OAS_CONVERTOR_145");
+        Assert.assertEquals(expectedCodes, diagnosticCodes);
     }
 
     @AfterMethod

@@ -60,14 +60,41 @@ public class TestUtils {
         compareWithGeneratedFile(new OASContractGenerator(), ballerinaFilePath, yamlFile);
     }
 
+    public static List<OpenAPIMapperDiagnostic> compareGeneratedFiles(Path ballerinaFilePath, Path expectedFilePath,
+                                                                      List<String> yamlFiles) throws IOException {
+        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        OASContractGenerator openApiConverter = new OASContractGenerator();
+        try {
+            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
+            for (String yamlFile : yamlFiles) {
+                String expectedYamlContent = getStringFromGivenBalFile(expectedFilePath, yamlFile);
+                if (Files.exists(tempDir.resolve(yamlFile))) {
+                    String generatedYaml = getStringFromGivenBalFile(tempDir, yamlFile);
+                    generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
+                    expectedYamlContent = (expectedYamlContent.trim()).replaceAll("\\s+", "");
+                    Assert.assertTrue(generatedYaml.contains(expectedYamlContent));
+                } else {
+                    Assert.fail("Yaml was not generated");
+                }
+            }
+            return openApiConverter.getDiagnostics();
+        } catch (IOException e) {
+            Assert.fail("Error while generating the service. " + e.getMessage());
+            return List.of();
+        } finally {
+            deleteGeneratedFiles("payloadV_openapi.yaml", tempDir);
+            deleteDirectory(tempDir);
+            System.gc();
+        }
+    }
+
     public static List<OpenAPIMapperDiagnostic> compareWithGeneratedFile(OASContractGenerator openApiConverter,
                                                                          Path ballerinaFilePath, String yamlFile)
             throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
-            openApiConverter.generateOAS3DefinitionsAllService(
-                    ballerinaFilePath, tempDir, null, false);
+            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
             if (Files.exists(tempDir.resolve("payloadV_openapi.yaml"))) {
                 String generatedYaml = getStringFromGivenBalFile(tempDir, "payloadV_openapi.yaml");
                 generatedYaml = (generatedYaml.trim()).replaceAll("\\s+", "");
