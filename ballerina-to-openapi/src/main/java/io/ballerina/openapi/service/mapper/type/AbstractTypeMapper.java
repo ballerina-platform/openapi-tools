@@ -56,12 +56,13 @@ public abstract class AbstractTypeMapper {
             return;
         }
         Schema schema = getReferenceSchema(components);
-        if (Objects.nonNull(schema)) {
-            if (additionalData.enableBallerinaExt()) {
-                BallerinaTypeExtensioner.addExtension(schema, typeSymbol);
-            }
-            components.addSchemas(name, schema);
+        if (Objects.isNull(schema)) {
+            return;
         }
+        if (additionalData.enableBallerinaExt()) {
+            BallerinaTypeExtensioner.addExtension(schema, typeSymbol);
+        }
+        components.addSchemas(name, schema);
     }
 
     static boolean hasMapping(Components components, TypeSymbol typeSymbol) {

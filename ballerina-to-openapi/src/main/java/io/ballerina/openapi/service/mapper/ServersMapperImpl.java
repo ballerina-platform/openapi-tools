@@ -204,15 +204,16 @@ public class ServersMapperImpl implements ServersMapper {
     }
 
     private static boolean isHttpDefaultListener(Node expression) {
-        if (expression.kind() == SyntaxKind.FUNCTION_CALL) {
-            FunctionCallExpressionNode functionCall = (FunctionCallExpressionNode) expression;
-            NameReferenceNode functionName = functionCall.functionName();
-            if (functionName instanceof QualifiedNameReferenceNode qualifiedName) {
-                return HTTP.equals(qualifiedName.modulePrefix().text()) &&
-                        DEFAULT_LISTENER_FUNCTION_NAME.equals(qualifiedName.identifier().text());
-            }
+        if (expression.kind() != SyntaxKind.FUNCTION_CALL) {
+            return false;
         }
-        return false;
+
+        FunctionCallExpressionNode functionCall = (FunctionCallExpressionNode) expression;
+        NameReferenceNode functionName = functionCall.functionName();
+
+        return functionName instanceof QualifiedNameReferenceNode qualifiedName &&
+               HTTP.equals(qualifiedName.modulePrefix().text()) &&
+               DEFAULT_LISTENER_FUNCTION_NAME.equals(qualifiedName.identifier().text());
     }
 
     // Function to handle ExplicitNewExpressionNode in listener.
