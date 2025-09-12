@@ -120,9 +120,9 @@ servers:
 ```
 
 > **Note:** The `port` parameter is a required parameter in the listener definition. But currently, the tool can only
-> extract the port information if it is defined as a literal value or provided as a current module level variable which 
-> ultimately holds a literal value. If the port is defined using any other expressions or function calls or external
-> variables, the tool cannot extract the port value and hence the servers section will not be generated.
+> extract the port information if it is defined as a literal value or provided as a **current** module level variable
+> which ultimately holds a literal value. If the port is defined using any other expressions or function calls or 
+> external variables, the tool cannot extract the port value and hence an error will be returned.
 
 A Ballerina service can be attached to multiple listeners.
 
