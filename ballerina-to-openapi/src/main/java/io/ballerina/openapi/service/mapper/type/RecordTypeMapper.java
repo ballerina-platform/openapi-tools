@@ -297,7 +297,10 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                     additionalData.diagnostics().add(error);
                 }
             }
-            properties.put(recordFieldName, recordFieldSchema);
+            // For never field types, the schema will be null
+            if (Objects.nonNull(recordFieldSchema)) {
+                properties.put(recordFieldName, recordFieldSchema);
+            }
         }
         return properties;
     }

@@ -86,6 +86,9 @@ public final class BallerinaTypeExtensioner {
     }
 
     private static void removeExtensionFromSchema(Schema schema, ExtensionRemovalCondition condition) {
+        if (Objects.isNull(schema)) {
+            return;
+        }
         Map<?, ?> extensions = schema.getExtensions();
         if (Objects.nonNull(extensions) && condition.shouldRemove(extensions, null, null)) {
             extensions.remove(X_BALLERINA_TYPE);
