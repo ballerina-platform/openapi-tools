@@ -150,8 +150,8 @@ public class ListenerTests {
         Assert.assertEquals(diagnostics.size(), 1);
         OpenAPIMapperDiagnostic diagnostic = diagnostics.getFirst();
         Assert.assertEquals(diagnostic.getCode(), "OAS_CONVERTOR_145");
-        Assert.assertTrue(diagnostic.getMessage().contains("The server port is defined as a configurable. Hence, using" +
-                " the default value to generate the server information"));
+        Assert.assertTrue(diagnostic.getMessage().contains("The server port is defined as a configurable. Hence, " +
+                "using the default value to generate the server information"));
         Assert.assertTrue(diagnostic.getLocation().isPresent());
         Assert.assertEquals(diagnostic.getLocation().get().lineRange().toString(), "(4:26,4:30)");
     }
@@ -193,16 +193,16 @@ public class ListenerTests {
     public void testListenerPortWithVariableNegative2() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_2.bal");
         List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
-        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_143",
-                "Unsupported expression found for the server port value", "(4:11,4:20)");
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_143", "Unsupported expression found for the" +
+                " server port value", "(4:11,4:20)");
     }
 
     @Test
     public void testListenerPortWithVariableNegative3() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_3.bal");
         List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
-        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_142",
-                "The server port value cannot be obtained since the value is provided via a variable defined outside the current module",
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_142", "The server port value cannot be " +
+                "obtained since the value is provided via a variable defined outside the current module",
                 "(2:11,2:34)");
     }
 
@@ -210,17 +210,33 @@ public class ListenerTests {
     public void testListenerPortWithVariableNegative4() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_4.bal");
         List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
-        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_143",
-                "Unsupported expression found for the server port value", "(2:16,2:24)");
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_143", "Unsupported expression found for the" +
+                " server port value", "(2:16,2:24)");
     }
 
     @Test
     public void testListenerPortWithVariableNegative5() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_5.bal");
         List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
-        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_146",
-                "The configurable value provided for the port should have a default value to generate the server details",
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_146", "The configurable value provided for the" +
+                        " port should have a default value to generate the server details",
                 "(2:24,2:25)");
+    }
+
+    @Test
+    public void testListenerPortWithVariableWithModules() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_modules/main.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_port_variable_modules.yaml");
+    }
+
+    @Test
+    // TODO: This should pass when the ModuleMemberVisitor is made module aware
+    public void testListenerPortWithVariableNegativeWithModules() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_modules_neg/main.bal");
+        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_142", "The server port value cannot be " +
+                        "obtained since the value is provided via a variable defined outside the current module",
+                "(4:41,4:49)");
     }
 
     @AfterMethod
