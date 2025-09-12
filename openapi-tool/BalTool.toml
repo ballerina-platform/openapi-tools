@@ -9,3 +9,9 @@ path = "../openapi-core/build/libs/openapi-core-2.4.0-SNAPSHOT.jar"
 
 [[dependency]]
 path = "../ballerina-to-openapi/build/libs/ballerina-to-openapi-2.4.0-SNAPSHOT.jar"
+
+[[dependency]]
+path = "../openapi-build-extension/build/libs/openapi-build-extension-2.4.0-SNAPSHOT.jar"
+
+[[dependency]]
+path = "../openapi-bal-task-plugin/build/libs/openapi-bal-task-plugin-2.4.0-SNAPSHOT.jar"
