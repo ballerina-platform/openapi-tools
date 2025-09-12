@@ -20,7 +20,6 @@ package io.ballerina.openapi.generators.openapi;
 import io.ballerina.openapi.cmd.OASContractGenerator;
 import io.ballerina.openapi.service.mapper.ServersMapperImpl;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -145,23 +144,83 @@ public class ListenerTests {
         Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_variable.bal");
         Path expectedFilePath = RES_DIR.resolve("expected_gen/listeners");
         List<String> expectedYamlFiles = List.of("api_default_openapi.yaml", "api_v1_openapi.yaml",
-                "api_v2_openapi.yaml", "api_v3_openapi.yaml", "api_v4_openapi.yaml", "api_v5_openapi.yaml",
-                "api_v6_openapi.yaml", "api_v7_openapi.yaml", "api_v8_openapi.yaml", "api_v9_openapi.yaml",
-                "api_v10_openapi.yaml", "api_v11_openapi.yaml");
+                "api_v2_openapi.yaml", "api_v3_openapi.yaml", "api_v4_openapi.yaml", "api_v5_openapi.yaml");
         List<OpenAPIMapperDiagnostic> diagnostics = TestUtils.compareGeneratedFiles(ballerinaFilePath,
                 expectedFilePath, expectedYamlFiles);
-        Assert.assertEquals(diagnostics.size(), 13);
-        Assert.assertTrue(diagnostics.stream()
-                .allMatch(diagnostic -> diagnostic.getDiagnosticSeverity()
-                        .equals(DiagnosticSeverity.WARNING)));
-        List<String> diagnosticCodes = diagnostics.stream()
-                .map(OpenAPIMapperDiagnostic::getCode)
-                .toList();
-        List<String> expectedCodes = List.of("OAS_CONVERTOR_143", "OAS_CONVERTOR_141", "OAS_CONVERTOR_143",
-                "OAS_CONVERTOR_141", "OAS_CONVERTOR_143", "OAS_CONVERTOR_141", "OAS_CONVERTOR_143",
-                "OAS_CONVERTOR_141", "OAS_CONVERTOR_142", "OAS_CONVERTOR_141", "OAS_CONVERTOR_146",
-                "OAS_CONVERTOR_141", "OAS_CONVERTOR_145");
-        Assert.assertEquals(expectedCodes, diagnosticCodes);
+        Assert.assertEquals(diagnostics.size(), 1);
+        OpenAPIMapperDiagnostic diagnostic = diagnostics.getFirst();
+        Assert.assertEquals(diagnostic.getCode(), "OAS_CONVERTOR_145");
+        Assert.assertTrue(diagnostic.getMessage().contains("The server port is defined as a configurable. Hence, using" +
+                " the default value to generate the server information"));
+        Assert.assertTrue(diagnostic.getLocation().isPresent());
+        Assert.assertEquals(diagnostic.getLocation().get().lineRange().toString(), "(4:26,4:30)");
+    }
+
+    private List<OpenAPIMapperDiagnostic> runNegativeListenerTest(Path ballerinaFilePath) throws IOException {
+        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        OASContractGenerator openApiConverter = new OASContractGenerator();
+        openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
+        Assert.assertEquals(Files.list(tempDir).count(), 0);
+        List<OpenAPIMapperDiagnostic> diagnostics = openApiConverter.getDiagnostics();
+        TestUtils.deleteDirectory(tempDir);
+        System.gc();
+        return diagnostics;
+    }
+
+    private void validateCommonNegativeDiagnostics(List<OpenAPIMapperDiagnostic> diagnostics, String expectedCode,
+                                                   String expectedMessageFragment, String expectedLocation) {
+        Assert.assertEquals(diagnostics.size(), 2);
+        OpenAPIMapperDiagnostic diagnostic1 = diagnostics.getFirst();
+        Assert.assertEquals(diagnostic1.getCode(), expectedCode);
+        Assert.assertTrue(diagnostic1.getMessage().contains(expectedMessageFragment));
+        Assert.assertTrue(diagnostic1.getLocation().isPresent());
+        Assert.assertEquals(diagnostic1.getLocation().get().lineRange().toString(), expectedLocation);
+
+        OpenAPIMapperDiagnostic diagnostic2 = diagnostics.getLast();
+        Assert.assertEquals(diagnostic2.getCode(), "OAS_CONVERTOR_141");
+        Assert.assertTrue(diagnostic2.getMessage().contains("Generated OpenAPI definition does not have the server"));
+    }
+
+    @Test
+    public void testListenerPortWithVariableNegative1() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_1.bal");
+        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_143",
+                "Unsupported expression found for the server port value", "(2:11,2:19)");
+    }
+
+    @Test
+    public void testListenerPortWithVariableNegative2() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_2.bal");
+        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_143",
+                "Unsupported expression found for the server port value", "(4:11,4:20)");
+    }
+
+    @Test
+    public void testListenerPortWithVariableNegative3() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_3.bal");
+        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_142",
+                "The server port value cannot be obtained since the value is provided via a variable defined outside the current module",
+                "(2:11,2:34)");
+    }
+
+    @Test
+    public void testListenerPortWithVariableNegative4() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_4.bal");
+        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_143",
+                "Unsupported expression found for the server port value", "(2:16,2:24)");
+    }
+
+    @Test
+    public void testListenerPortWithVariableNegative5() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_5.bal");
+        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_146",
+                "The configurable value provided for the port should have a default value to generate the server details",
+                "(2:24,2:25)");
     }
 
     @AfterMethod
