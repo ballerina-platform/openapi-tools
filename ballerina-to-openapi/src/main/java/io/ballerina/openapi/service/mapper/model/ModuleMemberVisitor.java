@@ -31,32 +31,26 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
-import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeDescriptor;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpServiceContract;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
  * Visitor to get the TypeDefinitionNode and ListenerDeclarationNodes.
  *
  * @since 1.6.0
  */
-// TODO: 2.4.0 - Current module member visitor is engaged to all the modules in the project. Hence it
-//  collects all the type definitions, listener declarations, variable declarations etc., from all
-//  the modules. But when get the definitions back, it does not check the module information which produces
-//  incorrect results. Hence we need to fix this.
 public class ModuleMemberVisitor extends NodeVisitor {
 
-    Set<TypeDefinitionNode> typeDefinitionNodes = new LinkedHashSet<>();
-    Set<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedHashSet<>();
-    Set<ClassDefinitionNode> interceptorServiceClassNodes = new LinkedHashSet<>();
-    Set<ServiceContractType> serviceContractTypeNodes = new LinkedHashSet<>();
+    Map<String, TypeDefinitionNode> typeDefinitionNodes = new LinkedHashMap<>();
+    Map<String, ListenerDeclarationNode> listenerDeclarations = new LinkedHashMap<>();
+    Map<String, ClassDefinitionNode> interceptorServiceClassNodes = new LinkedHashMap<>();
+    Map<String, ServiceContractType> serviceContractTypes = new LinkedHashMap<>();
     Map<String, VariableDeclaredValue> variableDeclarations = new LinkedHashMap<>();
     SemanticModel semanticModel;
 
@@ -64,37 +58,34 @@ public class ModuleMemberVisitor extends NodeVisitor {
     }
 
     public ModuleMemberVisitor(SemanticModel semanticModel) {
-        // This is the semantic model of the module which contains the service.
         this.semanticModel = semanticModel;
     }
 
     @Override
     public void visit(TypeDefinitionNode typeDefinitionNode) {
-        typeDefinitionNodes.add(typeDefinitionNode);
+        String typeName = unescapeIdentifier(typeDefinitionNode.typeName().text());
+        typeDefinitionNodes.put(typeName, typeDefinitionNode);
         Node descriptorNode = getTypeDescriptor(typeDefinitionNode);
         if (descriptorNode.kind().equals(SyntaxKind.OBJECT_TYPE_DESC) &&
                 isHttpServiceContract(descriptorNode, semanticModel)) {
-            serviceContractTypeNodes.add(new ServiceContractType(typeDefinitionNode));
+            serviceContractTypes.put(typeName, new ServiceContractType(typeDefinitionNode));
         }
     }
 
     @Override
     public void visit(ListenerDeclarationNode listenerDeclarationNode) {
-        listenerDeclarationNodes.add(listenerDeclarationNode);
+        String listenerName = unescapeIdentifier(listenerDeclarationNode.variableName().text());
+        listenerDeclarations.put(listenerName, listenerDeclarationNode);
     }
 
     @Override
     public void visit(ClassDefinitionNode classDefinitionNode) {
-        interceptorServiceClassNodes.add(classDefinitionNode);
+        String className = unescapeIdentifier(classDefinitionNode.className().text());
+        interceptorServiceClassNodes.put(className, classDefinitionNode);
     }
 
     @Override
     public void visit(ModuleVariableDeclarationNode moduleVariableDeclarationNode) {
-        // Only consider current module level variable declarations since the current ModuleMemberVisitor
-        // is not module aware.
-        if (notBelongsToTheServiceModule(moduleVariableDeclarationNode)) {
-            return;
-        }
         TypedBindingPatternNode typedBindingPatternNode = moduleVariableDeclarationNode.typedBindingPattern();
         TypeDescriptorNode typeDescriptorNode = typedBindingPatternNode.typeDescriptor();
         BindingPatternNode bindingPatternNode = typedBindingPatternNode.bindingPattern();
@@ -108,7 +99,7 @@ public class ModuleMemberVisitor extends NodeVisitor {
         if (captureBindingPatternNode.variableName().isMissing()) {
             return;
         }
-        String variableName = captureBindingPatternNode.variableName().text();
+        String variableName = unescapeIdentifier(captureBindingPatternNode.variableName().text());
         Optional<ExpressionNode> variableValue = moduleVariableDeclarationNode.initializer();
         boolean isConfigurable = moduleVariableDeclarationNode.qualifiers().stream()
                 .anyMatch(token -> token.kind().equals(SyntaxKind.CONFIGURABLE_KEYWORD));
@@ -118,12 +109,7 @@ public class ModuleMemberVisitor extends NodeVisitor {
 
     @Override
     public void visit(ConstantDeclarationNode constantDeclarationNode) {
-        // Only consider current module level variable declarations since the current ModuleMemberVisitor
-        // is not module aware.
-        if (notBelongsToTheServiceModule(constantDeclarationNode)) {
-            return;
-        }
-        String variableName = constantDeclarationNode.variableName().text();
+        String variableName = unescapeIdentifier(constantDeclarationNode.variableName().text());
         Node variableValue = constantDeclarationNode.initializer();
         if (variableValue instanceof ExpressionNode valueExpression) {
             // Constant declarations are always non-configurable
@@ -131,41 +117,38 @@ public class ModuleMemberVisitor extends NodeVisitor {
         }
     }
 
-    public Set<ListenerDeclarationNode> getListenerDeclarationNodes() {
-        return listenerDeclarationNodes;
+    public Optional<ListenerDeclarationNode> getListenerDeclaration(String listenerName) {
+        if (listenerDeclarations.containsKey(listenerName)) {
+            return Optional.of(listenerDeclarations.get(listenerName));
+        }
+        return Optional.empty();
     }
 
     public Optional<TypeDefinitionNode> getTypeDefinitionNode(String typeName) {
-        for (TypeDefinitionNode typeDefinitionNode : typeDefinitionNodes) {
-            if (MapperCommonUtils.unescapeIdentifier(typeDefinitionNode.typeName().text()).equals(typeName)) {
-                return Optional.of(typeDefinitionNode);
-            }
+        if (typeDefinitionNodes.containsKey(typeName)) {
+            return Optional.of(typeDefinitionNodes.get(typeName));
         }
         return Optional.empty();
     }
 
     public Optional<ClassDefinitionNode> getInterceptorServiceClassNode(String typeName) {
-        for (ClassDefinitionNode classDefinitionNode : interceptorServiceClassNodes) {
-            if (MapperCommonUtils.unescapeIdentifier(classDefinitionNode.className().text()).equals(typeName)) {
-                return Optional.of(classDefinitionNode);
-            }
+        if (interceptorServiceClassNodes.containsKey(typeName)) {
+            return Optional.of(interceptorServiceClassNodes.get(typeName));
         }
         return Optional.empty();
     }
 
-    public boolean hasVariableDeclaration(String variableName) {
-        return variableDeclarations.containsKey(variableName);
+    public Optional<VariableDeclaredValue> getVariableDeclaredValue(String variableName) {
+        if (variableDeclarations.containsKey(variableName)) {
+            return Optional.of(variableDeclarations.get(variableName));
+        }
+        return Optional.empty();
     }
 
-    public VariableDeclaredValue getVariableDeclaredValue(String variableName) {
-        return variableDeclarations.get(variableName);
-    }
-
-    public Set<ServiceContractType> getServiceContractTypeNodes() {
-        return serviceContractTypeNodes;
-    }
-
-    private boolean notBelongsToTheServiceModule(Node node) {
-        return semanticModel.symbol(node).isEmpty();
+    public Optional<ServiceContractType> getServiceContractType(String typeName) {
+        if (serviceContractTypes.containsKey(typeName)) {
+            return Optional.of(serviceContractTypes.get(typeName));
+        }
+        return Optional.empty();
     }
 }

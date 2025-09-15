@@ -17,6 +17,7 @@
  */
 package io.ballerina.openapi.service.mapper;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
@@ -41,8 +42,8 @@ import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor.VariableDeclaredValue;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
@@ -54,12 +55,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT_LISTENER_FUNCTION_NAME;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP;
 import static io.ballerina.openapi.service.mapper.Constants.PORT;
 import static io.ballerina.openapi.service.mapper.Constants.SERVER;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getModuleName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.unescapeIdentifier;
 
 /**
  * This {@link ServersMapperImpl} class is the implementation of the {@link ServersMapper} interface.
@@ -70,30 +72,16 @@ import static io.ballerina.openapi.service.mapper.Constants.SERVER;
 public class ServersMapperImpl implements ServersMapper {
 
     final OpenAPI openAPI;
-    final Set<ListenerDeclarationNode> endpoints;
     final ServiceNode service;
-    final ModuleMemberVisitor moduleMemberVisitor;
+    final PackageMemberVisitor packageMemberVisitor;
     final List<OpenAPIMapperDiagnostic> diagnostics;
+    SemanticModel semanticModel;
 
-    /**
-     * @deprecated Use {@link #ServersMapperImpl(OpenAPI, AdditionalData, Set, ServiceNode)}
-     * instead.
-     */
-    @Deprecated(forRemoval = true, since = "2.3.3")
-    public ServersMapperImpl(OpenAPI openAPI, Set<ListenerDeclarationNode> endpoints, ServiceNode service) {
+    public ServersMapperImpl(OpenAPI openAPI, AdditionalData additionalData, ServiceNode service) {
+        this.semanticModel = additionalData.semanticModel();
         this.openAPI = openAPI;
-        this.endpoints = endpoints;
         this.service = service;
-        this.moduleMemberVisitor = null;
-        this.diagnostics = new ArrayList<>();
-    }
-
-    public ServersMapperImpl(OpenAPI openAPI, AdditionalData additionalData, Set<ListenerDeclarationNode> endpoints,
-                             ServiceNode service) {
-        this.openAPI = openAPI;
-        this.endpoints = endpoints;
-        this.service = service;
-        this.moduleMemberVisitor = additionalData.moduleMemberVisitor();
+        this.packageMemberVisitor = additionalData.packageMemberVisitor();
         this.diagnostics = additionalData.diagnostics();
     }
 
@@ -106,14 +94,9 @@ public class ServersMapperImpl implements ServersMapper {
 
         extractServerForExpressionNode();
         List<Server> servers = openAPI.getServers();
-        //Handle ImplicitNewExpressionNode in listener
-        if (!endpoints.isEmpty()) {
-            for (ListenerDeclarationNode ep : endpoints) {
-                SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
-                for (ExpressionNode node : exprNodes) {
-                    updateServerDetails(servers, ep, node);
-                }
-            }
+        SeparatedNodeList<ExpressionNode> exprNodes = service.expressions();
+        for (ExpressionNode node : exprNodes) {
+            updateServerDetails(servers, node);
         }
         if (hasEmptyServer()) {
             diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_141));
@@ -134,25 +117,31 @@ public class ServersMapperImpl implements ServersMapper {
     }
 
 
-    private void updateServerDetails(List<Server> servers, ListenerDeclarationNode endPoint, ExpressionNode expNode) {
-
+    private void updateServerDetails(List<Server> servers, ExpressionNode expNode) {
+        String moduleName = getModuleName(semanticModel, expNode);
+        String listenerVariableName;
         if (expNode instanceof QualifiedNameReferenceNode refNode) {
-            //Handle QualifiedNameReferenceNode in listener
-            if (refNode.identifier().text().trim().equals(endPoint.variableName().text().trim())) {
-                String serviceBasePath = service.absoluteResourcePath();
-                Server server = extractServer(endPoint, serviceBasePath);
-                servers.add(server);
-            }
-        } else if (expNode.toString().trim().equals(endPoint.variableName().text().trim())) {
-            String serviceBasePath = service.absoluteResourcePath();
-            Server server = extractServer(endPoint, serviceBasePath);
-            servers.add(server);
+            listenerVariableName = refNode.identifier().text().trim();
+        } else if (expNode instanceof SimpleNameReferenceNode refNode) {
+            listenerVariableName = refNode.name().text().trim();
+        } else {
+            return;
         }
+        listenerVariableName = unescapeIdentifier(listenerVariableName);
+        Optional<ListenerDeclarationNode> listenerDeclarationNode =
+                packageMemberVisitor.getListenerDeclaration(moduleName, listenerVariableName);
+        if (listenerDeclarationNode.isEmpty()) {
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_147, expNode.location()));
+            return;
+        }
+        ListenerDeclarationNode endPoint = listenerDeclarationNode.get();
+        String serviceBasePath = service.absoluteResourcePath();
+        Server server = extractServer(endPoint, serviceBasePath);
+        servers.add(server);
     }
 
     private static Server addEnumValues(List<Server> servers) {
-
-        Server mainServer = servers.get(0);
+        Server mainServer = servers.getFirst();
         List<Server> rotated = new ArrayList<>(servers);
         ServerVariables mainVariable = mainServer.getVariables();
         ServerVariable hostVariable = mainVariable.get(SERVER);
@@ -296,32 +285,35 @@ public class ServersMapperImpl implements ServersMapper {
             return Optional.of(literal.literalToken().text());
         }
 
-        if (!expression.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE)) {
-            if (expression.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
-                diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_142, expression.location()));
-                return Optional.empty();
-            }
-
+        if (!expression.kind().equals(SyntaxKind.SIMPLE_NAME_REFERENCE) &&
+                !expression.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
             diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_143, expression.location()));
             return Optional.empty();
         }
 
-        SimpleNameReferenceNode simpleName = (SimpleNameReferenceNode) expression;
-        String portVariableName = simpleName.name().text();
-
-        // Added due the deprecated constructor
-        if (moduleMemberVisitor == null) {
+        if (expression.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
+            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_142, expression.location()));
             return Optional.empty();
         }
 
-        if (!moduleMemberVisitor.hasVariableDeclaration(portVariableName)) {
+        String portVariableName;
+        if (expression instanceof QualifiedNameReferenceNode refNode) {
+            portVariableName = refNode.identifier().text().trim();
+        } else {
+            portVariableName = expression.toString().trim();
+        }
+        portVariableName = unescapeIdentifier(portVariableName);
+
+        String moduleName = getModuleName(semanticModel, expression);
+        Optional<VariableDeclaredValue> variableDeclaredValueOpt = packageMemberVisitor
+                .getVariableDeclaredValue(moduleName, portVariableName);
+        if (variableDeclaredValueOpt.isEmpty()) {
             // Cannot find the variable declaration in the module
             diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_144,
                     expression.location()));
             return Optional.empty();
         }
-
-        VariableDeclaredValue variableDeclaredValue = moduleMemberVisitor.getVariableDeclaredValue(portVariableName);
+        VariableDeclaredValue variableDeclaredValue = variableDeclaredValueOpt.get();
         ExpressionNode portValue = variableDeclaredValue.value();
 
         if (portValue.kind().equals(SyntaxKind.REQUIRED_EXPRESSION)) {

@@ -107,10 +107,9 @@ public class SimpleTypeMapper extends AbstractTypeMapper {
             case ANYDATA:
                 return new Schema();
             case NEVER:
-                // TODO: Check whether this can be represented with `not` in object schema
-                // Current behaviour will be skipping the type mapping
-                return null;
             default:
+                // TODO: For NEVER type, check whether this can be represented with `not` in object schema
+                // Skip type mapping for unsupported types
                 return null;
         }
     }

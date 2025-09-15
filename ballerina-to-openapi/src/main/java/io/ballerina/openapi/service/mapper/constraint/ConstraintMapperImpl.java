@@ -34,7 +34,10 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.AdditionalData;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaPackage;
+import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -78,14 +81,15 @@ import static io.ballerina.openapi.service.mapper.constraint.Constants.VALUE;
 public class ConstraintMapperImpl implements ConstraintMapper {
 
     private final OpenAPI openAPI;
-    private final ModuleMemberVisitor moduleMemberVisitor;
+    private final PackageMemberVisitor packageMemberVisitor;
+    private final String currentModuleName;
     private final List<OpenAPIMapperDiagnostic> diagnostics;
 
-    public ConstraintMapperImpl(OpenAPI openAPI, ModuleMemberVisitor moduleMemberVisitor,
-                                List<OpenAPIMapperDiagnostic> diagnostics) {
+    public ConstraintMapperImpl(OpenAPI openAPI, AdditionalData additionalData) {
         this.openAPI = openAPI;
-        this.moduleMemberVisitor = moduleMemberVisitor;
-        this.diagnostics = diagnostics;
+        this.packageMemberVisitor = additionalData.packageMemberVisitor();
+        this.currentModuleName = additionalData.currentModuleName();
+        this.diagnostics = additionalData.diagnostics();
     }
 
     public void setConstraints() {
@@ -95,7 +99,15 @@ public class ConstraintMapperImpl implements ConstraintMapper {
         }
         Map<String, Schema> schemas = components.getSchemas();
         for (Map.Entry<String, Schema> schemaEntry : schemas.entrySet()) {
-            Optional<TypeDefinitionNode> typeDefNodeOpt = moduleMemberVisitor.getTypeDefinitionNode(
+            Optional<BallerinaPackage> ballerinaExt = BallerinaTypeExtensioner.getExtension(schemaEntry.getValue());
+            String moduleName;
+            if (ballerinaExt.isPresent()) {
+                BallerinaPackage ballerinaPkg = ballerinaExt.get();
+                moduleName = ballerinaPkg.moduleName();
+            } else {
+                moduleName = currentModuleName;
+            }
+            Optional<TypeDefinitionNode> typeDefNodeOpt = packageMemberVisitor.getTypeDefinitionNode(moduleName,
                     schemaEntry.getKey());
             if (typeDefNodeOpt.isEmpty()) {
                 continue;

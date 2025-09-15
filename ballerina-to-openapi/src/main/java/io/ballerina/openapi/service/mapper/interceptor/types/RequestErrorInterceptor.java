@@ -20,7 +20,7 @@ package io.ballerina.openapi.service.mapper.interceptor.types;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.openapi.service.mapper.interceptor.InterceptorMapperException;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 
 /**
  * This {@link RequestErrorInterceptor} class represents the request error interceptor service.
@@ -30,8 +30,8 @@ import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 public class RequestErrorInterceptor extends RequestInterceptor {
 
     public RequestErrorInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                                   ModuleMemberVisitor moduleMemberVisitor) throws InterceptorMapperException {
-        super(typeSymbol, semanticModel, moduleMemberVisitor);
+                                   PackageMemberVisitor packageMemberVisitor) throws InterceptorMapperException {
+        super(typeSymbol, semanticModel, packageMemberVisitor);
     }
 
     @Override

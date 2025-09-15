@@ -125,7 +125,9 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_145("OAS_CONVERTOR_145", "The server port is defined as a configurable. Hence, using the" +
             " default value to generate the server information", DiagnosticSeverity.WARNING),
     OAS_CONVERTOR_146("OAS_CONVERTOR_146", "The configurable value provided for the port should have a default value" +
-            " to generate the server details", DiagnosticSeverity.ERROR);
+            " to generate the server details", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_147("OAS_CONVERTOR_147", "Listener declaration cannot be found in the current package",
+            DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;

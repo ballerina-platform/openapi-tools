@@ -26,7 +26,6 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.openapi.service.mapper.response.model.HeaderRecordInfo;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
-import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -36,6 +35,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getModuleName;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeName;
 
 /**
  * This {@link StatusCodeTypeUtils} class provides common functionalities for mapping the Ballerina HTTP status code
@@ -88,7 +90,7 @@ public abstract class StatusCodeTypeUtils {
                 fieldDescriptors());
         Set<String> requiredFields = new HashSet<>();
         Map<String, Schema> recordFieldsMapping = typeMapper.getSchemaForRecordFields(recordFieldMap, requiredFields,
-                headersInfo.recordName(), false);
+                headersInfo.moduleName(), headersInfo.recordName(), false);
         return mapRecordFieldToHeaders(recordFieldsMapping, requiredFields);
     }
 
@@ -98,9 +100,11 @@ public abstract class StatusCodeTypeUtils {
                     responseRecordType.fieldDescriptors().get("headers").typeDescriptor());
             if (Objects.nonNull(headersType) && headersType instanceof TypeReferenceTypeSymbol headersRefType &&
                     headersRefType.typeDescriptor() instanceof RecordTypeSymbol recordType) {
-                return new HeaderRecordInfo(recordType, MapperCommonUtils.getTypeName(headersType));
+                return new HeaderRecordInfo(recordType, getModuleName(headersType),
+                        getTypeName(headersType));
             } else if (Objects.nonNull(headersType) && headersType instanceof RecordTypeSymbol recordType) {
-                return new HeaderRecordInfo(recordType, MapperCommonUtils.getTypeName(recordType));
+                return new HeaderRecordInfo(recordType, getModuleName(headersType),
+                        getTypeName(headersType));
             }
         }
         return null;
