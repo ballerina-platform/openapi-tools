@@ -136,8 +136,9 @@ public class InterceptorTests {
                 ballerinaFilePath, "interceptors/negative/interceptors00.yaml");
         Assert.assertEquals(errors.get(0).getMessage(), "Generated OpenAPI definition does not contain the" +
                 " response/request parameter information from the interceptor pipeline. Cause: no class definition " +
-                "found for the interceptor: RequestInterceptor. Make sure that the interceptor return type is " +
-                "defined with the specific interceptor class type rather than the generic `http:Interceptor` type");
+                "found for the interceptor: RequestInterceptor within the package. Make sure that the interceptor " +
+                "return type is defined with the specific interceptor class type rather than the generic " +
+                "`http:Interceptor` type and the specific interceptor class is defined within the package");
     }
 
     @AfterMethod
