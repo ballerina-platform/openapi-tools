@@ -54,8 +54,7 @@ include ':openapi-extension-tests'
 include ':openapi-integration-tests'
 include ':openapi-core'
 include 'openapi-client-native'
-include 'module-ballerina-tool.openapi'
-//include(':openapi-tests')
+include 'openapi-tool'
 
 gradleEnterprise {
     buildScan {
