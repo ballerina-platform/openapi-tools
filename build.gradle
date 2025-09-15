@@ -84,7 +84,7 @@ allprojects {
 
 subprojects {
     // Apply Java plugin only to Java modules, not pure Ballerina modules
-    if (project.name != 'openapi-tool') {
+    if (project.name != 'module-ballerina-tool.openapi') {
         apply plugin: 'java'
     }
     configurations {
@@ -155,12 +155,12 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 task codeCoverageReport(type: JacocoReport) {
-    dependsOn = subprojects.findAll { it.name != 'openapi-tool' }.test
+    dependsOn = subprojects.findAll { it.name != 'module-ballerina-tool.openapi' }.test
     dependsOn(":openapi-extension-tests:jacocoTestReport")
     dependsOn(":openapi-integration-tests:jacocoTestReport")
     dependsOn(":openapi-cli:jacocoTestReport")
     dependsOn(":openapi-validator:jacocoTestReport")
-    dependsOn(":openapi-tool:build")
+    dependsOn(":module-ballerina-tool.openapi:build")
 
     executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
 
