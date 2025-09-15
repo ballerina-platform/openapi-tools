@@ -61,7 +61,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("ballerina-openapi - Generate a Ballerina service"));
+        Assert.assertTrue(output.contains("NAME") &&
+            output.contains("ballerina-openapi - Generate a Ballerina service or a client from an") &&
+            output.contains("OpenAPI contract and vice versa."));
     }
 
     @Test(description = "Test openapi command with help flag")
@@ -71,7 +73,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("ballerina-openapi - Generate a Ballerina service"));
+        Assert.assertTrue(output.contains("NAME") &&
+            output.contains("ballerina-openapi - Generate a Ballerina service or a client from an") &&
+            output.contains("OpenAPI contract and vice versa."));
     }
 
     @Test(description = "Test openapi command without help flag")
@@ -80,7 +84,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(openApiCommand);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("ballerina-openapi - Generate a Ballerina service"));
+        Assert.assertTrue(output.contains("NAME") &&
+            output.contains("ballerina-openapi - Generate a Ballerina service or a client from an") &&
+            output.contains("OpenAPI contract and vice versa."));
     }
 
     @Test(description = "Test openapi gen-service without openapi contract file",
