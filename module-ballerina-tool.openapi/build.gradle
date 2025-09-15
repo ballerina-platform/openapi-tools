@@ -107,6 +107,7 @@ publishing {
 
 copyStdlibs.dependsOn unpackJballerinaTools
 updateTomlFiles.dependsOn copyStdlibs
+build.dependsOn "generatePomFileForMavenPublication"
 
 publishToMavenLocal.dependsOn build
 publish.dependsOn build
