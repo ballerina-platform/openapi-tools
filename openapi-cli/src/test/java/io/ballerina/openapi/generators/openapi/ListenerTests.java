@@ -202,7 +202,7 @@ public class ListenerTests {
         Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_3.bal");
         List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
         validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_142", "The server port value cannot be " +
-                "obtained since the value is provided via a variable defined outside the current module",
+                "obtained since the value is provided via a variable defined outside the current package",
                 "(2:11,2:34)");
     }
 
@@ -224,19 +224,15 @@ public class ListenerTests {
     }
 
     @Test
-    public void testListenerPortWithVariableWithModules() throws IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_modules/main.bal");
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_port_variable_modules.yaml");
+    public void testListenerPortWithVariableWithModules1() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_modules_1/main.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_port_variable_modules_1.yaml");
     }
 
     @Test
-    // TODO: This should pass when the ModuleMemberVisitor is made module aware
-    public void testListenerPortWithVariableNegativeWithModules() throws IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_modules_neg/main.bal");
-        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
-        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_142", "The server port value cannot be " +
-                        "obtained since the value is provided via a variable defined outside the current module",
-                "(4:41,4:49)");
+    public void testListenerPortWithVariableWithModules2() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_modules_2/main.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "listeners/listener_port_variable_modules_2.yaml");
     }
 
     @AfterMethod

@@ -291,14 +291,11 @@ public class ServersMapperImpl implements ServersMapper {
             return Optional.empty();
         }
 
-        if (expression.kind().equals(SyntaxKind.QUALIFIED_NAME_REFERENCE)) {
-            diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_142, expression.location()));
-            return Optional.empty();
-        }
-
         String portVariableName;
+        boolean qualifiedName = false;
         if (expression instanceof QualifiedNameReferenceNode refNode) {
             portVariableName = refNode.identifier().text().trim();
+            qualifiedName = true;
         } else {
             portVariableName = expression.toString().trim();
         }
@@ -308,7 +305,12 @@ public class ServersMapperImpl implements ServersMapper {
         Optional<VariableDeclaredValue> variableDeclaredValueOpt = packageMemberVisitor
                 .getVariableDeclaredValue(moduleName, portVariableName);
         if (variableDeclaredValueOpt.isEmpty()) {
-            // Cannot find the variable declaration in the module
+            if (qualifiedName) {
+                diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_142, expression.location()));
+                return Optional.empty();
+            }
+
+            // Cannot find the variable declaration in the package
             diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_144,
                     expression.location()));
             return Optional.empty();
