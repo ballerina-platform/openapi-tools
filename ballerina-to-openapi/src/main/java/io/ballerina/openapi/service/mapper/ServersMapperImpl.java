@@ -193,12 +193,10 @@ public class ServersMapperImpl implements ServersMapper {
 
     private static Optional<ParenthesizedArgList> extractListenerNodeType(Node expression) {
         Optional<ParenthesizedArgList> list = Optional.empty();
-        if (expression.kind() == SyntaxKind.EXPLICIT_NEW_EXPRESSION) {
-            ExplicitNewExpressionNode bTypeExplicit = (ExplicitNewExpressionNode) expression;
-            list = Optional.ofNullable(bTypeExplicit.parenthesizedArgList());
-        } else if (expression.kind() == SyntaxKind.IMPLICIT_NEW_EXPRESSION) {
-            ImplicitNewExpressionNode bTypeInit = (ImplicitNewExpressionNode) expression;
-            list = bTypeInit.parenthesizedArgList();
+        if (expression instanceof ExplicitNewExpressionNode newExpression) {
+            list = Optional.ofNullable(newExpression.parenthesizedArgList());
+        } else if (expression instanceof ImplicitNewExpressionNode newExpression) {
+            list = newExpression.parenthesizedArgList();
         }
         return list;
     }
