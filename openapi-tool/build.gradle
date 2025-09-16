@@ -32,6 +32,8 @@ def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/config/resources
 def balToolTomlFilePlaceHolder = new File("${project.rootDir}/config/resources/BalTool.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
 def balToolTomlFile = new File("$project.projectDir/BalTool.toml")
+def distributionPath =  "${project.rootDir}/module-ballerina-openapi/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
+def distributionBinPath = "${distributionPath}/bin"
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -53,6 +55,20 @@ ballerina {
     langVersion = ballerinaLangVersion
 }
 
+task publishToLocal {
+    doLast {
+        project.exec {
+            println "distributionBinPath: $distributionBinPath"
+            workingDir project.projectDir
+            environment 'JAVA_OPTS', '-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true'
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "$distributionBinPath/bal.bat pack && $distributionBinPath/bal.bat push --repository=local"
+            } else {
+                commandLine 'sh', '-c', "$distributionBinPath/bal pack && $distributionBinPath/bal push --repository=local"
+            }
+        }
+    }
+}
 task updateTomlFiles {
     doLast {
         def newBallerinaToml = ballerinaTomlFilePlaceHolder.text.replace("@toml.version@", tomlVersion)
@@ -107,6 +123,6 @@ publishing {
 copyStdlibs.dependsOn unpackJballerinaTools
 updateTomlFiles.dependsOn copyStdlibs
 build.dependsOn "generatePomFileForMavenPublication"
-
+build.dependsOn publishToLocal
 publishToMavenLocal.dependsOn build
 publish.dependsOn build
