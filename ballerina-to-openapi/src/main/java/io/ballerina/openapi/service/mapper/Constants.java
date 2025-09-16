@@ -83,6 +83,7 @@ public final class Constants {
     public static final String HTTP_HEADER_TYPE = "HttpHeader";
     public static final String EXAMPLE = "example";
     public static final String REQUEST = "request";
+    public static final String DEFAULT_LISTENER_FUNCTION_NAME = "getDefaultListener";
 
     private Constants() {
 

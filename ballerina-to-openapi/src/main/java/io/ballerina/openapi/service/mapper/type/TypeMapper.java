@@ -36,7 +36,7 @@ public interface TypeMapper {
     Schema getTypeSchema(TypeSymbol typeSymbol);
 
     Map<String, Schema> getSchemaForRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                 Set<String> requiredFields, String recordName,
+                                                 Set<String> requiredFields, String moduleName, String recordName,
                                                  boolean treatNilableAsOptional);
 
     TypeSymbol getReferredType(TypeSymbol typeSymbol);

@@ -38,7 +38,7 @@ import io.ballerina.openapi.service.mapper.example.parameter.PathExampleMapper;
 import io.ballerina.openapi.service.mapper.example.parameter.RequestExampleMapper;
 import io.ballerina.openapi.service.mapper.example.type.TypeExampleMapper;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.openapi.service.mapper.type.extension.BallerinaPackage;
@@ -82,7 +82,8 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
     private final List<OpenAPIMapperDiagnostic> diagnostics;
     private final ServiceNode serviceDeclarationNode;
     private final SemanticModel semanticModel;
-    private final ModuleMemberVisitor moduleMemberVisitor;
+    private final PackageMemberVisitor packageMemberVisitor;
+    private final String currentModuleName;
 
     private enum ParameterType {
         PAYLOAD,
@@ -96,7 +97,8 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
         this.diagnostics = additionalData.diagnostics();
         this.serviceDeclarationNode = serviceNode;
         this.semanticModel = additionalData.semanticModel();
-        this.moduleMemberVisitor = additionalData.moduleMemberVisitor();
+        this.packageMemberVisitor = additionalData.packageMemberVisitor();
+        this.currentModuleName = additionalData.currentModuleName();
     }
 
     @Override
@@ -154,8 +156,9 @@ public class OpenAPIExampleMapperImpl implements OpenAPIExampleMapper {
                     ballerinaPkg.version(), typeName);
         } else {
             // Try to get it from the module member visitor
-            // This only works for the types that are defined in the same package
-            Optional<TypeDefinitionNode> typeDefinitionNode = moduleMemberVisitor.getTypeDefinitionNode(name);
+            // This only works for the types that are defined in the same module as the service
+            Optional<TypeDefinitionNode> typeDefinitionNode = packageMemberVisitor
+                    .getTypeDefinitionNode(currentModuleName, name);
             if (typeDefinitionNode.isEmpty()) {
                 return Optional.empty();
             }
