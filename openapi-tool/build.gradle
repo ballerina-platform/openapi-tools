@@ -56,6 +56,10 @@ ballerina {
 }
 
 task publishToLocal {
+    dependsOn ":openapi-cli:build"
+    dependsOn ":openapi-bal-task-plugin:build"
+    dependsOn ":openapi-core:build"
+    dependsOn ":ballerina-to-openapi:build"
     doLast {
         project.exec {
             println "distributionBinPath: $distributionBinPath"
@@ -136,6 +140,10 @@ publishing {
 
 copyStdlibs.dependsOn unpackJballerinaTools
 updateTomlFiles.dependsOn copyStdlibs
+updateTomlFiles.dependsOn ":openapi-cli:build"
+updateTomlFiles.dependsOn ":openapi-bal-task-plugin:build"
+updateTomlFiles.dependsOn ":openapi-core:build"
+updateTomlFiles.dependsOn ":ballerina-to-openapi:build"
 copyOpenApiTool.dependsOn publishToLocal
 build.dependsOn "generatePomFileForMavenPublication"
 build.dependsOn publishToLocal
