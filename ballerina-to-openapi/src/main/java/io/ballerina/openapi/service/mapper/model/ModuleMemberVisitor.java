@@ -18,15 +18,24 @@
 package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.BindingPatternNode;
+import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
+import io.ballerina.compiler.syntax.tree.ConstantDeclarationNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
+import io.ballerina.compiler.syntax.tree.ModuleVariableDeclarationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
+import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,15 +47,24 @@ import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttp
  *
  * @since 1.6.0
  */
+// TODO: 2.4.0 - Current module member visitor is engaged to all the modules in the project. Hence it
+//  collects all the type definitions, listener declarations, variable declarations etc., from all
+//  the modules. But when get the definitions back, it does not check the module information which produces
+//  incorrect results. Hence we need to fix this.
 public class ModuleMemberVisitor extends NodeVisitor {
 
     Set<TypeDefinitionNode> typeDefinitionNodes = new LinkedHashSet<>();
     Set<ListenerDeclarationNode> listenerDeclarationNodes = new LinkedHashSet<>();
     Set<ClassDefinitionNode> interceptorServiceClassNodes = new LinkedHashSet<>();
     Set<ServiceContractType> serviceContractTypeNodes = new LinkedHashSet<>();
+    Map<String, VariableDeclaredValue> variableDeclarations = new LinkedHashMap<>();
     SemanticModel semanticModel;
 
+    public record VariableDeclaredValue(ExpressionNode value, boolean isConfigurable) {
+    }
+
     public ModuleMemberVisitor(SemanticModel semanticModel) {
+        // This is the semantic model of the module which contains the service.
         this.semanticModel = semanticModel;
     }
 
@@ -68,6 +86,49 @@ public class ModuleMemberVisitor extends NodeVisitor {
     @Override
     public void visit(ClassDefinitionNode classDefinitionNode) {
         interceptorServiceClassNodes.add(classDefinitionNode);
+    }
+
+    @Override
+    public void visit(ModuleVariableDeclarationNode moduleVariableDeclarationNode) {
+        // Only consider current module level variable declarations since the current ModuleMemberVisitor
+        // is not module aware.
+        if (notBelongsToTheServiceModule(moduleVariableDeclarationNode)) {
+            return;
+        }
+        TypedBindingPatternNode typedBindingPatternNode = moduleVariableDeclarationNode.typedBindingPattern();
+        TypeDescriptorNode typeDescriptorNode = typedBindingPatternNode.typeDescriptor();
+        BindingPatternNode bindingPatternNode = typedBindingPatternNode.bindingPattern();
+        if (!bindingPatternNode.kind().equals(SyntaxKind.CAPTURE_BINDING_PATTERN) ||
+                !(typeDescriptorNode.kind().equals(SyntaxKind.INT_TYPE_DESC) ||
+                        typeDescriptorNode.kind().equals(SyntaxKind.VAR_TYPE_DESC))) {
+            return;
+        }
+
+        CaptureBindingPatternNode captureBindingPatternNode = (CaptureBindingPatternNode) bindingPatternNode;
+        if (captureBindingPatternNode.variableName().isMissing()) {
+            return;
+        }
+        String variableName = captureBindingPatternNode.variableName().text();
+        Optional<ExpressionNode> variableValue = moduleVariableDeclarationNode.initializer();
+        boolean isConfigurable = moduleVariableDeclarationNode.qualifiers().stream()
+                .anyMatch(token -> token.kind().equals(SyntaxKind.CONFIGURABLE_KEYWORD));
+        variableValue.ifPresent(expressionNode -> variableDeclarations.put(variableName,
+                new VariableDeclaredValue(expressionNode, isConfigurable)));
+    }
+
+    @Override
+    public void visit(ConstantDeclarationNode constantDeclarationNode) {
+        // Only consider current module level variable declarations since the current ModuleMemberVisitor
+        // is not module aware.
+        if (notBelongsToTheServiceModule(constantDeclarationNode)) {
+            return;
+        }
+        String variableName = constantDeclarationNode.variableName().text();
+        Node variableValue = constantDeclarationNode.initializer();
+        if (variableValue instanceof ExpressionNode valueExpression) {
+            // Constant declarations are always non-configurable
+            variableDeclarations.put(variableName, new VariableDeclaredValue(valueExpression, false));
+        }
     }
 
     public Set<ListenerDeclarationNode> getListenerDeclarationNodes() {
@@ -92,7 +153,19 @@ public class ModuleMemberVisitor extends NodeVisitor {
         return Optional.empty();
     }
 
+    public boolean hasVariableDeclaration(String variableName) {
+        return variableDeclarations.containsKey(variableName);
+    }
+
+    public VariableDeclaredValue getVariableDeclaredValue(String variableName) {
+        return variableDeclarations.get(variableName);
+    }
+
     public Set<ServiceContractType> getServiceContractTypeNodes() {
         return serviceContractTypeNodes;
+    }
+
+    private boolean notBelongsToTheServiceModule(Node node) {
+        return semanticModel.symbol(node).isEmpty();
     }
 }

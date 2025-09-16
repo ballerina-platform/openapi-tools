@@ -113,7 +113,19 @@ public enum DiagnosticMessages {
     OAS_CONVERTOR_139("OAS_CONVERTOR_139", "Failed to find the OpenAPI definition resource for the " +
             "service contract type: '%s'", DiagnosticSeverity.ERROR),
     OAS_CONVERTOR_140("OAS_CONVERTOR_140", "Failed to resolve recursive references for `expand: true` option",
-            DiagnosticSeverity.ERROR);
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_141("OAS_CONVERTOR_141", "Generated OpenAPI definition does not have the server information",
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_142("OAS_CONVERTOR_142", "The server port value cannot be obtained since the value is provided" +
+            " via a variable defined outside the current module", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_143("OAS_CONVERTOR_143", "Unsupported expression found for the server port value",
+            DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_144("OAS_CONVERTOR_144", "The variable value provided for the server port, cannot be found" +
+            " in the current module", DiagnosticSeverity.ERROR),
+    OAS_CONVERTOR_145("OAS_CONVERTOR_145", "The server port is defined as a configurable. Hence, using the" +
+            " default value to generate the server information", DiagnosticSeverity.WARNING),
+    OAS_CONVERTOR_146("OAS_CONVERTOR_146", "The configurable value provided for the port should have a default value" +
+            " to generate the server details", DiagnosticSeverity.ERROR);
 
     private final String code;
     private final String description;

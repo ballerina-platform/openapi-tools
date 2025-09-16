@@ -53,6 +53,7 @@ import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtension
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -272,6 +273,12 @@ public final class ServiceToOpenAPIMapper {
 
                 ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(listeners, serviceDefinition);
                 serversMapperImpl.setServers();
+
+                // Return if there are any errors while setting the servers
+                if (diagnostics.stream().anyMatch(diagnostic -> diagnostic.getDiagnosticSeverity()
+                                .equals(DiagnosticSeverity.ERROR))) {
+                    return new OASResult(openapi, diagnostics);
+                }
 
                 if (oasAvailableViaServiceContract(serviceDefinition)) {
                     return updateOasResultWithServiceContract((ServiceDeclaration) serviceDefinition, currentPackage,
