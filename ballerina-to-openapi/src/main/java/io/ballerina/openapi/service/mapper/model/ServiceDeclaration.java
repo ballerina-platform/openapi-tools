@@ -54,7 +54,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createMetadataNode;
 import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
@@ -62,6 +61,7 @@ import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP_SERVICE_CONTRACT;
 import static io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper.generateOasFroServiceNode;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getModuleName;
 
 /**
  * The {@link ServiceDeclaration} represents the service declaration.
@@ -181,9 +181,9 @@ public class ServiceDeclaration implements ServiceNode {
     }
 
     public Optional<OpenAPI> getOpenAPIFromServiceContract(Package pkg, SemanticModel semanticModel,
-                                                           Set<ServiceContractType> serviceContractTypes,
+                                                           PackageMemberVisitor packageMemberVisitor,
                                                            List<OpenAPIMapperDiagnostic> diagnostics) {
-        Optional<String> jsonOpenApi = getOpenAPISpecFromResources(pkg, semanticModel, serviceContractTypes,
+        Optional<String> jsonOpenApi = getOpenAPISpecFromResources(pkg, semanticModel, packageMemberVisitor,
                 diagnostics);
         if (jsonOpenApi.isEmpty()) {
             return Optional.empty();
@@ -197,9 +197,10 @@ public class ServiceDeclaration implements ServiceNode {
     }
 
     private Optional<String> getOpenAPISpecFromResources(Package pkg, SemanticModel semanticModel,
-                                                         Set<ServiceContractType> serviceContractTypes,
+                                                         PackageMemberVisitor packageMemberVisitor,
                                                          List<OpenAPIMapperDiagnostic> diagnostics) {
         Optional<String> serviceName = serviceContractType.getName();
+        String moduleName = getModuleName(serviceContractType);
         if (serviceName.isEmpty()) {
             return Optional.empty();
         }
@@ -228,9 +229,8 @@ public class ServiceDeclaration implements ServiceNode {
 
         if (currentModuleId.orgName().equals(serviceContractModuleId.orgName()) && currentModuleId.moduleName()
                 .equals(serviceContractModuleId.moduleName())) {
-            Optional<ServiceContractType> serviceContract = serviceContractTypes.stream()
-                    .filter(contractType -> contractType.matchesName(serviceName.get()))
-                    .findFirst();
+            Optional<ServiceContractType> serviceContract = packageMemberVisitor
+                    .getServiceContractType(moduleName, serviceName.get());
             if (serviceContract.isEmpty()) {
                 diagnostics.add(new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_137, serviceName.get()));
                 return Optional.empty();

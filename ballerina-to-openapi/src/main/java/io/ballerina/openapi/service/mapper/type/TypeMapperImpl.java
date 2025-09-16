@@ -33,7 +33,7 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtensioner;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.ballerina.projects.Project;
@@ -79,8 +79,9 @@ public class TypeMapperImpl implements TypeMapper {
         this.components = new Components().schemas(new HashMap<>());
         SemanticModel semanticModel = context.semanticModel();
         Project project = context.currentPackage().project();
-        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(project, semanticModel);
-        this.componentMapperData = new AdditionalData(semanticModel, moduleMemberVisitor);
+        PackageMemberVisitor packageMemberVisitor = extractNodesFromProject(project);
+        String moduleName = context.moduleId().moduleName();
+        this.componentMapperData = new AdditionalData(semanticModel, packageMemberVisitor, moduleName);
     }
 
     public Schema getSchema(TypeSymbol typeSymbol) throws UnsupportedOperationException {
@@ -144,8 +145,8 @@ public class TypeMapperImpl implements TypeMapper {
     }
 
     private AdditionalData cloneComponentMapperData(boolean enableExpansion) {
-        return new AdditionalData(componentMapperData.semanticModel(), componentMapperData.moduleMemberVisitor(),
-                new ArrayList<>(), false, enableExpansion);
+        return new AdditionalData(componentMapperData.semanticModel(), componentMapperData.packageMemberVisitor(),
+                new ArrayList<>(), false, enableExpansion, componentMapperData.currentModuleName());
     }
 
     private boolean isAnydata(TypeSymbol typeSymbol) {
@@ -186,7 +187,7 @@ public class TypeMapperImpl implements TypeMapper {
             case TYPE_REFERENCE -> ReferenceTypeMapper.getSchema((TypeReferenceTypeSymbol) typeSymbol, components,
                     componentMapperData);
             case RECORD -> RecordTypeMapper.getSchema((RecordTypeSymbol) typeSymbol, components,
-                    null, componentMapperData);
+                    "", null, componentMapperData);
             case INTERSECTION ->
                     ReadOnlyTypeMapper.getSchema((IntersectionTypeSymbol) typeSymbol, components, componentMapperData);
             case UNION ->
@@ -230,11 +231,11 @@ public class TypeMapperImpl implements TypeMapper {
     }
 
     public Map<String, Schema> getSchemaForRecordFields(Map<String, RecordFieldSymbol> recordFieldMap,
-                                                        Set<String> requiredFields, String recordName,
-                                                        boolean treatNilableAsOptional) {
+                                                        Set<String> requiredFields, String moduleName,
+                                                        String recordName, boolean treatNilableAsOptional) {
 
         RecordTypeMapper.RecordFieldMappingContext context = new RecordTypeMapper.RecordFieldMappingContext(
-                recordFieldMap, components, requiredFields, recordName, treatNilableAsOptional,
+                recordFieldMap, components, requiredFields, moduleName, recordName, treatNilableAsOptional,
                 false, componentMapperData, new HashSet<>());
         return RecordTypeMapper.mapRecordFields(context);
     }

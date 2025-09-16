@@ -29,7 +29,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.service.mapper.interceptor.InterceptorMapperException;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 import io.ballerina.openapi.service.mapper.utils.MediaTypeUtils;
 
 import java.util.List;
@@ -40,6 +40,7 @@ import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
 import static io.ballerina.openapi.service.mapper.Constants.EMPTY;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP;
 import static io.ballerina.openapi.service.mapper.Constants.NEXT_SERVICE;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getModuleName;
 
 /**
  * This {@link Interceptor} class represents the abstract interceptor service.
@@ -59,12 +60,14 @@ public abstract class Interceptor extends Resource {
     protected Interceptor nextInResPath = null;
 
     protected Interceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                          ModuleMemberVisitor moduleMemberVisitor) throws InterceptorMapperException {
+                          PackageMemberVisitor packageMemberVisitor) throws InterceptorMapperException {
         super(semanticModel);
         String name = typeSymbol.getName().orElse("");
-        if (typeSymbol.getName().isPresent() &&
-                moduleMemberVisitor.getInterceptorServiceClassNode(name).isPresent()) {
-            this.serviceClassNode = moduleMemberVisitor.getInterceptorServiceClassNode(name).get();
+        String moduleName = getModuleName(typeSymbol);
+        Optional<ClassDefinitionNode> interceptorServiceClassNode = packageMemberVisitor
+                .getInterceptorServiceClassNode(moduleName, name);
+        if (interceptorServiceClassNode.isPresent()) {
+            this.serviceClassNode = interceptorServiceClassNode.get();
         } else {
             throw new InterceptorMapperException("no class definition found for the interceptor: " + name +
                     " within the package. Make sure that the interceptor return type is defined with the specific" +
@@ -144,7 +147,7 @@ public abstract class Interceptor extends Resource {
             if (effectiveMemberTypes.isEmpty()) {
                 return null;
             } else if (effectiveMemberTypes.size() == 1) {
-                return effectiveMemberTypes.get(0);
+                return effectiveMemberTypes.getFirst();
             }
             return semanticModel.types().builder().UNION_TYPE.withMemberTypes(
                     effectiveMemberTypes.toArray(TypeSymbol[]::new)).build();

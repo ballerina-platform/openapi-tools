@@ -23,7 +23,6 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.openapi.service.mapper.constraint.ConstraintMapper;
@@ -39,8 +38,8 @@ import io.ballerina.openapi.service.mapper.interceptor.pipeline.InterceptorPipel
 import io.ballerina.openapi.service.mapper.metainfo.MetaInfoMapper;
 import io.ballerina.openapi.service.mapper.metainfo.MetaInfoMapperImpl;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OperationInventory;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.model.ServiceNode;
 import io.ballerina.openapi.service.mapper.parameter.DefaultParameterMapper;
@@ -51,6 +50,7 @@ import io.ballerina.openapi.service.mapper.response.ResponseMapper;
 import io.ballerina.openapi.service.mapper.response.ResponseMapperWithInterceptors;
 import io.ballerina.openapi.service.mapper.type.TypeMapper;
 import io.ballerina.openapi.service.mapper.type.TypeMapperImpl;
+import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 
 import static io.ballerina.openapi.service.mapper.Constants.BALLERINA;
@@ -89,10 +88,13 @@ public class ServiceMapperFactory {
     private final MetaInfoMapper metaInfoMapper;
     private final OpenAPIExampleMapper exampleMapper;
 
-    public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                                List<OpenAPIMapperDiagnostic> diagnostics, ServiceNode serviceDefinition,
-                                boolean enableBallerinaExt) {
-        this.additionalData = new AdditionalData(semanticModel, moduleMemberVisitor, diagnostics, enableBallerinaExt);
+    public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel,
+                                PackageMemberVisitor packageMemberVisitor, List<OpenAPIMapperDiagnostic> diagnostics,
+                                ServiceNode serviceDefinition, boolean enableBallerinaExt) {
+        String moduleName = serviceDefinition.getSymbol(semanticModel)
+                .map(MapperCommonUtils::getModuleName).orElse("");
+        this.additionalData = new AdditionalData(semanticModel, packageMemberVisitor, diagnostics, enableBallerinaExt,
+                moduleName);
         this.treatNilableAsOptional = isTreatNilableAsOptionalParameter(serviceDefinition);
         this.openAPI = openAPI;
         // Skip interceptor pipeline build for services implemented via service contract
@@ -101,19 +103,20 @@ public class ServiceMapperFactory {
                 getInterceptorPipeline(serviceDefinition, additionalData);
 
         this.typeMapper = new TypeMapperImpl(getComponents(openAPI), additionalData);
-        this.constraintMapper = new ConstraintMapperImpl(openAPI, moduleMemberVisitor, diagnostics);
+        this.constraintMapper = new ConstraintMapperImpl(openAPI, this.additionalData);
         this.hateoasMapper = new HateoasMapperImpl();
         this.metaInfoMapper = new MetaInfoMapperImpl();
         this.exampleMapper = new OpenAPIExampleMapperImpl(openAPI, serviceDefinition, additionalData);
     }
 
-    public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                                List<OpenAPIMapperDiagnostic> diagnostics, ServiceNode serviceDefinition) {
-        this(openAPI, semanticModel, moduleMemberVisitor, diagnostics, serviceDefinition, false);
+    public ServiceMapperFactory(OpenAPI openAPI, SemanticModel semanticModel,
+                                PackageMemberVisitor packageMemberVisitor, List<OpenAPIMapperDiagnostic> diagnostics,
+                                ServiceNode serviceDefinition) {
+        this(openAPI, semanticModel, packageMemberVisitor, diagnostics, serviceDefinition, false);
     }
 
-    public ServersMapper getServersMapper(Set<ListenerDeclarationNode> endpoints, ServiceNode serviceNode) {
-        return new ServersMapperImpl(openAPI, endpoints, serviceNode);
+    public ServersMapper getServersMapper(ServiceNode serviceNode) {
+        return new ServersMapperImpl(openAPI, additionalData, serviceNode);
     }
 
     public ResourceMapper getResourceMapper(List<ResourceFunction> resources) {

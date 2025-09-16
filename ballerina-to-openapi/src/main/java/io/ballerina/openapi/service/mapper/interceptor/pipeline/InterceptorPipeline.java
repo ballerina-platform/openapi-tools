@@ -37,7 +37,7 @@ import io.ballerina.openapi.service.mapper.interceptor.types.RequestInterceptor;
 import io.ballerina.openapi.service.mapper.interceptor.types.ResponseErrorInterceptor;
 import io.ballerina.openapi.service.mapper.interceptor.types.ResponseInterceptor;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.ServiceNode;
 
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public class InterceptorPipeline {
 
         if (!interceptors.isEmpty()) {
             InterceptorPipeline pipeline = new InterceptorPipeline(additionalData);
-            Interceptor prevInterceptor = interceptors.get(0);
+            Interceptor prevInterceptor = interceptors.getFirst();
             if (prevInterceptor.getType().equals(InterceptorType.REQUEST)) {
                 pipeline.initReqInterceptor = prevInterceptor;
             } else if (prevInterceptor instanceof ResponseInterceptor) {
@@ -97,7 +97,7 @@ public class InterceptorPipeline {
 
     private static List<Interceptor> buildInterceptors(ServiceNode serviceDefinition, AdditionalData additionalData) {
         SemanticModel semanticModel = additionalData.semanticModel();
-        ModuleMemberVisitor moduleMemberVisitor = additionalData.moduleMemberVisitor();
+        PackageMemberVisitor packageMemberVisitor = additionalData.packageMemberVisitor();
 
         Optional<TypeSymbol> optInterceptorReturn = serviceDefinition.getInterceptorReturnType(semanticModel);
         if (optInterceptorReturn.isEmpty()) {
@@ -109,10 +109,10 @@ public class InterceptorPipeline {
             if (interceptorReturn instanceof TypeReferenceTypeSymbol interceptorType &&
                     isSubTypeOf(interceptorReturn, INTERCEPTOR, semanticModel)) {
                 Interceptor.InterceptorType type = getInterceptorType(interceptorType, semanticModel);
-                Interceptor interceptor = getInterceptor(interceptorType, type, semanticModel, moduleMemberVisitor);
+                Interceptor interceptor = getInterceptor(interceptorType, type, semanticModel, packageMemberVisitor);
                 return List.of(interceptor);
             } else if (interceptorReturn instanceof TupleTypeSymbol interceptorTupleType) {
-                return getInterceptorListFromReturnType(interceptorTupleType, semanticModel, moduleMemberVisitor);
+                return getInterceptorListFromReturnType(interceptorTupleType, semanticModel, packageMemberVisitor);
             }
         } catch (InterceptorMapperException e) {
             addWarningDiagnostic(additionalData, e.getMessage());
@@ -132,27 +132,27 @@ public class InterceptorPipeline {
     }
 
     private static Interceptor getInterceptor(TypeReferenceTypeSymbol interceptorType, InterceptorType type,
-                                              SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor)
+                                              SemanticModel semanticModel, PackageMemberVisitor packageMemberVisitor)
             throws InterceptorMapperException {
         return switch (Objects.requireNonNull(type)) {
-            case REQUEST -> new RequestInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
-            case REQUEST_ERROR -> new RequestErrorInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
-            case RESPONSE -> new ResponseInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
+            case REQUEST -> new RequestInterceptor(interceptorType, semanticModel, packageMemberVisitor);
+            case REQUEST_ERROR -> new RequestErrorInterceptor(interceptorType, semanticModel, packageMemberVisitor);
+            case RESPONSE -> new ResponseInterceptor(interceptorType, semanticModel, packageMemberVisitor);
             default -> // RESPONSE_ERROR
-                    new ResponseErrorInterceptor(interceptorType, semanticModel, moduleMemberVisitor);
+                    new ResponseErrorInterceptor(interceptorType, semanticModel, packageMemberVisitor);
         };
     }
 
     private static List<Interceptor> getInterceptorListFromReturnType(TupleTypeSymbol interceptorTupleType,
                                                                       SemanticModel semanticModel,
-                                                                      ModuleMemberVisitor moduleMemberVisitor)
+                                                                      PackageMemberVisitor packageMemberVisitor)
             throws InterceptorMapperException {
         List<Interceptor> interceptors = new ArrayList<>();
         for (TypeSymbol typeDescriptor : interceptorTupleType.memberTypeDescriptors()) {
             if (typeDescriptor instanceof TypeReferenceTypeSymbol interceptorType) {
                 InterceptorType type = getInterceptorType(interceptorType, semanticModel);
                 Interceptor interceptor = getInterceptor(interceptorType, type, semanticModel,
-                        moduleMemberVisitor);
+                        packageMemberVisitor);
                 interceptors.add(interceptor);
             }
         }

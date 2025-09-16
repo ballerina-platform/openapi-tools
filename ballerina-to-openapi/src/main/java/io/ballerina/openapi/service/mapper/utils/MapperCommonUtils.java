@@ -67,6 +67,7 @@ import io.ballerina.openapi.service.mapper.model.OASResult;
 import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
+import io.ballerina.projects.ModuleName;
 import io.ballerina.runtime.api.utils.IdentifierUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -645,5 +646,29 @@ public class MapperCommonUtils {
         }
 
         return Optional.of(nameFromAnnotation);
+    }
+
+    public static String getModuleName(SemanticModel semanticModel, Node node) {
+        Optional<Symbol> symbol = semanticModel.symbol(node);
+        if (symbol.isEmpty()) {
+            return "";
+        }
+        return getModuleName(symbol.get());
+    }
+
+    public static String getModuleName(Symbol symbol) {
+        Optional<ModuleSymbol> module = symbol.getModule();
+        if (module.isEmpty()) {
+            return "";
+        }
+        return module.get().id().moduleName();
+    }
+
+    public static String getModuleNameString(ModuleName moduleName) {
+        String packageName = moduleName.packageName().value();
+        if (Objects.isNull(moduleName.moduleNamePart())) {
+            return packageName;
+        }
+        return String.format("%s.%s", packageName, moduleName.moduleNamePart());
     }
 }

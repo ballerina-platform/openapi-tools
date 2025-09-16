@@ -164,19 +164,7 @@ public class OpenApiCmd implements BLauncherCmd {
     @Override
     public void execute() {
         if (isHelp()) {
-            String commandUsageInfo;
-            String fileName = new StringBuilder().append("cli-help/").append("ballerina-").append(getName())
-                    .append(".help").toString().replace("\\", "/");
-            try (InputStream inputStream = OpenApiCmd.class.getClassLoader().getResourceAsStream(fileName)) {
-                if (inputStream == null) {
-                    exitError(this.exitWhenFinish);
-                    return;
-                }
-                commandUsageInfo = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                exitError(this.exitWhenFinish);
-                return;
-            }
+            String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName(), OpenApiCmd.class.getClassLoader());
             outStream.println(commandUsageInfo);
             return;
         }
@@ -334,6 +322,9 @@ public class OpenApiCmd implements BLauncherCmd {
                 OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(mapperDiagnostic.getCode(),
                         mapperDiagnostic.getMessage(), mapperDiagnostic.getDiagnosticSeverity(),
                         mapperDiagnostic.getLocation().orElse(null));
+                if (exitWithError && diagnostic.diagnosticInfo().severity() != DiagnosticSeverity.ERROR) {
+                    continue;
+                }
                 outStream.println(diagnostic);
             }
         }

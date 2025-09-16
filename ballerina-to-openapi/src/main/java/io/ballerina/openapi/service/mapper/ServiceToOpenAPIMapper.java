@@ -23,7 +23,6 @@ import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
 import io.ballerina.compiler.syntax.tree.MethodDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -43,6 +42,7 @@ import io.ballerina.openapi.service.mapper.metainfo.MetaInfoMapper;
 import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
 import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 import io.ballerina.openapi.service.mapper.model.ResourceFunction;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDeclaration;
 import io.ballerina.openapi.service.mapper.model.ResourceFunctionDefinition;
@@ -53,6 +53,7 @@ import io.ballerina.openapi.service.mapper.type.extension.BallerinaTypeExtension
 import io.ballerina.projects.Module;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
@@ -64,10 +65,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.HYPHEN;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.containErrors;
+import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getModuleNameString;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getOpenApiFileName;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.getTypeDescriptor;
 import static io.ballerina.openapi.service.mapper.utils.MapperCommonUtils.isHttpService;
@@ -254,10 +255,7 @@ public final class ServiceToOpenAPIMapper {
         ServiceNode serviceDefinition = oasGenerationMetaInfo.getServiceNode();
         SemanticModel semanticModel = oasGenerationMetaInfo.getSemanticModel();
         Package currentPackage = oasGenerationMetaInfo.getProject().currentPackage();
-        ModuleMemberVisitor moduleMemberVisitor = extractNodesFromProject(oasGenerationMetaInfo.getProject(),
-                semanticModel);
-        Set<ListenerDeclarationNode> listeners = moduleMemberVisitor.getListenerDeclarationNodes();
-        Set<ServiceContractType> serviceContractTypes = moduleMemberVisitor.getServiceContractTypeNodes();
+        PackageMemberVisitor packageMemberVisitor = oasGenerationMetaInfo.getPackageMemberVisitor();
         String openApiFileName = oasGenerationMetaInfo.getOpenApiFileName();
         Path ballerinaFilePath = oasGenerationMetaInfo.getBallerinaFilePath();
         // 01.Fill the openAPI info section
@@ -268,14 +266,20 @@ public final class ServiceToOpenAPIMapper {
             List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
             if (openapi.getPaths() == null) {
                 ServiceMapperFactory serviceMapperFactory = new ServiceMapperFactory(openapi, semanticModel,
-                        moduleMemberVisitor, diagnostics, serviceDefinition, true);
+                        packageMemberVisitor, diagnostics, serviceDefinition, true);
 
-                ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(listeners, serviceDefinition);
+                ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(serviceDefinition);
                 serversMapperImpl.setServers();
+
+                // Return if there are any errors while setting the servers
+                if (diagnostics.stream().anyMatch(diagnostic -> diagnostic.getDiagnosticSeverity()
+                                .equals(DiagnosticSeverity.ERROR))) {
+                    return new OASResult(openapi, diagnostics);
+                }
 
                 if (oasAvailableViaServiceContract(serviceDefinition)) {
                     return updateOasResultWithServiceContract((ServiceDeclaration) serviceDefinition, currentPackage,
-                            oasResult, semanticModel, serviceContractTypes);
+                            oasResult, semanticModel, packageMemberVisitor);
                 }
 
                 convertServiceToOpenAPI(serviceDefinition, serviceMapperFactory);
@@ -319,9 +323,9 @@ public final class ServiceToOpenAPIMapper {
 
     private static OASResult updateOasResultWithServiceContract(ServiceDeclaration serviceDeclaration, Package pkg,
                                                                 OASResult oasResult, SemanticModel semanticModel,
-                                                                Set<ServiceContractType> serviceContractTypes) {
+                                                                PackageMemberVisitor packageMemberVisitor) {
         Optional<OpenAPI> openAPI = serviceDeclaration.getOpenAPIFromServiceContract(pkg, semanticModel,
-                serviceContractTypes, oasResult.getDiagnostics());
+                packageMemberVisitor, oasResult.getDiagnostics());
         if (openAPI.isEmpty()) {
             return oasResult;
         }
@@ -378,6 +382,22 @@ public final class ServiceToOpenAPIMapper {
             });
         });
         return balNodeVisitor;
+    }
+
+    public static PackageMemberVisitor extractNodesFromProject(Project project) {
+        PackageMemberVisitor packageMemberVisitor = new PackageMemberVisitor();
+        project.currentPackage().moduleIds().forEach(moduleId -> {
+            Module module = project.currentPackage().module(moduleId);
+            SemanticModel semanticModel = module.getCompilation().getSemanticModel();
+            String moduleName = getModuleNameString(module.moduleName());
+            ModuleMemberVisitor balNodeVisitor = packageMemberVisitor.createModuleVisitor(moduleName,
+                    semanticModel);
+            module.documentIds().forEach(documentId -> {
+                SyntaxTree syntaxTreeDoc = module.document(documentId).syntaxTree();
+                syntaxTreeDoc.rootNode().accept(balNodeVisitor);
+            });
+        });
+        return packageMemberVisitor;
     }
 
     private static void convertServiceToOpenAPI(ServiceNode serviceNode, ServiceMapperFactory serviceMapperFactory) {

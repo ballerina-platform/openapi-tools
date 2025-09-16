@@ -102,12 +102,12 @@ The `servers` section specifies the API servers and corresponding base URLs. Thi
 
 The Ballerina OpenAPI tool populates the `url` field of the `server` objects in this section. The `url` field is derived from the Ballerina service object and the listener configuration. The `url` field is constructed using the following information:
 
-| Field       | Description                                                                                                                             |
-|-------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| `scheme`    | The `scheme` field derived from the listener definition                                                                                 |
-| `server`    | The `host` field of the listener configuration. If the `host` field is not specified, defaults to `localhost`                           |
-| `port`      | The `port` field of the listener configuration. If the `port` field is not specified, defaults to `80` for `http` and `443` for `https` |
-| `base-path` | The base path retrieved from the Ballerina service object                                                                               |
+| Field       | Description                                                                                                   |
+|-------------|---------------------------------------------------------------------------------------------------------------|
+| `scheme`    | The `scheme` field derived from the listener definition                                                       |
+| `server`    | The `host` field of the listener configuration. If the `host` field is not specified, defaults to `localhost` |
+| `port`      | The `port` field of the listener configuration.                                                               |
+| `base-path` | The base path retrieved from the Ballerina service object                                                     |
 
 ```yml
 servers:
@@ -118,6 +118,11 @@ servers:
     port:
       default: <port>
 ```
+
+> **Note:** The `port` parameter is a required parameter in the listener definition. But currently, the tool can only
+> extract the port information if it is defined as a literal value or provided as a **current** module level variable
+> which ultimately holds a literal value. If the port is defined using any other expressions or function calls or 
+> external variables, the tool cannot extract the port value and hence an error will be returned.
 
 A Ballerina service can be attached to multiple listeners.
 

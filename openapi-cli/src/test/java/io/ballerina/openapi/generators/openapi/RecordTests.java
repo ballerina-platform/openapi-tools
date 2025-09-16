@@ -143,6 +143,12 @@ public class RecordTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/included_record.yaml");
     }
 
+    @Test(description = "Test for records with never field")
+    public void testRecordWithNeverField() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("record/record_with_never_field.bal");
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "record/record_with_never_field.yaml");
+    }
+
     @AfterMethod
     public void cleanUp() {
         TestUtils.deleteDirectory(this.tempDir);
