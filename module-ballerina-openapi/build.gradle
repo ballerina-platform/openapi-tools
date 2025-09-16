@@ -118,6 +118,19 @@ task copyStdlibs(type: Copy) {
     }
 }
 
+task copyOpenApiTool {
+    doLast {
+        def ballerinaDist = "build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
+        def openApiCacheSource = "build/cache_parent/bala/ballerina/openapi"
+        if (file(openApiCacheSource).exists()) {
+            copy {
+                from openApiCacheSource
+                into "${ballerinaDist}/repo/bala/ballerina/openapi"
+            }
+        }
+    }
+}
+
 task updateTomlFile {
     doLast {
         def stdlibDependentIoVersion = stripBallerinaExtensionVersion(project.stdlibIoVersion)
@@ -316,7 +329,10 @@ publishing {
 
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
+copyOpenApiTool.dependsOn unpackJballerinaTools
+copyOpenApiTool.dependsOn ':openapi-tool:build'
 updateTomlFile.dependsOn copyStdlibs
+updateTomlFile.dependsOn copyOpenApiTool
 updateCompilerTomlFile.dependsOn updateTomlFile
 
 ballerinaBuild.dependsOn ":ballerina-to-${packageName}:build"

@@ -69,6 +69,20 @@ task publishToLocal {
         }
     }
 }
+
+task copyOpenApiTool {
+    doLast {
+        def ballerinaDist = "build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
+        def openApiToolCacheSource = "${project.rootDir}/openapi-tool/target/cache/ballerina/tool.openapi"
+        if (file(openApiToolCacheSource).exists()) {
+            copy {
+                from openApiToolCacheSource
+                into "${ballerinaDist}/repo/bala/ballerina/tool.openapi"
+            }
+        }
+    }
+}
+
 task updateTomlFiles {
     doLast {
         def newBallerinaToml = ballerinaTomlFilePlaceHolder.text.replace("@toml.version@", tomlVersion)
@@ -122,6 +136,7 @@ publishing {
 
 copyStdlibs.dependsOn unpackJballerinaTools
 updateTomlFiles.dependsOn copyStdlibs
+copyOpenApiTool.dependsOn publishToLocal
 build.dependsOn "generatePomFileForMavenPublication"
 build.dependsOn publishToLocal
 publishToMavenLocal.dependsOn build
