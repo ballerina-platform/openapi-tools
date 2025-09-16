@@ -118,7 +118,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
     }
 
     public List<Parameter> getRecordParameterSchema() {
-        RecordTypeMapper.RecordTypeInfo recordTypeInfo = RecordTypeMapper.getDirectRecordType(type, null);
+        RecordTypeMapper.RecordTypeInfo recordTypeInfo = RecordTypeMapper.getDirectRecordType(type, "", null);
         if (Objects.isNull(recordTypeInfo)) {
             return List.of();
         }
@@ -127,7 +127,7 @@ public class HeaderParameterMapper extends AbstractParameterMapper {
         HashMap<String, RecordFieldSymbol> headerMap = new HashMap<>(recordTypeInfo.typeSymbol().fieldDescriptors());
         headerMap = updateHeaderMapWithName(headerMap);
         Map<String, Schema> headerSchemaMap = typeMapper.getSchemaForRecordFields(headerMap, requiredHeaders,
-                recordTypeInfo.name(), treatNilableAsOptional);
+                recordTypeInfo.moduleName(), recordTypeInfo.name(), treatNilableAsOptional);
 
         return headerSchemaMap.entrySet().stream().map(
                 entry -> createHeaderParameter(entry.getKey(), entry.getValue(),

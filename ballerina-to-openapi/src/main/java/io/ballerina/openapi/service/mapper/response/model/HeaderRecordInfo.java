@@ -22,10 +22,12 @@ import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
 /**
  * This {@link HeaderRecordInfo} record stores the response header record information.
  * @param recordType - The record type of the response header.
+ * @param moduleName - The module name of the record.
  * @param recordName - The name of the record.
  *
  * @since 1.9.0
  */
 public record HeaderRecordInfo(RecordTypeSymbol recordType,
+                               String moduleName,
                                String recordName) {
 }

@@ -322,6 +322,9 @@ public class OpenApiCmd implements BLauncherCmd {
                 OpenAPIDiagnostic diagnostic = CmdUtils.constructOpenAPIDiagnostic(mapperDiagnostic.getCode(),
                         mapperDiagnostic.getMessage(), mapperDiagnostic.getDiagnosticSeverity(),
                         mapperDiagnostic.getLocation().orElse(null));
+                if (exitWithError && diagnostic.diagnosticInfo().severity() != DiagnosticSeverity.ERROR) {
+                    continue;
+                }
                 outStream.println(diagnostic);
             }
         }

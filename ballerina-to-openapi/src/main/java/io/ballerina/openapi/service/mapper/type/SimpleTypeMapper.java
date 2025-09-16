@@ -61,7 +61,8 @@ public class SimpleTypeMapper extends AbstractTypeMapper {
 
     public static Schema getTypeSchema(TypeSymbol typeSymbol, AdditionalData additionalData) {
         Schema schema = getSchema(typeSymbol.typeKind());
-        if (Objects.isNull(schema)) {
+        // Never type should be return with a null schema
+        if (Objects.isNull(schema) && !typeSymbol.typeKind().equals(TypeDescKind.NEVER)) {
             ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_121,
                     MapperCommonUtils.getTypeName(typeSymbol));
             additionalData.diagnostics().add(error);
@@ -105,7 +106,10 @@ public class SimpleTypeMapper extends AbstractTypeMapper {
                 return schema;
             case ANYDATA:
                 return new Schema();
+            case NEVER:
             default:
+                // TODO: For NEVER type, check whether this can be represented with `not` in object schema
+                // Skip type mapping for unsupported types
                 return null;
         }
     }

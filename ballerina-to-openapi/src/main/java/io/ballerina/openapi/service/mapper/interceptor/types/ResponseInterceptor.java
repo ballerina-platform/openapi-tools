@@ -24,7 +24,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.openapi.service.mapper.interceptor.InterceptorMapperException;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 
 import java.util.List;
 import java.util.Map;
@@ -39,8 +39,8 @@ import java.util.Optional;
 public class ResponseInterceptor extends Interceptor {
 
     public ResponseInterceptor(TypeReferenceTypeSymbol typeSymbol, SemanticModel semanticModel,
-                               ModuleMemberVisitor moduleMemberVisitor) throws InterceptorMapperException {
-        super(typeSymbol, semanticModel, moduleMemberVisitor);
+                               PackageMemberVisitor packageMemberVisitor) throws InterceptorMapperException {
+        super(typeSymbol, semanticModel, packageMemberVisitor);
     }
 
     @Override

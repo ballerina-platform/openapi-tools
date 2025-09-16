@@ -35,7 +35,7 @@ import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.service.mapper.diagnostic.ExceptionDiagnostic;
 import io.ballerina.openapi.service.mapper.model.AdditionalData;
-import io.ballerina.openapi.service.mapper.model.ModuleMemberVisitor;
+import io.ballerina.openapi.service.mapper.model.PackageMemberVisitor;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -72,20 +72,21 @@ public class RecordTypeMapper extends AbstractTypeMapper {
     @Override
     public Schema getReferenceSchema(Components components) {
         RecordTypeSymbol recordTypeSymbol = (RecordTypeSymbol) typeSymbol.typeDescriptor();
-        return getSchema(recordTypeSymbol, components, name, additionalData).description(description);
+        String moduleName = MapperCommonUtils.getModuleName(typeSymbol);
+        return getSchema(recordTypeSymbol, components, moduleName, name, additionalData).description(description);
     }
 
-    public static Schema getSchema(RecordTypeSymbol typeSymbol, Components components, String recordName,
-                                   AdditionalData additionalData) {
+    public static Schema getSchema(RecordTypeSymbol typeSymbol, Components components, String moduleName,
+                                   String recordName, AdditionalData additionalData) {
         Set<String> fieldsOnlyForRequiredList = new HashSet<>();
         ObjectSchema schema = new ObjectSchema();
         Set<String> requiredFields = new HashSet<>();
 
         Map<String, RecordFieldSymbol> recordFieldMap = new LinkedHashMap<>(typeSymbol.fieldDescriptors());
         List<Schema> allOfSchemaList = mapIncludedRecords(typeSymbol, components, recordFieldMap, additionalData,
-                recordName, fieldsOnlyForRequiredList);
+                moduleName, recordName, fieldsOnlyForRequiredList);
         RecordFieldMappingContext mappingContext = new RecordFieldMappingContext(
-                recordFieldMap, components, requiredFields, recordName, false,
+                recordFieldMap, components, requiredFields, moduleName, recordName, false,
                 true, additionalData, fieldsOnlyForRequiredList);
         Map<String, Schema> properties = mapRecordFields(mappingContext);
 
@@ -112,7 +113,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
 
     static List<Schema> mapIncludedRecords(RecordTypeSymbol typeSymbol, Components components,
                                            Map<String, RecordFieldSymbol> recordFieldMap,
-                                           AdditionalData additionalData, String recordName,
+                                           AdditionalData additionalData, String moduleName, String recordName,
                                            Set<String> fieldsOnlyForRequiredList) {
         List<Schema> allOfSchemaList = new ArrayList<>();
         List<TypeSymbol> typeInclusions = typeSymbol.typeInclusions();
@@ -136,8 +137,8 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                     if (!includedRecordFieldValue.typeDescriptor().equals(recordFieldSymbol.typeDescriptor())) {
                         continue;
                     }
-                    IncludedFieldContext context = new IncludedFieldContext(recordFieldMap, recordName, typeInclusion,
-                            includedRecordField, recordFieldSymbol, includedRecordFieldValue);
+                    IncludedFieldContext context = new IncludedFieldContext(recordFieldMap, moduleName, recordName,
+                            typeInclusion, includedRecordField, recordFieldSymbol, includedRecordFieldValue);
                     eliminateRedundantFields(context, additionalData, fieldsOnlyForRequiredList);
                 }
             }
@@ -149,6 +150,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                                                  Set<String> fieldsOnlyForRequiredList) {
         Map<String, RecordFieldSymbol> recordFieldMap = context.recordFieldMap();
         String recordName = context.recordName();
+        String moduleName = context.moduleName();
         TypeSymbol typeInclusion = context.typeInclusion();
         Map.Entry<String, RecordFieldSymbol> includedRecordField = context.includedRecordField();
         RecordFieldSymbol recordFieldSymbol = context.recordFieldSymbol();
@@ -162,13 +164,14 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         boolean recordFieldName = recordFieldSymbol.getName().isPresent();
 
         if (recordHasDefault && includedHasDefault && hasTypeInclusionName) {
-            Optional<Object> recordFieldDefaultValueOpt = getRecordFieldDefaultValue(recordName,
-                    includedRecordField.getKey(), additionalData.moduleMemberVisitor(),
+            Optional<Object> recordFieldDefaultValueOpt = getRecordFieldDefaultValue(moduleName, recordName,
+                    includedRecordField.getKey(), additionalData.packageMemberVisitor(),
                     additionalData.semanticModel());
 
-            Optional<Object> includedFieldDefaultValueOpt = getRecordFieldDefaultValue(
+            String typeInclusionModuleName = MapperCommonUtils.getModuleName(typeInclusion);
+            Optional<Object> includedFieldDefaultValueOpt = getRecordFieldDefaultValue(typeInclusionModuleName,
                     typeInclusion.getName().get(), includedRecordField.getKey(),
-                    additionalData.moduleMemberVisitor(), additionalData.semanticModel());
+                    additionalData.packageMemberVisitor(), additionalData.semanticModel());
 
             /*
               This check the scenarios
@@ -220,6 +223,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
      * Encapsulates the context of included fields in a record for processing.
      *
      * @param recordFieldMap         A map containing record field symbols.
+     * @param moduleName             The name of the module containing the record.
      * @param recordName             The name of the record being processed.
      * @param typeInclusion          The type symbol representing type inclusions in the record.
      * @param includedRecordField    An entry representing the included record field and its symbol.
@@ -228,6 +232,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
      */
     public record IncludedFieldContext(
             Map<String, RecordFieldSymbol> recordFieldMap,
+            String moduleName,
             String recordName,
             TypeSymbol typeInclusion,
             Map.Entry<String, RecordFieldSymbol> includedRecordField,
@@ -241,6 +246,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
      * @param recordFieldMap        A map containing record field symbols.
      * @param components            Components used for managing and storing schemas during mapping.
      * @param requiredFields        A set of field names that are required in the mapped schema.
+     * @param moduleName            The name of the module containing the record.
      * @param recordName            The name of the record being processed.
      * @param treatNilableAsOptional Flag indicating whether nilable fields should be treated as optional.
      * @param inferNameFromJsonData Flag indicating whether field names should be inferred from JSON data.
@@ -251,6 +257,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             Map<String, RecordFieldSymbol> recordFieldMap,
             Components components,
             Set<String> requiredFields,
+            String moduleName,
             String recordName,
             boolean treatNilableAsOptional,
             boolean inferNameFromJsonData,
@@ -263,6 +270,7 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         Components components = context.components();
         Set<String> requiredFields = context.requiredFields();
         String recordName = context.recordName();
+        String moduleName = context.moduleName();
         boolean treatNilableAsOptional = context.treatNilableAsOptional();
         boolean inferNameFromJsonData = context.inferNameFromJsonData();
         AdditionalData additionalData = context.additionalData();
@@ -287,8 +295,8 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 recordFieldSchema = recordFieldSchema.description(recordFieldDescription);
             }
             if (recordFieldSymbol.hasDefaultValue()) {
-                Optional<Object> recordFieldDefaultValueOpt = getRecordFieldDefaultValue(recordName, recordFieldName,
-                        additionalData.moduleMemberVisitor(), additionalData.semanticModel());
+                Optional<Object> recordFieldDefaultValueOpt = getRecordFieldDefaultValue(moduleName, recordName,
+                        recordFieldName, additionalData.packageMemberVisitor(), additionalData.semanticModel());
                 if (recordFieldDefaultValueOpt.isPresent()) {
                     TypeMapper.setDefaultValue(recordFieldSchema, recordFieldDefaultValueOpt.get());
                 } else {
@@ -297,7 +305,10 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                     additionalData.diagnostics().add(error);
                 }
             }
-            properties.put(recordFieldName, recordFieldSchema);
+            // For never field types, the schema will be null
+            if (Objects.nonNull(recordFieldSchema)) {
+                properties.put(recordFieldName, recordFieldSchema);
+            }
         }
         return properties;
     }
@@ -310,10 +321,11 @@ public class RecordTypeMapper extends AbstractTypeMapper {
                 defaultName, recordFieldEntry.getValue()) : defaultName;
     }
 
-    public static Optional<Object> getRecordFieldDefaultValue(String recordName, String fieldName,
-                                                              ModuleMemberVisitor moduleMemberVisitor,
+    public static Optional<Object> getRecordFieldDefaultValue(String moduleName, String recordName, String fieldName,
+                                                              PackageMemberVisitor packageMemberVisitor,
                                                               SemanticModel semanticModel) {
-        Optional<TypeDefinitionNode> recordDefNodeOpt = moduleMemberVisitor.getTypeDefinitionNode(recordName);
+        Optional<TypeDefinitionNode> recordDefNodeOpt = packageMemberVisitor
+                .getTypeDefinitionNode(moduleName, recordName);
         if (recordDefNodeOpt.isPresent() &&
                 recordDefNodeOpt.get().typeDescriptor() instanceof RecordTypeDescriptorNode recordDefNode) {
             return getRecordFieldDefaultValue(fieldName, recordDefNode, semanticModel);
@@ -345,21 +357,22 @@ public class RecordTypeMapper extends AbstractTypeMapper {
         return Optional.of(MapperCommonUtils.parseBalSimpleLiteral(defaultValueExpression.toString().trim()));
     }
 
-    public static RecordTypeInfo getDirectRecordType(TypeSymbol typeSymbol, String recordName) {
+    public static RecordTypeInfo getDirectRecordType(TypeSymbol typeSymbol, String moduleName, String recordName) {
         if (typeSymbol.typeKind() == TypeDescKind.RECORD) {
-            return new RecordTypeInfo(recordName, (RecordTypeSymbol) typeSymbol);
+            return new RecordTypeInfo(moduleName, recordName, (RecordTypeSymbol) typeSymbol);
         } else if (typeSymbol.typeKind() == TypeDescKind.TYPE_REFERENCE) {
             TypeSymbol referredType = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
             String referredRecordName = MapperCommonUtils.getTypeName(typeSymbol);
-            return getDirectRecordType(referredType, referredRecordName);
+            String referredModuleName = MapperCommonUtils.getModuleName(typeSymbol);
+            return getDirectRecordType(referredType, referredModuleName, referredRecordName);
         } else if (typeSymbol.typeKind() == TypeDescKind.INTERSECTION) {
             // Only readonly record intersection types are supported
             List<TypeSymbol> memberTypeSymbols = ((IntersectionTypeSymbol) typeSymbol).memberTypeDescriptors();
             if (memberTypeSymbols.size() == 2) {
                 if (memberTypeSymbols.get(0).typeKind() == TypeDescKind.READONLY) {
-                    return getDirectRecordType(memberTypeSymbols.get(1), recordName);
+                    return getDirectRecordType(memberTypeSymbols.get(1), moduleName, recordName);
                 } else if (memberTypeSymbols.get(1).typeKind() == TypeDescKind.READONLY) {
-                    return getDirectRecordType(memberTypeSymbols.get(0), recordName);
+                    return getDirectRecordType(memberTypeSymbols.getFirst(), moduleName, recordName);
                 }
             }
         } else if (typeSymbol.typeKind() == TypeDescKind.UNION) {
@@ -367,16 +380,16 @@ public class RecordTypeMapper extends AbstractTypeMapper {
             List<TypeSymbol> memberTypeSymbols = ((UnionTypeSymbol) typeSymbol).memberTypeDescriptors();
             if (memberTypeSymbols.size() == 2) {
                 if (memberTypeSymbols.get(0).typeKind() == TypeDescKind.NIL) {
-                    return getDirectRecordType(memberTypeSymbols.get(1), recordName);
+                    return getDirectRecordType(memberTypeSymbols.get(1), moduleName, recordName);
                 } else if (memberTypeSymbols.get(1).typeKind() == TypeDescKind.NIL) {
-                    return getDirectRecordType(memberTypeSymbols.get(0), recordName);
+                    return getDirectRecordType(memberTypeSymbols.getFirst(), moduleName, recordName);
                 }
             }
         }
         return null;
     }
 
-    public record RecordTypeInfo(String name, RecordTypeSymbol typeSymbol) {
+    public record RecordTypeInfo(String moduleName, String name, RecordTypeSymbol typeSymbol) {
 
     }
 }

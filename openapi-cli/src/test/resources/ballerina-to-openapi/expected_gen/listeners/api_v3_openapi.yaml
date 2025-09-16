@@ -1,0 +1,22 @@
+openapi: 3.0.1
+info:
+  title: Api V3
+  version: 0.0.0
+servers:
+- url: "{server}:{port}/api/v3"
+  variables:
+    server:
+      default: http://localhost
+    port:
+      default: "8093"
+paths:
+  /hello:
+    get:
+      operationId: getHello
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string

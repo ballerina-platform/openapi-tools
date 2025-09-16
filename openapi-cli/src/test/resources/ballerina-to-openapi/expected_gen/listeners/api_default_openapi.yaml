@@ -1,0 +1,22 @@
+openapi: 3.0.1
+info:
+  title: Api Default
+  version: 0.0.0
+servers:
+- url: "http://{server}:{port}/api/default"
+  variables:
+    server:
+      default: localhost
+    port:
+      default: "9090"
+paths:
+  /hello:
+    get:
+      operationId: getHello
+      responses:
+        "200":
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string

@@ -24,6 +24,8 @@ import io.ballerina.projects.Project;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import static io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper.extractNodesFromProject;
+
 /**
  * This {@link OASGenerationMetaInfo} contains details related to openAPI specification.
  *
@@ -37,6 +39,7 @@ public class OASGenerationMetaInfo {
     private final ServiceNode serviceNode;
     private final Project project;
     private final Boolean ballerinaExtensionLevel;
+    private final PackageMemberVisitor packageMemberVisitor;
 
     public OASGenerationMetaInfo(OASGenerationMetaInfoBuilder builder) {
         this.openApiFileName = builder.openApiFileName;
@@ -49,6 +52,7 @@ public class OASGenerationMetaInfo {
         this.serviceNode = serviceNodeFromBuilder;
         this.project = builder.project;
         this.ballerinaExtensionLevel = builder.ballerinaExtension;
+        this.packageMemberVisitor = extractNodesFromProject(builder.project);
     }
 
     public String getOpenApiFileName() {
@@ -73,6 +77,10 @@ public class OASGenerationMetaInfo {
 
     public Boolean getBallerinaExtension() {
         return ballerinaExtensionLevel;
+    }
+
+    public PackageMemberVisitor getPackageMemberVisitor() {
+        return packageMemberVisitor;
     }
 
     /**

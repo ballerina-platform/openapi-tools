@@ -26,33 +26,40 @@ import java.util.List;
 /**
  * This {@link AdditionalData} record stores the additional data required for the openapi service mapper.
  * @param semanticModel - The semantic model of the ballerina project.
- * @param moduleMemberVisitor - The module member visitor.
+ * @param packageMemberVisitor - The package member visitor.
  * @param diagnostics - The list of diagnostics.
  * @param enableBallerinaExt - The flag to enable ballerina extension in the type schema.
  * @param enableExpansion - The flag to enable expansion in the reference type schema.
  * @param visitedTypes - The list of visited types.
+ * @param currentModuleName - The current module name which has the target service.
  *
  * @since 1.9.0
  */
 public record AdditionalData(SemanticModel semanticModel,
-                             ModuleMemberVisitor moduleMemberVisitor,
+                             PackageMemberVisitor packageMemberVisitor,
                              List<OpenAPIMapperDiagnostic> diagnostics,
                              boolean enableBallerinaExt,
                              boolean enableExpansion,
-                             List<String> visitedTypes) {
+                             List<String> visitedTypes,
+                             String currentModuleName) {
 
-    public AdditionalData(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor) {
-        this(semanticModel, moduleMemberVisitor, new ArrayList<>(), false, false, new ArrayList<>());
+    public AdditionalData(SemanticModel semanticModel, PackageMemberVisitor packageMemberVisitor,
+                          String currentModuleName) {
+        this(semanticModel, packageMemberVisitor, new ArrayList<>(), false, false, new ArrayList<>(),
+                currentModuleName);
     }
 
-    public AdditionalData(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
-                          List<OpenAPIMapperDiagnostic> diagnostics, boolean enableBallerinaExt) {
-        this(semanticModel, moduleMemberVisitor, diagnostics, enableBallerinaExt, false, new ArrayList<>());
-    }
-
-    public AdditionalData(SemanticModel semanticModel, ModuleMemberVisitor moduleMemberVisitor,
+    public AdditionalData(SemanticModel semanticModel, PackageMemberVisitor packageMemberVisitor,
                           List<OpenAPIMapperDiagnostic> diagnostics, boolean enableBallerinaExt,
-                          boolean enableExpansion) {
-        this(semanticModel, moduleMemberVisitor, diagnostics, enableBallerinaExt, enableExpansion, new ArrayList<>());
+                          String currentModuleName) {
+        this(semanticModel, packageMemberVisitor, diagnostics, enableBallerinaExt, false, new ArrayList<>(),
+                currentModuleName);
+    }
+
+    public AdditionalData(SemanticModel semanticModel, PackageMemberVisitor packageMemberVisitor,
+                          List<OpenAPIMapperDiagnostic> diagnostics, boolean enableBallerinaExt,
+                          boolean enableExpansion, String currentModuleName) {
+        this(semanticModel, packageMemberVisitor, diagnostics, enableBallerinaExt, enableExpansion, new ArrayList<>(),
+                currentModuleName);
     }
 }
