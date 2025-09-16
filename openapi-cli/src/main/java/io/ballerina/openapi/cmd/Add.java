@@ -112,7 +112,8 @@ public class Add implements BLauncherCmd {
 
         try {
             if (baseCmd.helpFlag) {
-                String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(COMMAND_IDENTIFIER);
+                String commandUsageInfo = BLauncherCmd
+                        .getCommandUsageInfo(COMMAND_IDENTIFIER, Add.class.getClassLoader());
                 outStream.println(commandUsageInfo);
                 return;
             }

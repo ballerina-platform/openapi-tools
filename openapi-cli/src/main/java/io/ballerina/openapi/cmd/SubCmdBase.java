@@ -140,16 +140,16 @@ public abstract class SubCmdBase implements BLauncherCmd {
         this.infoMsgPrefix = infoMsgPrefix;
     }
 
-    public void printHelpText() {
+    public void printHelpText(ClassLoader classLoader) {
         String commandIdentifier = String.format(COMMAND_IDENTIFIER, cmdType.getName());
-        String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(commandIdentifier);
+        String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(commandIdentifier, classLoader);
         infoStream.println(commandUsageInfo);
     }
 
     @Override
     public void execute() {
         if (helpFlag) {
-            printHelpText();
+            printHelpText(this.getClass().getClassLoader());
             return;
         }
 
