@@ -101,11 +101,8 @@ jacocoTestReport {
     def classFiles = new File("${rootDir}/openapi-cli/build/classes/java/main/io/ballerina/openapi")
     def validatorClassFiles = new File("${rootDir}/openapi-validator/build/classes/java/main/io/ballerina/openapi" +
             "/validator")
-    def buildClassFiles = new File("${rootDir}/openapi-build-extension/build/classes/java/main/io/ballerina" +
-            "/openapi/build")
     additionalClassDirs(classFiles)
     additionalClassDirs(validatorClassFiles)
-    additionalClassDirs(buildClassFiles)
     reports {
         xml.required = true
         html.required = true
