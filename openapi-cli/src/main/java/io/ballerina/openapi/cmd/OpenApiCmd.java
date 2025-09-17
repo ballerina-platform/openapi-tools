@@ -140,7 +140,7 @@ public class OpenApiCmd implements BLauncherCmd {
         this.exitWhenFinish = true;
     }
 
-    private String getVersion() throws IOException {
+    private String getClientNativeVersion() throws IOException {
         try (InputStream inputStream = OpenApiCmd.class.getClassLoader().getResourceAsStream(
                 "openapi-client-native-version.properties")) {
             Properties properties = new Properties();
@@ -151,6 +151,7 @@ public class OpenApiCmd implements BLauncherCmd {
                     exception.getMessage());
         }
     }
+
     private String getVersion() throws IOException {
         try (InputStream inputStream = OpenApiCmd.class.getClassLoader().getResourceAsStream(
                 "version.properties")) {
@@ -364,7 +365,7 @@ public class OpenApiCmd implements BLauncherCmd {
     private void openApiToBallerina(String fileName, Filter filter) throws IOException {
         boolean skipDependecyUpdate = true;
         if (statusCodeBinding && Objects.nonNull(ballerinaTomlPath)) {
-            skipDependecyUpdate = clientNativeDependencyAlreadyExist(getVersion());
+            skipDependecyUpdate = clientNativeDependencyAlreadyExist(getClientNativeVersion());
         }
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         generator.setLicenseHeader(this.setLicenseHeader());
@@ -534,7 +535,7 @@ public class OpenApiCmd implements BLauncherCmd {
 
     private void updateBallerinaTomlWithClientNativeDependency() {
         try {
-            String version = getVersion();
+            String version = getClientNativeVersion();
             TextDocument configDocument = TextDocuments.from(Files.readString(ballerinaTomlPath));
             SyntaxTree syntaxTree = SyntaxTree.from(configDocument);
             DocumentNode rootNode = syntaxTree.rootNode();
