@@ -57,11 +57,6 @@ def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/libs/${packageName}-validator-${project.version}.jar""")
-def targetOpenApiCommonJar = file("$project.rootDir/ballerina-to-openapi/build/libs/ballerina-to-openapi-${project.version}.jar")
-def targetOpenApiCoreJar = file("$project.rootDir/openapi-core/build/libs/openapi-core-${project.version}.jar")
-def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
-def targetOpenApiBalTaskJar = file("$project.rootDir/openapi-bal-task-plugin/build/libs/openapi-bal-task-plugin-${project.version}.jar")
-def targetOpenApiLSJar = file("$project.rootDir/openapi-ls-extension/build/libs/openapi-ls-extension-${project.version}.jar")
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
@@ -221,31 +216,6 @@ task ballerinaBuild {
         copy {
             from targetNativeJar
             into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiCommonJar
-            into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiCoreJar
-            into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiCliJar
-            into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiBalTaskJar
-            into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiLSJar
-            into file("$artifactLibParent/lslibs")
         }
 
         // Doc creation and packing
