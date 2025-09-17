@@ -122,8 +122,13 @@ subprojects {
 
 task createProperties(dependsOn: processResources) {
     doLast {
-        def file = new File("$project.rootDir/openapi-cli/src/main/resources/openapi-client-native-version.properties")
-        file.text = "version=${clientNativeVersion}"
+        def file = new File("$project.rootDir/openapi-cli/src/main/resources/version.properties")
+        def versionWithoutSnapshot = version.replace("-SNAPSHOT", "")
+        file.text = "version=${versionWithoutSnapshot}"
+        
+        def clientNativeVersionFile = 
+            new File("$project.rootDir/openapi-cli/src/main/resources/openapi-client-native-version.properties")
+        clientNativeVersionFile.text = "version=${clientNativeVersion}"
     }
 }
 
