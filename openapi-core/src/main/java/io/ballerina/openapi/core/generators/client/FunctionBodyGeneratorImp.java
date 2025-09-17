@@ -378,8 +378,9 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                 FieldAccessExpressionNode fieldExpr = createFieldAccessExpressionNode(
                         createSimpleNameReferenceNode(createIdentifierToken(SELF)), createToken(DOT_TOKEN),
                         createSimpleNameReferenceNode(createIdentifierToken(apiKeyConfigToken)));
-                SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(createIdentifierToken(
-                        escapeIdentifier(apiKeyNamePair.displayName())));
+                // Api Key is already escaped so no need to escape again.
+                SimpleNameReferenceNode valueExpr = createSimpleNameReferenceNode(
+                        createIdentifierToken(apiKeyNamePair.displayName()));
                 ExpressionNode apiKeyExpr = createFieldAccessExpressionNode(
                         fieldExpr, createToken(DOT_TOKEN), valueExpr);
                 statementNodeList.add(createAssignmentStatementNode(fieldName, equal, apiKeyExpr, createToken(
