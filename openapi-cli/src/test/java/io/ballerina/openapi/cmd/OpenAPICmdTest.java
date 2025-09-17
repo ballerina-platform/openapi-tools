@@ -31,10 +31,12 @@ import picocli.CommandLine;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,8 +63,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("NAME\n" +
-                "       ballerina-openapi - Generate a Ballerina service"));
+        Assert.assertTrue(output.contains("NAME") &&
+            output.contains("ballerina-openapi - Generate a Ballerina service or a client from an") &&
+            output.contains("OpenAPI contract and vice versa."));
     }
 
     @Test(description = "Test openapi command with help flag")
@@ -72,8 +75,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("NAME\n" +
-                "       ballerina-openapi - Generate a Ballerina service"));
+        Assert.assertTrue(output.contains("NAME") &&
+            output.contains("ballerina-openapi - Generate a Ballerina service or a client from an") &&
+            output.contains("OpenAPI contract and vice versa."));
     }
 
     @Test(description = "Test openapi command without help flag")
@@ -82,8 +86,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(openApiCommand);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("NAME\n" +
-                "       ballerina-openapi - Generate a Ballerina service"));
+        Assert.assertTrue(output.contains("NAME") &&
+            output.contains("ballerina-openapi - Generate a Ballerina service or a client from an") &&
+            output.contains("OpenAPI contract and vice versa."));
     }
 
     @Test(description = "Test openapi gen-service without openapi contract file",
@@ -1137,6 +1142,33 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(align).parseArgs(args);
         align.execute();
         compareFiles(expectedFilePath, tmpDir.resolve("aligned_ballerina_openapi.yaml"));
+    }
+
+    @Test(description = "Test openapi command with the version flag")
+    public void testOpenAPICmdVersionFlag() throws IOException {
+        testVersionFlag("-v");
+        testVersionFlag("--version");
+    }
+    
+    private void testVersionFlag(String versionFlag) throws IOException {
+        String[] args = {versionFlag};
+        OpenApiCmd openApiCommand = new OpenApiCmd(printStream, tmpDir, false);
+        new CommandLine(openApiCommand).parseArgs(args);
+        openApiCommand.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("OpenAPI Tool " + getVersionFromProperties()));
+    }
+
+    private String getVersionFromProperties() throws IOException {
+        try (InputStream inputStream = OpenAPICmdTest.class.getClassLoader().getResourceAsStream(
+                "version.properties")) {
+            if (inputStream == null) {
+                throw new IOException("version.properties file not found in classpath");
+            }
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            return properties.getProperty("version");
+        }
     }
 
     @AfterTest

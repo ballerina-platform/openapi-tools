@@ -25,8 +25,8 @@ import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.generators.common.GeneratorTestUtils;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.ballerinalang.formatter.core.FormatterException;
-import org.junit.After;
-import org.junit.Before;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -46,7 +46,7 @@ public class MapSchemaNegativeTests {
     private ByteArrayOutputStream output = new ByteArrayOutputStream();
     SyntaxTree syntaxTree = null;
 
-    @Before
+    @BeforeSuite
     public void setUp() {
         System.setErr(new PrintStream(output));
     }
@@ -94,7 +94,7 @@ public class MapSchemaNegativeTests {
         // todo : check the diagnostics list
     }
 
-    @After
+    @AfterSuite
     public void tearDown() {
         output = new ByteArrayOutputStream();
         System.setErr(new PrintStream(output));

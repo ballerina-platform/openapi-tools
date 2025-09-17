@@ -148,6 +148,31 @@ public class TestUtil {
         if (System.getProperty("os.name").startsWith("Windows")) {
             balFile = "bal.bat";
         }
+
+        List<String> pullArgs = new LinkedList<>();
+        pullArgs.add(0, TEST_DISTRIBUTION_PATH.resolve(distributionName).resolve("bin").resolve(balFile).toString());
+        pullArgs.add(1, "tool");
+        pullArgs.add(2, "pull");
+        pullArgs.add(3, "openapi:" + System.getProperty("openapi.version").replace("-SNAPSHOT", ""));
+        pullArgs.add(4, "--repository");
+        pullArgs.add(5, "local");
+
+        OUT.println("Executing pull command: " + StringUtils.join(pullArgs, ' '));
+        ProcessBuilder pullPb = new ProcessBuilder(pullArgs);
+        pullPb.directory(sourceDirectory.toFile());
+        try {
+            Process pullProcess = pullPb.start();
+            int pullExitCode = pullProcess.waitFor();
+            logOutput(pullProcess.getInputStream());
+            logOutput(pullProcess.getErrorStream());
+            if (pullExitCode != 0) {
+                OUT.println("Pull command failed with exit code: " + pullExitCode);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Pull command was interrupted", e);
+        }
+        
         args.add(0, TEST_DISTRIBUTION_PATH.resolve(distributionName).resolve("bin").resolve(balFile).toString());
         OUT.println("Executing: " + StringUtils.join(args, ' '));
         ProcessBuilder pb = new ProcessBuilder(args);

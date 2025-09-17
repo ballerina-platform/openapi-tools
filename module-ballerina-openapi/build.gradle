@@ -35,7 +35,7 @@ dependencies {
 
 clean {
     delete "$project.projectDir/target"
-    delete "$project.projectDir/Ballerina.lock"
+    delete "$project.projectDir/build"
 }
 
 jar {
@@ -57,12 +57,6 @@ def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/libs/${packageName}-validator-${project.version}.jar""")
-def targetOpenApiCommonJar = file("$project.rootDir/ballerina-to-openapi/build/libs/ballerina-to-openapi-${project.version}.jar")
-def targetOpenApiCoreJar = file("$project.rootDir/openapi-core/build/libs/openapi-core-${project.version}.jar")
-def targetOpenApiCliJar = file("$project.rootDir/openapi-cli/build/libs/openapi-cli-${project.version}.jar")
-def targetOpenApiBalTaskJar = file("$project.rootDir/openapi-bal-task-plugin/build/libs/openapi-bal-task-plugin-${project.version}.jar")
-def targetOpenApiBuildExtensionJar = file("$project.rootDir/openapi-build-extension/build/libs/openapi-build-extension-${project.version}.jar")
-def targetOpenApiLSJar = file("$project.rootDir/openapi-ls-extension/build/libs/openapi-ls-extension-${project.version}.jar")
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
@@ -115,6 +109,19 @@ task copyStdlibs(type: Copy) {
         }
         into("repo/cache") {
             from "${artifactExtractedPath}/cache"
+        }
+    }
+}
+
+task copyOpenApiTool {
+    doLast {
+        def ballerinaDist = "build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
+        def openApiCacheSource = "build/cache_parent/bala/ballerina/openapi"
+        if (file(openApiCacheSource).exists()) {
+            copy {
+                from openApiCacheSource
+                into "${ballerinaDist}/repo/bala/ballerina/openapi"
+            }
         }
     }
 }
@@ -211,36 +218,6 @@ task ballerinaBuild {
             into file("$artifactLibParent/libs")
         }
 
-        copy {
-            from targetOpenApiCommonJar
-            into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiCoreJar
-            into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiCliJar
-            into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiBuildExtensionJar
-            into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiBalTaskJar
-            into file("$artifactLibParent/libs")
-        }
-
-        copy {
-            from targetOpenApiLSJar
-            into file("$artifactLibParent/lslibs")
-        }
-
         // Doc creation and packing
         exec {
             workingDir project.projectDir
@@ -322,14 +299,16 @@ publishing {
 
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
+copyOpenApiTool.dependsOn unpackJballerinaTools
+copyOpenApiTool.dependsOn ':openapi-tool:build'
 updateTomlFile.dependsOn copyStdlibs
+updateTomlFile.dependsOn copyOpenApiTool
 updateCompilerTomlFile.dependsOn updateTomlFile
 
 ballerinaBuild.dependsOn ":ballerina-to-${packageName}:build"
 ballerinaBuild.dependsOn ":${packageName}-cli:build"
 ballerinaBuild.dependsOn ":${packageName}-ls-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-validator:build"
-ballerinaBuild.dependsOn ":${packageName}-build-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-bal-task-plugin:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile
 ballerinaBuild.dependsOn initializeVariables

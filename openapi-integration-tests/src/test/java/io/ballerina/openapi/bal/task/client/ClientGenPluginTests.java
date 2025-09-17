@@ -48,7 +48,9 @@ public class ClientGenPluginTests extends OpenAPITest {
         TestUtil.cleanDistribution();
     }
 
-    @Test
+    // Temporarily disabled due to conflict between bal-tools.toml files.
+    // Enable after the fix is merged for https://github.com/ballerina-platform/ballerina-lang/issues/44291
+    @Test(enabled = false)
     public void testValidSwaggerContract() throws IOException, InterruptedException {
         List<String> ids = new LinkedList<>();
         ids.add("delivery01");

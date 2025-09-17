@@ -15,55 +15,30 @@
  *
  */
 plugins {
-    id "base"
+    id 'base'
     id 'maven-publish'
-    id "com.github.spotbugs" version "${spotbugsPluginVersion}"
-    id "com.github.johnrengelman.shadow" version "${shadowJarPluginVersion}"
-    id "de.undercouch.download" version "${downloadPluginVersion}"
-    id "net.researchgate.release" version "${releasePluginVersion}"
-    id 'org.javamodularity.moduleplugin' version '1.7.0' apply false
-    id "org.sonarqube" version "4.0.0.2929"
+    id 'com.github.spotbugs'
+    id 'com.github.johnrengelman.shadow'
+    id 'de.undercouch.download'
+    id 'net.researchgate.release'
+    id 'org.javamodularity.moduleplugin' apply false
+    id 'org.sonarqube'
+    id 'jacoco'
 }
 
-apply plugin: 'java'
-apply plugin: "com.github.spotbugs"
-apply plugin: 'jacoco'
 apply plugin: "org.javamodularity.moduleplugin"
-apply from: "$rootDir/gradle/javaProject.gradle"
 
-ext.clientNativeVersion = project.clientNativeVersion
-ext.clientNativePublish = project.clientNativePublish
-ext.ballerinaToOpenAPIPublish = project.ballerinaToOpenAPIPublish
-ext.ballerinaLangVersion = project.ballerinaLangVersion
-ext.testngVersion = project.testngVersion
-ext.commonsLang3Version = project.commonsLang3Version
-ext.commonsIoVersion = project.commonsIoVersion
-ext.netLingalaZip4jVersion = project.netLingalaZip4jVersion
-ext.slf4jVersion = project.slf4jVersion
-ext.commonsLang3Version = project.commonsLang3Version
-ext.commonsIoVersion = project.commonsIoVersion
-ext.commonsCodecVersion = project.commonsCodecVersion
-ext.netLingalaZip4jVersion = project.netLingalaZip4jVersion
-ext.stdlibIoVersion = project.stdlibIoVersion
-ext.stdlibLogVersion = project.stdlibLogVersion
-ext.stdlibMimeVersion = project.stdlibMimeVersion
-ext.stdlibAuthVersion = project.stdlibAuthVersion
-ext.stdlibCacheVersion = project.stdlibCacheVersion
-ext.stdlibTimeVersion = project.stdlibTimeVersion
-ext.stdlibCryptoVersion = project.stdlibCryptoVersion
-ext.stdlibTaskVersion = project.stdlibTaskVersion
-ext.stdlibFileVersion = project.stdlibFileVersion
-ext.stdlibHttpVersion = project.stdlibHttpVersion
-ext.stdlibUrlVersion = project.stdlibUrlVersion
-ext.stdlibDataXmldataVersion = project.stdlibDataXmldataVersion
-ext.stdlibGraphqlVersion = project.stdlibGraphqlVersion
-ext.stdlibGrpcVersion = project.stdlibGrpcVersion
-ext.stdlibWebsubVersion = project.stdlibWebsubVersion
-ext.stdlibConstraintVersion = project.stdlibConstraintVersion
-ext.stdlibWebsocketVersion = project.stdlibWebsocketVersion
-ext.stdlibDataJsonDataVersion = project.stdlibDataJsonDataVersion
-ext.jacocoVersion = project.jacocoVersion
-ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
+jacoco {
+    toolVersion = "${jacocoVersion}"
+}
+
+configurations {
+    jacocoAnt
+}
+
+dependencies {
+    jacocoAnt "org.jacoco:org.jacoco.ant:${jacocoVersion}"
+}
 
 allprojects {
     group = 'io.ballerina'
@@ -108,7 +83,10 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'java'
+    // Apply Java plugin only to Java modules, not pure Ballerina modules
+    if (project.name != 'openapi-tool') {
+        apply plugin: 'java'
+    }
     configurations {
         ballerinaStdLibs
     }
@@ -144,8 +122,13 @@ subprojects {
 
 task createProperties(dependsOn: processResources) {
     doLast {
-        def file = new File("$project.rootDir/openapi-cli/src/main/resources/openapi-client-native-version.properties")
-        file.text = "version=${clientNativeVersion}"
+        def file = new File("$project.rootDir/openapi-cli/src/main/resources/version.properties")
+        def versionWithoutSnapshot = version.replace("-SNAPSHOT", "")
+        file.text = "version=${versionWithoutSnapshot}"
+        
+        def clientNativeVersionFile = 
+            new File("$project.rootDir/openapi-cli/src/main/resources/openapi-client-native-version.properties")
+        clientNativeVersionFile.text = "version=${clientNativeVersion}"
     }
 }
 
@@ -177,23 +160,29 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 task codeCoverageReport(type: JacocoReport) {
-    dependsOn = subprojects.test
-    dependsOn(":test")
+    dependsOn = subprojects.findAll { it.name != 'openapi-tool' }.test
     dependsOn(":openapi-extension-tests:jacocoTestReport")
     dependsOn(":openapi-integration-tests:jacocoTestReport")
+    dependsOn(":openapi-cli:jacocoTestReport")
+    dependsOn(":openapi-validator:jacocoTestReport")
+    dependsOn(":openapi-tool:build")
 
     executionData fileTree(project.rootDir.absolutePath).include("**/build/coverage-reports/*.exec")
 
     subprojects.each {
-        sourceSets it.sourceSets.main
+        if (it.plugins.hasPlugin('jacoco')) {
+            sourceSets it.sourceSets.main
+        }
     }
+
+    jacocoClasspath = configurations.jacocoAnt
     reports {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
-        html.destination = new File("${buildDir}/reports/jacoco/report.html")
-        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
+        html.outputLocation = file("${buildDir}/reports/jacoco/report.html")
+        csv.outputLocation = file("${buildDir}/reports/jacoco/report.csv")
     }
 
     onlyIf = {

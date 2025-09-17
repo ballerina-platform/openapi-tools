@@ -69,13 +69,19 @@ task copyOpenAPI() {
             from file("${targetOpenApiModule}/lib_parent/libs")
             into("${bDistribution}/bre/lib/")
         }
+
+        copy {
+            from file("${project.rootDir}/openapi-tool/build/bala_unzipped/bala/ballerina")
+            into("${bDistribution}/repo/bala/ballerina/")
+        }
     }
 }
 
 test {
     systemProperties =  [ jacocoAgentLine: "-javaagent:${configurations.jacocoRuntime.asPath}=destfile=${test.jacoco.destinationFile.absolutePath},append=true,inclnolocationclasses=true,exclclassloader=jdk.internal.reflect.DelegatingClassLoader" ,
                           "distributions.dir": bDistribution,
-                          "target.dir": "$project.buildDir"
+                          "target.dir": "$project.buildDir",
+                          "openapi.version": "${version}"
     ]
 
     useTestNG() {
@@ -101,18 +107,15 @@ jacocoTestReport {
     def classFiles = new File("${rootDir}/openapi-cli/build/classes/java/main/io/ballerina/openapi")
     def validatorClassFiles = new File("${rootDir}/openapi-validator/build/classes/java/main/io/ballerina/openapi" +
             "/validator")
-    def buildClassFiles = new File("${rootDir}/openapi-build-extension/build/classes/java/main/io/ballerina" +
-            "/openapi/build")
     additionalClassDirs(classFiles)
     additionalClassDirs(validatorClassFiles)
-    additionalClassDirs(buildClassFiles)
     reports {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.destination = new File("${buildDir}/reports/jacoco/report.xml")
-        html.destination = new File("${buildDir}/reports/jacoco/report.html")
-        csv.destination = new File("${buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
+        html.outputLocation = file("${buildDir}/reports/jacoco/report.html")
+        csv.outputLocation = file("${buildDir}/reports/jacoco/report.csv")
     }
 }
 

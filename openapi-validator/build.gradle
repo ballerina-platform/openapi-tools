@@ -15,10 +15,11 @@
  *
  */
 
-apply from: "$rootDir/gradle/javaProject.gradle"
+plugins {
+    id 'com.github.johnrengelman.shadow'
+}
 
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
+apply from: "$rootDir/gradle/javaProject.gradle"
 description = 'Ballerina - OpenAPI - Validator'
 
 configurations.all {
@@ -43,7 +44,6 @@ dependencies {
     implementation "org.ballerinalang:ballerina-tools-api"
     implementation "org.ballerinalang:ballerina-parser"
     implementation "org.ballerinalang:ballerina-cli"
-    testImplementation "org.testng:testng"
 
     balTools("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
         transitive = false
@@ -106,7 +106,7 @@ task copyStdlibs(type: Copy) {
 
 clean {
     delete "$project.projectDir/target"
-    delete "$project.projectDir/Ballerina.lock"
+    delete "$project.projectDir/build"
 }
 
 jar {

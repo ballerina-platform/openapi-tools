@@ -43,7 +43,6 @@ dependencies {
     implementation "org.ballerinalang:toml-parser:${ballerinaLangVersion}"
     implementation "com.google.code.findbugs:jsr305"
     implementation "commons-codec:commons-codec:${commonsCodecVersion}"
-    testImplementation "org.testng:testng"
 }
 
 shadowJar {
