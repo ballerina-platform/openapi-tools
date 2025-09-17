@@ -158,6 +158,10 @@ components:
           type: string
         artist:
           type: string
+        _type:
+          enum:
+            - full
+            - single
       additionalProperties: false
     album_aRTIST:
       required:

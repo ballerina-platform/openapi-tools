@@ -204,8 +204,9 @@ public class TypesDocCommentGenerator implements DocCommentsGenerator {
     }
 
     private static String getKey(Map.Entry<String, Schema> entry) {
-        return GeneratorUtils.getBallerinaNameExtension(entry.getValue())
-                .orElse(GeneratorUtils.escapeIdentifier(entry.getKey()));
+        String key = GeneratorUtils.getBallerinaNameExtension(entry.getValue())
+                .orElse(entry.getKey());
+        return GeneratorUtils.escapeIdentifier(key);
     }
 
     private static MetadataNode updateMetadataNode(Optional<MetadataNode> metadata, Schema<?> schema,
