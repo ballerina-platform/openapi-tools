@@ -43,6 +43,8 @@ public type Album record {|
     @jsondata:Name {value: "_id"}
     string id;
     string title;
+    @jsondata:Name {value: "_type"}
+    "full"|"single" 'type?;
 |};
 
 public type MessageNotFound record {|

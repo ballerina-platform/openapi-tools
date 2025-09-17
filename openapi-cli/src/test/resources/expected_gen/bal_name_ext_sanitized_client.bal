@@ -259,11 +259,11 @@ public type AlbumARTIST record {|
 
 public type Album record {|
     string artist;
-    @jsondata:Name {value: "_type"}
-    "full"|"single" 'type?;
     @jsondata:Name {value: "_id"}
     string id;
     string title;
+    @jsondata:Name {value: "_type"}
+    "full"|"single" 'type?;
 |};
 
 # Represents the Queries record for the operation: getAlbums
