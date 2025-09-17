@@ -1310,17 +1310,20 @@ public class AuthConfigGeneratorImp {
                         setApiKeysConfigRecordFields(schemaValue);
                         switch (apiKeyType) {
                             case "query":
-                                String name = schemaValue.getName();
-                                ApiKeyNamePair queryApiKeyNamePair = new ApiKeyNamePair(name,
-                                        GeneratorUtils.getBallerinaNameExtension(schemaValue.getExtensions())
-                                                .orElse(name));
+                                String actualName = schemaValue.getName();
+                                String name = GeneratorUtils.getBallerinaNameExtension(schemaValue.getExtensions())
+                                        .orElse(actualName);
+                                String displayName = escapeIdentifier(name);
+                                ApiKeyNamePair queryApiKeyNamePair = new ApiKeyNamePair(actualName, displayName);
                                 queryApiKeyNameMap.put(securitySchemeEntry.getKey(), queryApiKeyNamePair);
                                 break;
                             case "header":
-                                String headerName = schemaValue.getName();
-                                ApiKeyNamePair headerApiKeyNamePair = new ApiKeyNamePair(headerName,
-                                        GeneratorUtils.getBallerinaNameExtension(schemaValue.getExtensions())
-                                                .orElse(headerName));
+                                String actualHeaderName = schemaValue.getName();
+                                String headerName = GeneratorUtils.getBallerinaNameExtension(schemaValue
+                                                .getExtensions()).orElse(actualHeaderName);
+                                String displayHeaderName = escapeIdentifier(headerName);
+                                ApiKeyNamePair headerApiKeyNamePair = new ApiKeyNamePair(actualHeaderName,
+                                        displayHeaderName);
                                 headerApiKeyNameMap.put(securitySchemeEntry.getKey(), headerApiKeyNamePair);
                                 break;
                             default:
@@ -1350,9 +1353,9 @@ public class AuthConfigGeneratorImp {
             metadataNode = getMetadataNode(securityScheme.getDescription(), annotationNodes);
         }
         TypeDescriptorNode stringTypeDesc = createSimpleNameReferenceNode(createToken(STRING_KEYWORD));
-        IdentifierToken apiKeyName = createIdentifierToken(
-                escapeIdentifier(GeneratorUtils.getBallerinaNameExtension(securityScheme.getExtensions())
-                        .orElse(securityScheme.getName())));
+        String name = GeneratorUtils.getBallerinaNameExtension(securityScheme.getExtensions())
+                .orElse(securityScheme.getName());
+        IdentifierToken apiKeyName = createIdentifierToken(escapeIdentifier(name));
         apiKeysConfigRecordFields.add(createRecordFieldNode(metadataNode, null, stringTypeDesc,
                 apiKeyName, null, createToken(SEMICOLON_TOKEN)));
     }
