@@ -69,6 +69,11 @@ task copyOpenAPI() {
             from file("${targetOpenApiModule}/lib_parent/libs")
             into("${bDistribution}/bre/lib/")
         }
+
+        copy {
+            from file("${project.rootDir}/openapi-tool/build/bala_unzipped/bala/ballerina")
+            into("${bDistribution}/repo/bala/ballerina/")
+        }
     }
 }
 
