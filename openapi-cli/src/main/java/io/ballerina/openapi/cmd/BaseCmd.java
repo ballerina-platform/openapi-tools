@@ -65,4 +65,7 @@ public class BaseCmd {
     @CommandLine.Option(names = {"--use-sanitized-oas"}, hidden = true, description = "This option enables code " +
             "generation by modifying the given OAS to follow the Ballerina language best practices.")
     public boolean useSanitized;
+
+    @CommandLine.Option(names = {"-v", "--version"})
+    public boolean versionFlag;
 }

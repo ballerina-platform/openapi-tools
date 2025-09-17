@@ -151,6 +151,17 @@ public class OpenApiCmd implements BLauncherCmd {
                     exception.getMessage());
         }
     }
+    private String getVersion() throws IOException {
+        try (InputStream inputStream = OpenApiCmd.class.getClassLoader().getResourceAsStream(
+                "version.properties")) {
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            return properties.getProperty("version");
+        } catch (IOException exception) {
+            throw new IOException("error occurred while reading version from version.properties: " +
+                    exception.getMessage());
+        }
+    }
 
     public OpenApiCmd(PrintStream outStream, Path executionDir) {
         new OpenApiCmd(outStream, executionDir, true);
@@ -163,6 +174,18 @@ public class OpenApiCmd implements BLauncherCmd {
     }
     @Override
     public void execute() {
+        if (baseCmd.versionFlag) {
+            String version;
+            try {
+                version = getVersion();
+            } catch (IOException e) {
+                outStream.println("Error occurred while retrieving the version: " + e.getMessage());
+                exitError(this.exitWhenFinish);
+                return;
+            }
+            outStream.println("Ballerina OpenAPI Tool: " + version);
+            return;
+        }
         if (isHelp()) {
             String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName(), OpenApiCmd.class.getClassLoader());
             outStream.println(commandUsageInfo);
