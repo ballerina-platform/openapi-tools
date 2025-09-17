@@ -1156,7 +1156,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("Ballerina OpenAPI Tool: " + getVersionFromProperties()));
+        Assert.assertTrue(output.contains("OpenAPI Tool " + getVersionFromProperties()));
     }
 
     private String getVersionFromProperties() throws IOException {

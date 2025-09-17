@@ -184,7 +184,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 exitError(this.exitWhenFinish);
                 return;
             }
-            outStream.println("Ballerina OpenAPI Tool: " + version);
+            outStream.println("OpenAPI Tool " + version);
             return;
         }
         if (isHelp()) {
