@@ -199,4 +199,9 @@ components:
           x-ballerina-name: id
         title:
           type: string
+        _type:
+          enum:
+            - full
+            - single
+          x-ballerina-name: type
       additionalProperties: false

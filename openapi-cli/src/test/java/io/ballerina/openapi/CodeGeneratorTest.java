@@ -925,7 +925,8 @@ public class CodeGeneratorTest {
         String definitionPath = RES_DIR.resolve("bal_name_ext_sanitized.yaml").toString();
         BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
         try {
-            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath, "bal_name_ext_client.bal");
+            String expectedClientContent = getStringFromGivenBalFile(expectedDirPath,
+                    "bal_name_ext_sanitized_client.bal");
             generator.generateClient(definitionPath, resourcePath.toString(), filter,
                     new ClientGeneratorOptions(false, true, false, false,
                             true, false));

@@ -71,6 +71,7 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.RECORD_KEYWORD;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.SEMICOLON_TOKEN;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.convertOpenAPITypeToBallerina;
+import static io.ballerina.openapi.core.generators.common.GeneratorUtils.escapeIdentifier;
 
 /**
  * Generate TypeDefinitionNode and TypeDescriptorNode for object type schema.
@@ -283,7 +284,7 @@ public class RecordTypeGenerator extends TypeGenerator {
 
         Optional<String> fieldNameFromExt = GeneratorUtils.getBallerinaNameExtension(fieldSchema);
         if (fieldNameFromExt.isPresent()) {
-            fieldName = createIdentifierToken(fieldNameFromExt.get());
+            fieldName = createIdentifierToken(escapeIdentifier(fieldNameFromExt.get()));
             metadataNode = GeneratorUtils.getNameAnnotationMetadataNode(field.getKey(), fieldSchema);
         }
         if (required != null && required.contains(field.getKey().trim())) {
