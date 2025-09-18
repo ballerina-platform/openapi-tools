@@ -153,7 +153,7 @@ public class TestUtil {
         pullArgs.add(0, TEST_DISTRIBUTION_PATH.resolve(distributionName).resolve("bin").resolve(balFile).toString());
         pullArgs.add(1, "tool");
         pullArgs.add(2, "pull");
-        pullArgs.add(3, "openapi:" + System.getProperty("openapi.version").replace("-SNAPSHOT", ""));
+        pullArgs.add(3, "openapi:" + System.getProperty("openapi.version").split("-", 2)[0]);
         pullArgs.add(4, "--repository");
         pullArgs.add(5, "local");
 
