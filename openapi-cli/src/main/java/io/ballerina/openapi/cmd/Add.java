@@ -107,6 +107,10 @@ public class Add implements BLauncherCmd {
 
     @Override
     public void execute() {
+        if (baseCmd.isVersionFlag(outStream, exitWhenFinish)) {
+            return;
+        }
+
         Path projectPath = packagePath != null ? Path.of(packagePath) :
                 Paths.get(System.getProperty("user.dir")).toAbsolutePath();
 

@@ -107,6 +107,9 @@ public abstract class SubCmdBase implements BLauncherCmd {
     private final CommandType cmdType;
     private final String infoMsgPrefix;
 
+    @CommandLine.Option(names = {"-v", "--version"})
+    public boolean versionFlag;
+
     @CommandLine.Option(names = {"-h", "--help"}, hidden = true)
     public boolean helpFlag;
 
@@ -146,8 +149,24 @@ public abstract class SubCmdBase implements BLauncherCmd {
         infoStream.println(commandUsageInfo);
     }
 
+    public void printVersion() {
+        String version;
+        try {
+            version = BaseCmd.getVersion();
+            infoStream.println("OpenAPI Tool " + version);
+        } catch (IOException e) {
+            errorStream.println("Error occurred while retrieving the version: " + e.getMessage());
+            exitError();
+        }
+    }
+
     @Override
     public void execute() {
+        if (versionFlag) {
+            printVersion();
+            return;
+        }
+
         if (helpFlag) {
             printHelpText(this.getClass().getClassLoader());
             return;
