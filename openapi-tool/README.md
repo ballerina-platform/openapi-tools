@@ -1,234 +1,259 @@
-# Ballerina OpenAPI CLI Tool
+## Overview
 
-The OpenAPI contract is a specification that creates a RESTful contract for APIs by detailing all of its resources and operations in a human and machine-readable format for easy development, discovery, and integration. Ballerina Swan Lake supports the OpenAPI contract version 3.0.0 onwards.
-
-Ballerina OpenAPI tool makes it easy for you to start the development of a service documented in an OpenAPI contract in Ballerina by generating a Ballerina service and client skeletons. It enables you to take the code-first API design approach by generating an OpenAPI contract for the given service implementation.
-
-## Features
+The OpenAPI contract is a specification that creates a RESTful contract for APIs by detailing all of its resources and operations in a human and machine-readable format for easy development, discovery, and integration. The Ballerina OpenAPI tool makes it easy for you to start the development of a service documented in an OpenAPI contract in Ballerina by generating a Ballerina service and client skeletons facilitating contract-first development. It also enables you to take the code-first API design approach by generating an OpenAPI contract for the given service implementation.
 
 The Ballerina OpenAPI tool provides the following capabilities:
 
-1. **Generate Ballerina service/client stubs** from a given OpenAPI contract file using the CLI tool
-2. **Export the OpenAPI definition** from a given Ballerina service implementation using the CLI tool
-3. **Validate the service implementation compliance** with a provided OpenAPI contract using the OpenAPI annotation
+1. **Modify OpenAPI contracts** to be more compatible with Ballerina by aligning names to Ballerina naming conventions and flattening inline schemas
+2. **Generate Ballerina service/client stubs** from a given OpenAPI contract file
+3. **Export the OpenAPI contract** from a given Ballerina service implementation
+4. **Integrate client generation from the OpenAPI contract** as a build option in Ballerina projects
 
-> **Info:** The OpenAPI compiler plugin allows you to validate a service implementation against an OpenAPI contract during compile time. This plugin ensures that the implementation of a service does not deviate from its OpenAPI contract.
+## Commands
 
-## Usage
+### `bal openapi flatten`
 
-### OpenAPI to Ballerina
+Make the OpenAPI contract more readable by relocating all inline embedded schemas to the components section and assigning each a unique, Ballerina-friendly name.
 
-Generate Ballerina service and client stubs from an OpenAPI contract:
+**Synopsis:**
 
 ```bash
-bal openapi [-i | --input] <openapi-contract-file-path>
-            [-o | --output] <output-location>
-            [--mode] <mode-type>
-            [--tags] <tag-names>
-            [--operations] <operation-names>
+bal openapi flatten -i | --input <openapi-contract-file-path>
+                    [-o | --output <output-file-path>]
+                    [-n | --name <generated-file-name>]
+                    [-f | --format <json|yaml>]
+                    [-t | --tags <tag-names>]
+                    [--operations <operation-names>]
+```
+
+**Options:**
+
+| Option           | Description                                               | Required |
+|------------------|-----------------------------------------------------------|----------|
+| `-i`, `--input`  | Path of the OpenAPI contract file                         | Yes      |
+| `-o`, `--output` | Output directory location (defaults to current directory) | No       |
+| `-n`, `--name`   | Generated file name (defaults to `flattened_openapi`)     | No       |
+| `-f`, `--format` | Output format: `json` or `yaml`                           | No       |
+| `-t`, `--tags`   | Filter by specific tags                                   | No       |
+| `--operations`   | Filter by specific operations                             | No       |
+
+### `bal openapi align`
+
+Align the OpenAPI contract file according to the best practices of Ballerina.
+
+**Default alignments:**
+
+- **`name`**: Align according to the best naming practices of Ballerina. The Ballerina name extensions are added to the schemas which cannot be modified directly.
+- **`doc`**: Align according to the best documentation practices of Ballerina.
+- **`basepath`**: Extract the common base path from the operations and add it to the server URL.
+
+The alignments can be filtered using the `--include` and `--exclude` options. The `--include` option has higher priority than the `--exclude` option.
+
+**Synopsis:**
+
+```bash
+bal openapi align -i | --input <openapi-contract-file-path>
+                  [-o | --output <output-file-path>]
+                  [-n | --name <generated-file-name>]
+                  [-f | --format <json|yaml>]
+                  [-t | --tags <tag-names>]
+                  [--operations <operation-names>]
+                  [--include <alignment-names>]
+                  [--exclude <alignment-names>]
+```
+
+**Options:**
+
+| Option           | Description                                                                    | Required |
+|------------------|--------------------------------------------------------------------------------|----------|
+| `-i`, `--input`  | Path of the OpenAPI contract file                                              | Yes      |
+| `-o`, `--output` | Output directory location (defaults to current directory)                      | No       |
+| `-n`, `--name`   | Generated file name (defaults to `aligned_ballerina_openapi`)                  | No       |
+| `-f`, `--format` | Output format: `json` or `yaml`                                                | No       |
+| `-t`, `--tags`   | Filter by specific tags                                                        | No       |
+| `--operations`   | Filter by specific operations                                                  | No       |
+| `--include`      | Comma-separated list of alignment names to include (`name`, `doc`, `basepath`) | No       |
+| `--exclude`      | Comma-separated list of alignment names to exclude (`name`, `doc`, `basepath`) | No       |
+
+### `bal openapi` (OpenAPI to Ballerina)
+
+Generate Ballerina service and client stubs from an OpenAPI contract.
+
+**Synopsis:**
+
+```bash
+bal openapi -i | --input <openapi-contract-file-path>
+            [-o | --output <output-directory>]
+            [--mode <mode-type>]
+            [--tags <tag-names>]
+            [--operations <operation-names>]
             [-n | --nullable]
-            [--license] <license-file-path>
+            [--license <license-file-path>]
             [--with-tests]
-            [--status-code-binding] [--mock] [--with-service-contract]
-            [--single-file] [--use-sanitized-oas]
+            [--client-methods <resource|remote>]
+            [--without-data-binding]
+            [--status-code-binding]
+            [--mock]
+            [--with-service-contract]
+            [--single-file]
 ```
 
-### Ballerina to OpenAPI
+**Options:**
 
-Export OpenAPI definition from a Ballerina service:
+| Option                    | Description                                                                                | Required |
+|---------------------------|--------------------------------------------------------------------------------------------|----------|
+| `-i`, `--input`           | Path of the OpenAPI contract file                                                          | Yes      |
+| `-o`, `--output`          | Output directory location (defaults to current directory)                                  | No       |
+| `--mode`                  | Generation mode: `service`, `client`, or both (default: both)                              | No       |
+| `--tags`                  | Filter operations by specific tags for service/client generation                           | No       |
+| `--operations`            | List of specific operations to generate                                                    | No       |
+| `-n`, `--nullable`        | Generate all data types with Ballerina nil support for safer JSON schema to record binding | No       |
+| `--license`               | Add copyright/license header from specified file path                                      | No       |
+| `--with-tests`            | Generate test boilerplate for all remote functions in client generation                    | No       |
+| `--client-methods`        | Client method type: `resource` (default) or `remote`                                       | No       |
+| `--without-data-binding`  | Generate low-level service without data-binding logic                                      | No       |
+| `--status-code-binding`   | Generate client methods with status code response binding                                  | No       |
+| `--mock`                  | Generate mock client for the given OpenAPI contract                                        | No       |
+| `--with-service-contract` | Generate service contract type for the OpenAPI contract                                    | No       |
+| `--single-file`           | Generate service or client with related types and utilities in a single file               | No       |
+
+### `bal openapi` (Ballerina to OpenAPI)
+
+Export OpenAPI definition from a Ballerina service.
+
+**Synopsis:**
 
 ```bash
-bal openapi [-i | --input] <ballerina-service-file-path> [--json]
-            [-s | --service] <current-service-name>
-            [-o | --output] <output-location>
+bal openapi -i | --input <ballerina-service-file-path>
+            [-o | --output <output-location>]
+            [-s | --service <service-name>]
+            [--json]
 ```
 
-### Align OpenAPI Contract
+**Options:**
 
-Align OpenAPI contract according to Ballerina naming conventions:
+| Option            | Description                                               | Required |
+|-------------------|-----------------------------------------------------------|----------|
+| `-i`, `--input`   | Path of the Ballerina service file                        | Yes      |
+| `-o`, `--output`  | Output directory location (defaults to current directory) | No       |
+| `-s`, `--service` | Name of the current service                               | No       |
+| `--json`          | Generate OpenAPI output in JSON format (defaults to YAML) | No       |
+
+### `bal openapi add`
+
+Update the `Ballerina.toml` file with OpenAPI tool configuration details for generating a Ballerina service or client as part of the build process.
+
+**Synopsis:**
 
 ```bash
-bal openapi align [-i | --input] <openapi-contract-file-path>
-                  [-o | --output] <output-file-path>
-                  [-n | --name] <generated-file-name>
-                  [-f | --format] [json|yaml]
-                  [-t | --tags] <tag-names>
-                  [--operations] <operation-names>
+bal openapi add -i | --input <openapi-contract-file-path>
+                --id <service/client-id>
+                [-p | --package <package-location>]
+                [--module <module-name>]
+                [--mode <mode-type>]
+                [--tags <tag-names>]
+                [--operations <operation-names>]
+                [-n | --nullable]
+                [--license <license-file-path>]
+                [--client-methods <resource|remote>]
+                [--status-code-binding]
 ```
 
-### Flatten OpenAPI Contract
+**Options:**
 
-Make OpenAPI contract more readable by relocating inline schemas:
-
-```bash
-bal openapi flatten [-i | --input] <openapi-contract-file-path>
-                    [-o | --output] <output-file-path>
-                    [-n | --name] <generated-file-name>
-                    [-f | --format] [json|yaml]
-                    [-t | --tags] <tag-names>
-                    [--operations] <operation-names>
-```
-
-## Command Options
-
-### OpenAPI to Ballerina Options
-
-| Option | Description | Required |
-|--------|-------------|----------|
-| `-i \| --input` | Path of the OpenAPI contract file (e.g., my-api.yaml or my-api.json) | Yes |
-| `-o \| --output` | Output directory location (defaults to current directory) | No |
-| `--mode` | Mode type: service or client (defaults to both) | No |
-| `--tags` | Generate stubs with specific tags only | No |
-| `--operations` | Generate stubs with specific operations only | No |
-| `-n \| --nullable` | Generate all data types with Ballerina nil support | No |
-| `--license` | Add copyright/license header from file | No |
-| `--with-tests` | Generate boilerplate tests for client methods | No |
-| `--status-code-binding` | Generate status code binding | No |
-| `--mock` | Generate mock service | No |
-| `--with-service-contract` | Generate service contract | No |
-| `--single-file` | Generate single file output | No |
-| `--use-sanitized-oas` | Use sanitized OpenAPI specification | No |
-
-### Ballerina to OpenAPI Options
-
-| Option | Description | Required |
-|--------|-------------|----------|
-| `-i \| --input` | Path of the Ballerina service file | Yes |
-| `--json` | Generate OpenAPI in JSON format (defaults to YAML) | No |
-| `-s \| --service` | Name of the current service | No |
-| `-o \| --output` | Output directory location | No |
-
-### Align Options
-
-| Option | Description | Required |
-|--------|-------------|----------|
-| `-i \| --input` | Path of the OpenAPI contract file | Yes |
-| `-o \| --output` | Output directory location | No |
-| `-n \| --name` | Generated file name (defaults to aligned_ballerina_openapi) | No |
-| `-f \| --format` | Output format: json or yaml | No |
-| `-t \| --tags` | Filter by specific tags | No |
-| `--operations` | Filter by specific operations | No |
-
-### Flatten Options
-
-| Option | Description | Required |
-|--------|-------------|----------|
-| `-i \| --input` | Path of the OpenAPI contract file | Yes |
-| `-o \| --output` | Output directory location | No |
-| `-n \| --name` | Generated file name (defaults to flattened_openapi) | No |
-| `-f \| --format` | Output format: json or yaml | No |
-| `-t \| --tags` | Filter by specific tags | No |
-| `--operations` | Filter by specific operations | No |
-
-## OpenAPI Annotation
-
-Use the `@openapi:ServiceInfo` annotation to configure OpenAPI generation:
-
-```ballerina
-@openapi:ServiceInfo {
-    title: "Pet Store API",
-    version: "1.0.0",
-    description: "A sample Pet Store API",
-    contactName: "API Support",
-    contactEmail: "support@example.com",
-    contactURL: "https://example.com/support",
-    termsOfService: "https://example.com/terms",
-    licenseName: "MIT",
-    licenseURL: "https://opensource.org/licenses/MIT",
-    embed: true
-}
-service /petstore on new http:Listener(9090) {
-    // Service implementation
-}
-```
-
-### Annotation Attributes
-
-| Attribute | Description | Required |
-|-----------|-------------|----------|
-| `title: string` | API title | Yes |
-| `version: string` | API version | No |
-| `description: string` | API description | No |
-| `email: string` | Contact email | No |
-| `contactName: string` | Contact person/organization | No |
-| `contactURL: string` | Contact webpage URL | No |
-| `termsOfService: string` | Terms of service URL | No |
-| `licenseName: string` | License name | No |
-| `licenseURL: string` | License URL | No |
-| `embed: boolean` | Enable introspection endpoint support | No |
+| Option                  | Description                                                                 | Required |
+|-------------------------|-----------------------------------------------------------------------------|----------|
+| `-i`, `--input`         | Path of the OpenAPI contract file                                           | Yes      |
+| `--id`                  | Unique identifier for the service/client in `Ballerina.toml`                | Yes      |
+| `-p`, `--package`       | Package location to update `Ballerina.toml` (defaults to current directory) | No       |
+| `--module`              | Module name for generated service/client                                    | No       |
+| `--mode`                | Generation mode: `service` or `client` (default: `client`)                  | No       |
+| `--tags`                | Filter operations by specific tags                                          | No       |
+| `--operations`          | List of specific operations to generate                                     | No       |
+| `-n`, `--nullable`      | Generate all data types with Ballerina nil support                          | No       |
+| `--license`             | Add copyright/license header from specified file path                       | No       |
+| `--client-methods`      | Client method type: `resource` (default) or `remote`                        | No       |
+| `--status-code-binding` | Generate client methods with status code response binding                   | No       |
 
 ## Examples
 
-### Generate Service from OpenAPI
+### Flatten OpenAPI contracts
+
+```bash
+# Basic flattening
+bal openapi flatten -i api.yaml
+
+# Flatten with custom output directory and JSON format
+bal openapi flatten -i api.yaml -o ./flattened -f json
+
+# Flatten specific tags only
+bal openapi flatten -i api.yaml -t "pets,users" -n pets_flattened
+```
+
+### Align OpenAPI contracts
+
+```bash
+# Basic alignment with all default alignments
+bal openapi align -i api.yaml
+
+# Align with custom output and specific alignments
+bal openapi align -i api.yaml -o ./aligned -n my_api.yaml --include "name,doc"
+
+# Align excluding basepath alignment
+bal openapi align -i api.yaml --exclude "basepath"
+```
+
+### Generate Ballerina code from OpenAPI
 
 ```bash
 # Generate both service and client
 bal openapi -i petstore.yaml
 
-# Generate only service
-bal openapi -i petstore.yaml --mode service
+# Generate only service with nullable support
+bal openapi -i petstore.yaml --mode service -n
 
-# Generate with specific tags
-bal openapi -i petstore.yaml --tags "pets,users"
+# Generate client with specific tags and test files
+bal openapi -i petstore.yaml --mode client --tags "pets,users" --with-tests
 
-# Generate with nullable support
-bal openapi -i petstore.yaml -n
+# Generate with remote client methods and status code binding
+bal openapi -i petstore.yaml --client-methods remote --status-code-binding
+
+# Generate mock client for testing
+bal openapi -i petstore.yaml --mode client --mock
+
+# Generate in a single file with service contract
+bal openapi -i petstore.yaml --single-file --with-service-contract
 ```
 
 ### Export OpenAPI from Ballerina
 
 ```bash
-# Export to YAML (default)
+# Export to YAML (default format)
 bal openapi -i service.bal
 
-# Export to JSON
-bal openapi -i service.bal --json
+# Export to JSON with specific output directory
+bal openapi -i service.bal --json -o ./openapi-specs
 
-# Export specific service
-bal openapi -i service.bal -s PetStoreService
+# Export specific service by name
+bal openapi -i service.bal -s PetStoreService -o ./specs
 ```
 
-### Align OpenAPI Contract
+### Add OpenAPI client generation as a build option
 
 ```bash
-# Align to Ballerina naming conventions
-bal openapi align -i api.yaml
-
-# Align with custom output
-bal openapi align -i api.yaml -o ./aligned -n my_api.yaml
+# Add client generation to Ballerina.toml
+bal openapi add -i petstore.yaml --id petstoreClient --module petstore
 ```
 
-### Flatten OpenAPI Contract
+### Advanced usage scenarios
 
 ```bash
-# Flatten inline schemas
-bal openapi flatten -i api.yaml
+# Contract-first development
+bal openapi flatten -i original-api.yaml
+bal openapi align -i flattened_openapi.yaml --include "name,doc"
+bal openapi -i aligned_ballerina_openapi.yaml --mode service --with-service-contract
 
-# Flatten with custom output
-bal openapi flatten -i api.yaml -o ./flattened -f json
+# Code-first development
+bal openapi -i my_service.bal --json -o ./api-docs
+bal openapi -i ./api-docs/openapi.json --mode client --mock
 ```
-
-## OpenAPI Contract Modifier
-
-### Ballerina-Preferred Naming Conventions
-
-The `align` subcommand adds Ballerina-specific name extensions (`x-ballerina-name`) to schemas and properties that cannot be modified directly, ensuring compatibility with Ballerina naming conventions.
-
-### Inline Schema Extraction
-
-The `flatten` subcommand relocates all inline embedded schemas to the components section, making the OpenAPI contract more readable and maintainable.
-
-## Learn More
-
-- [Ballerina OpenAPI Tool Documentation](https://ballerina.io/learn/openapi-tool/)
-- [Ballerina Language Documentation](https://ballerina.io/learn/)
-- [OpenAPI Specification](https://spec.openapis.org/)
-- [Ballerina by Example](https://ballerina.io/learn/by-example/)
-
-## Contributing
-
-This project is part of the Ballerina OpenAPI tools ecosystem. For contributing guidelines and development setup, please refer to the main project repository.
-
-## License
-
-This project is licensed under the Apache License 2.0.
