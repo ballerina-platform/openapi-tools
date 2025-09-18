@@ -30,7 +30,6 @@ dependencies {
     implementation project(':openapi-core')
     implementation project(':openapi-cli')
     implementation project(':openapi-bal-task-plugin')
-    implementation project(':openapi-ls-extension')
 }
 
 clean {
@@ -307,7 +306,6 @@ updateCompilerTomlFile.dependsOn updateTomlFile
 
 ballerinaBuild.dependsOn ":ballerina-to-${packageName}:build"
 ballerinaBuild.dependsOn ":${packageName}-cli:build"
-ballerinaBuild.dependsOn ":${packageName}-ls-extension:build"
 ballerinaBuild.dependsOn ":${packageName}-validator:build"
 ballerinaBuild.dependsOn ":${packageName}-bal-task-plugin:build"
 ballerinaBuild.dependsOn updateCompilerTomlFile
