@@ -86,4 +86,4 @@ EXAMPLES
 
        Update the `Ballerina.toml` file for generating a Ballerina client using
        a `hello.yaml` OpenAPI contract with the tags filter.
-           $ bal openapi add -i hello.yaml --id hello_client--tags tag_ID
+           $ bal openapi add -i hello.yaml --id hello_client --tags tag_ID
