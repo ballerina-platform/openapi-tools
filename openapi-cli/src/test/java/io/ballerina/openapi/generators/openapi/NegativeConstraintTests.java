@@ -100,7 +100,7 @@ public class NegativeConstraintTests {
     @Test(description = "When String constraint has compilation errors (REGEX pattern with invalid format)")
     public void testInvalidRegexPattern() throws ProjectException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/invalidRegexPattern.bal");
-        Project project = ProjectLoader.loadProject(ballerinaFilePath);
+        Project project = ProjectLoader.load(ballerinaFilePath).project();
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                 DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();
@@ -114,7 +114,7 @@ public class NegativeConstraintTests {
     @Test(description = "When Integer constraint has float value which is invalid")
     public void testInvalidInteger() throws ProjectException {
         Path ballerinaFilePath = RES_DIR.resolve("constraint-negative/invalidInteger.bal");
-        Project project = ProjectLoader.loadProject(ballerinaFilePath);
+        Project project = ProjectLoader.load(ballerinaFilePath).project();
         DiagnosticResult diagnostic = getCompilation(project);
         Object[] errors = diagnostic.diagnostics().stream().filter(d ->
                 DiagnosticSeverity.ERROR == d.diagnosticInfo().severity()).toArray();

@@ -89,7 +89,7 @@ public class OASContractGenerator {
     public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName,
                                                   Boolean needJson) {
         // Load project instance for single ballerina file
-        project = ProjectLoader.loadProject(servicePath);
+        project = ProjectLoader.load(servicePath).project();
         DiagnosticResult diagnosticsFromCodeGenAndModify = project.currentPackage().runCodeGenAndModifyPlugins();
         boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));

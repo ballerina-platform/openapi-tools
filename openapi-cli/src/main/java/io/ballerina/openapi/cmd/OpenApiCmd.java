@@ -561,7 +561,7 @@ public class OpenApiCmd implements BLauncherCmd {
     }
 
     private boolean clientNativeDependencyAlreadyExist(String version) {
-        Project project = ProjectLoader.loadProject(executionPath);
+        Project project = ProjectLoader.load(executionPath).project();
         Map<String, Platform> platforms = project.currentPackage().manifest().platforms();
         if (Objects.nonNull(platforms) && platforms.containsKey("java21")) {
             Optional<Map<String, Object>> nativeDependency = platforms.get("java21").dependencies().stream().filter(
