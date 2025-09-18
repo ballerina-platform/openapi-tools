@@ -147,5 +147,6 @@ updateTomlFiles.dependsOn ":ballerina-to-openapi:build"
 copyOpenApiTool.dependsOn publishToLocal
 build.dependsOn "generatePomFileForMavenPublication"
 build.dependsOn publishToLocal
+publishToLocal.dependsOn updateTomlFiles
 publishToMavenLocal.dependsOn build
 publish.dependsOn build
