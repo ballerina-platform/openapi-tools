@@ -4,20 +4,16 @@
  [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/openapi-tools.svg)](https://github.com/ballerina-platform/openapi-tools/commits/master)
  [![GitHub issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/openapi-tools.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-library/labels/module%2Fopenapi-tools)
  
-The OpenAPI Specification is a specification, which creates a RESTFUL contract for APIs detailing all of its resources 
-and operations in both human and machine-readable format for easy development, discovery, and integration. Ballerina
- OpenAPI tooling will make it easy for users to start the development of a service documented in the OpenAPI contract 
-  by generating the Ballerina service and client skeletons. The OpenAPI tools provide the following capabilities.
- 
- 1. Generate the Ballerina service or client code for a given OpenAPI definition. 
- 2. Export the OpenAPI definition of a Ballerina service.
- 3. Validate the service implementation of a given OpenAPI contract.
-    
-The `openapi` command in Ballerina is used for OpenAPI to Ballerina and Ballerina to OpenAPI code generations. 
-The OpenAPI compiler plugin will allow you to validate a service implementation against an OpenAPI contract during
- compile time. 
-This plugin ensures that the implementation of a service does not deviate from its OpenAPI contract.
-For more information on the supported operations, go to [Using the OpenAPI Tools](https://ballerina.io/learn/openapi-tool/)
+Ballerina OpenAPI tools provide seamless integration between Ballerina and OpenAPI specifications, enabling both 
+contract-first and code-first API development approaches. The `bal openapi` command offers contract optimization 
+through `flatten` and `align` operations to make OpenAPI contracts Ballerina-compatible, bidirectional code generation
+to create Ballerina services and clients from OpenAPI contracts or export OpenAPI specifications from Ballerina 
+services, and build-time integration via the `add` command for automated client generation. Additionally, 
+the OpenAPI module provides annotations like `@openapi:ServiceInfo`, `@openapi:ResourceInfo`, and `@openapi:Example`
+to enrich generated contracts with metadata, enable runtime introspection by exposing OpenAPI documentation, validate
+service implementations against existing contracts at compile-time, and enhance API documentation with examples and 
+descriptions.
+
 ## Building from the Source
 
 ### Setting Up the Prerequisites

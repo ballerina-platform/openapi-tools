@@ -1,259 +1,196 @@
-## Module Overview
+## Overview
 
-This module provides the Ballerina OpenAPI tooling, which will make it easy to start the development of a service documented in an OpenAPI contract in Ballerina by generating the Ballerina service and client skeletons.
+This module provides comprehensive annotations and utilities to enhance the seamless interoperability between Ballerina and OpenAPI specifications.
 
-The OpenAPI tools provide the following capabilities.
+The OpenAPI module delivers the following key capabilities:
 
-1. Generate the Ballerina service or client code for a given OpenAPI definition.
-2. Export the OpenAPI definition of a Ballerina service.
-3. Validate the service implementation of a given OpenAPI contract.
+1. **Contract Enhancement**: Annotations to enrich and customize OpenAPI contracts generated from Ballerina services
+2. **Contract Validation**: Annotations to facilitate compile-time validation of Ballerina services against existing OpenAPI contracts
+3. **Runtime Introspection**: Built-in support for exposing OpenAPI documentation as introspection resources
 
-The `openapi` command in Ballerina is used for OpenAPI to Ballerina and Ballerina to OpenAPI code generations.
-Code generation from OpenAPI to Ballerina can produce `ballerina service stubs` and `ballerina client stubs`.
-The OpenAPI compiler plugin will allow you to validate a service implementation against an OpenAPI contract during
-the compile time.
-This plugin ensures that the implementation of a service does not deviate from its OpenAPI contract.
+## Annotations for Enriching Generated OpenAPI Contracts
 
-### OpenAPI to Ballerina
-#### Generate Service and Client Stub from an OpenAPI Contract
+### ServiceInfo Annotation
 
-```bash
-bal openapi -i <openapi-contract-path> 
-               [--tags: tags list]
-               [--operations: operationsID list]
-               [--mode service|client ]
-               [(-o|--output): output file path]
-```
-Generates both the Ballerina service and Ballerina client stubs for a given OpenAPI file.
+The `@openapi:ServiceInfo` annotation configures service-level metadata for OpenAPI contract generation, including title, description, contact information, and version details.
 
-This `-i <openapi-contract-path>` parameter of the command is mandatory. It will get the path to the
-OpenAPI contract file (i.e., `my-api.yaml` or `my-api.json`) as an input.
-
-You can give the specific tags and operations that you need to document as services without documenting all the operations using these optional `--tags` and `--operations` commands.
-
-The `(-o|--output)` is an optional parameter. You can use this to give the output path of the generated files.
-If not, it will take the execution path as the output path.
-
-##### Modes
-If you want to generate a service only, you can set the mode as `service` in the OpenAPI tool.
-
-```bash
-    bal openapi -i <openapi-contract-path> --mode service [(-o|--output) output file path]
-```
-
-If you want to generate a client only, you can set the mode as  `client` in the OpenAPI tool.
-This client can be used in client applications to call the service defined in the OpenAPI file.
-
-```bash
-    bal openapi -i <openapi-contract-path> --mode client [(-o|--output) output file path]
-```
-
-### Ballerina to OpenAPI
-#### Service to OpenAPI Export
-```bash
-    bal openapi -i <ballerina-file-path> 
-               [(-o|--output) output openapi file path]
-```
-Export the Ballerina service to an  OpenAPI Specification 3.0 definition. For the export to work properly,
-the input Ballerina service should be defined using the basic service and resource-level HTTP annotations.
-If you need to document an OpenAPI contract for only one given service, then use this command.
-```bash
-    bal openapi -i <ballerina-file-path> (-s | --service) <service-name>
-```
-
-### Using Annotations in Ballerina OpenAPI Conversion
-### `@openapi:ServiceInfo` Annotation
-The `@openapi:ServiceInfo` annotation is used to specify metadata about the Ballerina service during OpenAPI
-generation.
-The following is an example of the annotation usage.
 ```ballerina
 @openapi:ServiceInfo {
-    contract: "/path/to/openapi.json",
-    tags: ["store"],
-    operations: ["op1", "op2"],
-    failOnErrors: true,
-    excludeTags: ["pets", "user"],
-    excludeOperations: ["op1", "op2"],
-    title: "store",
-    version: "0.1.0",
-    description: "API system description",
-    email: "mark@abc.com",
-    contactName: "ABC company",
-    contactURL: "http://mock-api-contact",
-    termsOfService: "http://mock-api-doc",
-    licenseName: "ABC",
-    licenseURL: "http://abc-license.com",
-    embed: true // (default value => false)
+    contract: "/path/to/openapi.json|yaml",
+    title: "Store Management API",
+    version: "1.0.0",
+    description: "Comprehensive API for managing retail store operations"
 }
-service /greet on new http:Listener(9090) {
-    ...
+service /store on new http:Listener(8080) {
+    // Service implementation
 }
 ```
-#### Annotation Supports for the Following Attributes:
-- **Contract** (Optional) : **string**  :
-  Here, you can provide a path to the OpenAPI contract as a string and the OpenAPI file can either be `.yaml` or `.json`.
-  This is a required attribute.
 
-- **Tag** (Optional) : **string[]?**     :
-  The compiler will only validate resources against operations, which are tagged with a tag specified in the list.
-  If not specified, the compiler will validate resources against all the operations defined in the OpenAPI contract.
+#### Configuration Fields
 
-- **Operations** (Optional): **string[]?**  :
-  Should contain a list of operation names that need to be validated against the resources in the service.
-  If not specified, the compiler will validate resources against all the operations defined in the OpenAPI contract. If both tags and operations are defined, it will validate against the union set of the resources.
+| Field Name     | Type    | Description                                                                                                                                                                                      |
+|----------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| contract       | string  | Path to an existing OpenAPI contract file (.yaml or .json). When specified, the tool uses this contract as the base. If omitted, generates a new contract from the Ballerina service definition. |
+| title          | string  | Sets the API title in the info section. Defaults to the service's absolute base path if not provided.                                                                                            |
+| version        | string  | Specifies the API version in the info section. Defaults to the Ballerina package version if not specified.                                                                                       |
+| description    | string  | Provides a detailed description of the API's purpose, features, and usage guidelines for the info section.                                                                                       |
+| email          | string  | Contact email address for API support or inquiries.                                                                                                                                              |
+| contactName    | string  | Name of the person or organization responsible for the API.                                                                                                                                      |
+| contactURL     | string  | URL to a webpage with additional API information, documentation, or support resources.                                                                                                           |
+| termsOfService | string  | URL pointing to the terms of service governing API usage.                                                                                                                                        |
+| licenseName    | string  | Name of the license under which the API is distributed.                                                                                                                                          |
+| licenseURL     | string  | URL to the complete license text and terms.                                                                                                                                                      |
+| embed          | boolean | When set to `true`, exposes the OpenAPI contract as an introspection resource at runtime.                                                                                                        |
+| failOnErrors   | boolean | Controls validation behavior. When `true` (default), contract violations generate compilation errors. When `false`, violations are reported as warnings.                                         |
 
-- **ExcludeTags** (Optional) : **string[]?**    :
-  This feature is for users to store the tag. It does not need to be validated.
-  At the same time, the `excludeTag` and `Tag` cannot store and the plugin will generate warning messages regarding
-  it.
+> **Note:** All fields in the `@openapi:ServiceInfo` annotation are optional.
 
-- **ExcludeOperations** (Optional) : **string[]?**  :
-  This feature is for users to store the operations that do not need to be validated.
-  At the same time, the `excludeOperations` and  `Operations` can not store and they will generate warning messages.
-  The `Tag` feature can store with `excludeOperations`. Then, all the tag operations will be validated except the `exclude`
-  operations.
+### ResourceInfo Annotation
 
-- **FailOnErrors** (Optional) : **boolean value**   :
-  If you need to turn off the validation, add this to the annotation with the value as `false`.
+The `@openapi:ResourceInfo` annotation enriches individual resource functions with operation-specific metadata such as operation IDs, summaries, tags, and examples.
 
-- **title** (Optional) :
-  This feature adds the title of the `info` section in the generated OpenAPI contract.
-
-- **version** (Optional) :
-  This feature adds the version of the `info` section in the generated OpenAPI contract.
-
-- **description** (Optional) :
-  This feature can be used to add the description of the `info` section in the generated OpenAPI contract. A brief
-  description of the API, outlining its purpose, features, and any other relevant details that help users understand
-  what the API does and how to use it.
-
-- **email** (Optional) :
-  This feature can be used to add the email address to the `contact` section in the OpenAPI contract. This describes
-  email details for the API provider or support.
-
-- **contactName** (Optional) :
-  Users can use this attribute to add the name of the person or organization responsible for the API.
-
-- **contactURL** (Optional) :
-  Users can use this attribute to add the URL to a web page with more information about the API, the provider, or support.
-
-- **termsOfService** (Optional) :
-  Users can use this to add the URL details to the terms of service for the API.
-
-- **licenseName** (Optional) :
-  Users can use this to add the name of the license under which the API is provided.
-
-- **licenseURL** (Optional) :
-  Users can use this to add the URL details regarding the full text of the license.
-
-- **embed** (Optional) : **boolean value** :
-  This feature turns on generating OpenAPI documentation for the service for introspection endpoint support when used
-  with `true` in the annotation.
-
-### `@openapi:ResourceInfo` Annotation
-The `@openapi:ResourceInfo` annotation provides metadata for specific resource functions.
-The following is an example of the Ballerina resource function with the OpenAPI annotation.
 ```ballerina
 @openapi:ResourceInfo {
-    operationId: "createStoreData",
-    summary: "API for adding store amount",
-    tags: ["retail", "rate"]
+    operationId: "createStoreInventory",
+    summary: "Add new inventory items to store",
+    tags: ["inventory", "retail", "management"],
+    examples: {
+        requestBody: {
+            "application/json": {
+                value: {
+                    itemId: "ITEM001",
+                    quantity: 50,
+                    price: 29.99
+                }
+            }
+        }
+    }
 }
-resource function post store(Inventory payload) returns string? {
-        // logic here
+resource function post inventory(Inventory payload) returns InventoryResponse|error {
+    // Resource implementation
 }
 ```
-Following is the generated OpenAPI contract with the given details
-```yaml
-...
-paths:
-  /store:
-    post:
-      tags:
-      - retail
-      - rate
-      summary: API for adding store amount
-      operationId: createStoreData
-      requestBody:
-        content:
-          application/json:
-            schema:
-...
-```
-#### Annotation Supports for the Following Attributes:
-- **operationId** (Optional) :
-  Users can use this to update opearation Id in particular operation in OpenAPI contract.
 
-- **summary** (Optional) :
-  This attribute helps users to add summary for the particular operation in the OpenAPI contract.
+#### Configuration Fields
 
-- **tags** (Optional) :
-  This attribute specifies the tag in the list map to the tags list in operation.
+| Field Name  | Type     | Description                                                                                                           |
+|-------------|----------|-----------------------------------------------------------------------------------------------------------------------|
+| operationId | string   | Unique identifier for the operation within the OpenAPI contract. Useful for code generation and API client libraries. |
+| summary     | string   | Brief, descriptive summary of the operation's purpose and functionality.                                              |
+| tags        | string[] | Array of tags for logical grouping and organization of operations in documentation.                                   |
+| examples    | Examples | Comprehensive examples for the operation, including request bodies, responses, and parameter values.                  |
 
-### `@openapi:Example` Annotation
-The `@openapi:Example` annotation renders examples in the OpenAPI contract. It can be attached to parameters,
-record types, or record fields.
-The following is an example for Ballerina object level example mapping.
+> **Note:** All fields in the `@openapi:ResourceInfo` annotation are optional.
+
+### Example Annotation
+
+The `@openapi:Example` annotation provides concrete examples for types, record fields, and parameters to improve API documentation and developer experience.
+
 ```ballerina
+// Type-level example
 @openapi:Example {
-  value: {
-    id: 10,
-    name: "Jessica Smith"
-  }
+    value: {
+        id: 12345,
+        name: "Jessica Smith",
+        email: "jessica.smith@example.com",
+        role: "admin"
+    }
 }
 type User record {
-  int id;
-  string name
+    int id;
+    string name;
+    string email;
+    string role;
+};
+
+// Field-level examples
+type Product record {
+    @openapi:Example { value: "PROD-001" }
+    string productId;
+    
+    @openapi:Example { value: "Premium Wireless Headphones" }
+    string name;
+    
+    @openapi:Example { value: 199.99 }
+    decimal price;
+};
+
+// Parameter example
+resource function get orders(
+    @openapi:Example { value: "approved" } 
+    "approved"|"pending"|"cancelled"|"shipped" status,
+    
+    @openapi:Example { value: 10 }
+    int? 'limit = 20
+) returns Order[]|error {
+    // Implementation
 }
 ```
-Following is the generated OpenAPI contract with the given details.
-```yaml
-...
-components:
-  schemas:
-    User:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-      example:
-        id: 10
-        name: Jessica Smith
-...
+
+## Runtime OpenAPI Contract Introspection
+
+Enable runtime exposure of OpenAPI contracts by setting the `embed` field to `true` in the `@openapi:ServiceInfo` annotation. This creates introspection endpoints that serve the OpenAPI specification and interactive documentation.
+
+```ballerina
+@openapi:ServiceInfo {
+    embed: true,
+    title: "Hello World API",
+    description: "A simple greeting service with embedded OpenAPI documentation"
+}
+service /hello on new http:Listener(9090) {
+    resource function get greeting(string? name = "World") returns string {
+        return string `Hello, ${name}!`;
+    }
+}
 ```
 
-### Samples for OpenAPI Commands
-#### Generate Service and Client Stub from OpenAPI
+### Accessing Introspection Resources
+
+An OPTIONS request to the service reveals available introspection endpoints:
+
 ```bash
-    bal openapi -i hello.yaml
+curl -v localhost:9090/hello -X OPTIONS
 ```
 
-This will generate a Ballerina service and client stub for the `hello.yaml` OpenAPI contract named `hello-service`
-and client named `hello-client`. The above command can be run from within anywhere on the execution path.
-It is not mandatory to run it from inside the Ballerina project.
+**Response:**
 
-Output:
-```bash
-The service generation process is complete. The following files were created.
--- hello-service.bal
--- client.bal
--- types.bal
+```http
+HTTP/1.1 204 No Content
+allow: GET, OPTIONS
+link: </hello/openapi-doc-dygixywsw>;rel="service-desc", 
+      </hello/swagger-ui-dygixywsw>;rel="swagger-ui"
+server: ballerina
+date: Thu, 13 Jun 2024 20:04:11 +0530
 ```
-#### Generate an OpenAPI Contract from a Service
 
- ```bash
-    bal openapi -i modules/helloworld/helloService.bal
-  ```
-This will generate the OpenAPI contracts for the Ballerina services, which are in the `hello.bal` Ballerina file.
- ```bash 
-    bal openapi -i modules/helloworld/helloService.bal (-s | --service) helloworld
-  ```
-This command will generate the `helloworld-openapi.yaml` file that is related to the `helloworld` service inside the
-`helloService.bal` file.
- ```bash
-    bal openapi -i modules/helloworld/helloService.bal --json
-  ```
-This `--json` option can be used with the Ballerina to OpenAPI command to generate the `helloworld-openapi.json` file
-instead of generating the YAML file.
+The response includes links to:
+
+- **OpenAPI Specification** (`rel="service-desc"`): Raw OpenAPI JSON/YAML document
+- **Swagger UI** (`rel="swagger-ui"`): Interactive API documentation interface
+
+## Contract-First Development with Validation
+
+Use the `@openapi:ServiceInfo` annotation to validate Ballerina services against existing OpenAPI contracts at compile time, ensuring API compliance and consistency.
+
+```ballerina
+@openapi:ServiceInfo {
+    contract: "petstore-api.yaml",
+    failOnErrors: true  // Strict validation (default)
+}
+service /petstore on new http:Listener(8080) {
+    resource function get pets() returns Pet[]|error {
+        // Implementation must match contract specification
+    }
+    
+    resource function post pets(NewPet payload) returns Pet|error {
+        // Implementation validated against contract
+    }
+}
+```
+
+### Validation Modes
+
+- **Strict Mode** (`failOnErrors: true`): Contract violations generate compilation errors, preventing deployment of non-compliant services
+- **Warning Mode** (`failOnErrors: false`): Contract violations are reported as warnings, allowing deployment with notifications
+
+> **Best Practice**: For contract-first development, consider generating service contract types from the OpenAPI specification and implementing services against these types. This approach provides stronger type safety and compile-time guarantees. See [Generate service contract from OpenAPI](https://ballerina.io/learn/openapi-tool/#generate-service-contract-object-for-given-openapi-contract) for detailed guidance.

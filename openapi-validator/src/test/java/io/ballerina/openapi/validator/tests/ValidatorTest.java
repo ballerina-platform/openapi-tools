@@ -42,7 +42,7 @@ public class ValidatorTest {
         Project project = null;
         // Load project instance for single ballerina file
         try {
-            project = ProjectLoader.loadProject(servicePath);
+            project = ProjectLoader.load(servicePath).project();
         } catch (ProjectException e) {
             //ignore
         }

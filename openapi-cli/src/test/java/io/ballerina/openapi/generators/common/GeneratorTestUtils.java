@@ -152,7 +152,7 @@ public class GeneratorTestUtils {
         // Load project instance for single ballerina file
         Project project = null;
         try {
-            project = ProjectLoader.loadProject(servicePath);
+            project = ProjectLoader.load(servicePath).project();
         } catch (ProjectException ignored) {
         }
 

@@ -215,7 +215,7 @@ public class BallerinaUtilGenerator {
     private void addUtilFunctionDeclarationNodes(List<ModuleMemberDeclarationNode> memberDeclarationNodes,
                                                  Set<String> functionNameList) throws IOException {
         Path path = getResourceFilePath();
-        Project project = ProjectLoader.loadProject(path);
+        Project project = ProjectLoader.load(path).project();
         Package currentPackage = project.currentPackage();
         DocumentId docId = currentPackage.getDefaultModule().documentIds().iterator().next();
         SyntaxTree fileSyntaxTree = currentPackage.getDefaultModule().document(docId).syntaxTree();

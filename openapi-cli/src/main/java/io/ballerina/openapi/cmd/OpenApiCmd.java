@@ -64,6 +64,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.cmd.BaseCmd.exitError;
 import static io.ballerina.openapi.cmd.CmdConstants.BAL_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.Mode.BOTH_SERVICE_CLIENT;
@@ -152,18 +153,6 @@ public class OpenApiCmd implements BLauncherCmd {
         }
     }
 
-    private String getVersion() throws IOException {
-        try (InputStream inputStream = OpenApiCmd.class.getClassLoader().getResourceAsStream(
-                "version.properties")) {
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            return properties.getProperty("version");
-        } catch (IOException exception) {
-            throw new IOException("error occurred while reading version from version.properties: " +
-                    exception.getMessage());
-        }
-    }
-
     public OpenApiCmd(PrintStream outStream, Path executionDir) {
         new OpenApiCmd(outStream, executionDir, true);
     }
@@ -175,16 +164,7 @@ public class OpenApiCmd implements BLauncherCmd {
     }
     @Override
     public void execute() {
-        if (baseCmd.versionFlag) {
-            String version;
-            try {
-                version = getVersion();
-            } catch (IOException e) {
-                outStream.println("Error occurred while retrieving the version: " + e.getMessage());
-                exitError(this.exitWhenFinish);
-                return;
-            }
-            outStream.println("OpenAPI Tool " + version);
+        if (baseCmd.isVersionFlag(outStream, exitWhenFinish)) {
             return;
         }
         if (isHelp()) {
@@ -561,7 +541,7 @@ public class OpenApiCmd implements BLauncherCmd {
     }
 
     private boolean clientNativeDependencyAlreadyExist(String version) {
-        Project project = ProjectLoader.loadProject(executionPath);
+        Project project = ProjectLoader.load(executionPath).project();
         Map<String, Platform> platforms = project.currentPackage().manifest().platforms();
         if (Objects.nonNull(platforms) && platforms.containsKey("java21")) {
             Optional<Map<String, Object>> nativeDependency = platforms.get("java21").dependencies().stream().filter(
@@ -625,16 +605,5 @@ public class OpenApiCmd implements BLauncherCmd {
 
     @Override
     public void setParentCmdParser(CommandLine parentCmdParser) {
-    }
-
-    /**
-     * Exit with error code 1.
-     *
-     * @param exit Whether to exit or not.
-     */
-    private static void exitError(boolean exit) {
-        if (exit) {
-            Runtime.getRuntime().exit(1);
-        }
     }
 }
