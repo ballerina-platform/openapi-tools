@@ -3,16 +3,17 @@ NAME
        configuration details for generating a Ballerina service or client.
 
 SYNOPSIS
-       bal openapi add [-i | --input] <openapi-contract-file-path>
-                       [-p | --package] <package-location>
-                       [--id] <service/client id>
-                       [--module] <module-name-for-generated-service/client>
-                       [--mode] <mode-type>
-                       [--tags] <tag-names>
-                       [--operations] <operation-names>
+       bal openapi add -h | --help
+       bal openapi add -i | --input <openapi-contract-file-path>
+                       --id <service/client id>
+                       [-p | --package <package-location>]
+                       [--module <module-name-for-generated-service/client>]
+                       [--mode <mode-type>]
+                       [--tags <tag-names>]
+                       [--operations <operation-names>]
                        [-n | --nullable]
-                       [--license] <license-file-path>
-                       [--client-methods] <resource|remote>
+                       [--license <license-file-path>]
+                       [--client-methods <resource|remote>]
                        [--status-code-binding]
 
 DESCRIPTION
@@ -22,6 +23,9 @@ DESCRIPTION
        options.
 
 OPTIONS
+       -h, --help
+            Print help information about the `bal openapi add` command.
+
        -i, --input <openapi-contract-file-path>
             This is a mandatory input. The given OpenAPI contract will generate
             a Ballerina service and the client stub files for the given OpenAPI
@@ -76,10 +80,10 @@ OPTIONS
             Ballerina client methods with the status code response binding.
 
 EXAMPLES
-       Update the `Ballerina.toml` file for generating a Ballerina client using a
-       `hello.yaml` OpenAPI contract to generate a module named `hello`.
+       Update the `Ballerina.toml` file for generating a Ballerina client using
+       a `hello.yaml` OpenAPI contract to generate a module named `hello`.
            $ bal openapi add -i hello.yaml --id hello_client --mode client --module hello
 
-       Update the `Ballerina.toml` file for generating a Ballerina client using a
-       `hello.yaml` OpenAPI contract with the tags filter.
-           $ bal openapi add -i hello.yaml --id hello_client --mode client --tags tag_ID
+       Update the `Ballerina.toml` file for generating a Ballerina client using
+       a `hello.yaml` OpenAPI contract with the tags filter.
+           $ bal openapi add -i hello.yaml --id hello_client--tags tag_ID

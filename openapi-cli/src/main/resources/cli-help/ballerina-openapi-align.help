@@ -3,15 +3,15 @@ NAME
        the best practices of Ballerina.
 
 SYNOPSIS
-       bal openapi align [-i | --input] <openapi-contract-file-path>
-                         [-o | --output] <output-file-path>
-                         [-n | --name] <generated-file-name>
-                         [-f | --format] [json|yaml]
-                         [-t | --tags] <tag-names>
-                         [--operations] <operation-names>
-                         [--include] <align-type-names>
-                         [--exclude] <align-type-names>
-                         [--help]
+       bal openapi align -h | --help
+       bal openapi align -i | --input <openapi-contract-file-path>
+                         [-o | --output <output-file-path>]
+                         [-n | --name <generated-file-name>]
+                         [-f | --format <json|yaml>]
+                         [-t | --tags <tag-names>]
+                         [--operations <operation-names>]
+                         [--include <align-type-names>]
+                         [--exclude <align-type-names>]
 
 DESCRIPTION
        Align the OpenAPI contract file according to the best practices of Ballerina.
@@ -27,6 +27,9 @@ DESCRIPTION
        The `--include` option has higher priority than the `--exclude` option.
 
 OPTIONS
+       -h, --help
+            Print help information about the `bal openapi align` command.
+
        -i, --input <openapi-contract-file-path>
             This is a mandatory input. The given OpenAPI contract will be aligned.
             The OpenAPI contract can be either a YAML or a JSON.
