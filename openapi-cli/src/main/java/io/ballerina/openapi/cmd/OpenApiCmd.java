@@ -164,9 +164,6 @@ public class OpenApiCmd implements BLauncherCmd {
     }
     @Override
     public void execute() {
-        if (baseCmd.isVersionFlag(outStream, exitWhenFinish)) {
-            return;
-        }
         if (isHelp()) {
             String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName(), OpenApiCmd.class.getClassLoader());
             outStream.println(commandUsageInfo);

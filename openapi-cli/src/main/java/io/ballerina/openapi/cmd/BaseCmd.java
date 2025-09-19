@@ -71,37 +71,6 @@ public class BaseCmd {
             "generation by modifying the given OAS to follow the Ballerina language best practices.")
     public boolean useSanitized;
 
-    @CommandLine.Option(names = {"-v", "--version"})
-    public boolean versionFlag;
-
-    public boolean isVersionFlag(PrintStream outStream, boolean exitWhenFinish) {
-        if (!versionFlag) {
-            return false;
-        }
-        String version;
-        try {
-            version = getVersion();
-        } catch (IOException e) {
-            outStream.println("Error occurred while retrieving the version: " + e.getMessage());
-            exitError(exitWhenFinish);
-            return true;
-        }
-        outStream.println("OpenAPI Tool " + version);
-        return true;
-    }
-
-    public static String getVersion() throws IOException {
-        try (InputStream inputStream = BaseCmd.class.getClassLoader().getResourceAsStream(
-                "version.properties")) {
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            return properties.getProperty("version");
-        } catch (IOException exception) {
-            throw new IOException("error occurred while reading version from version.properties: " +
-                    exception.getMessage());
-        }
-    }
-
     /**
      * Exit with error code 1.
      *
