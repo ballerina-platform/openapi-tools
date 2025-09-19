@@ -147,7 +147,7 @@ Update the `Ballerina.toml` file with OpenAPI tool configuration details for gen
 
 ```bash
 bal openapi add -i | --input <openapi-contract-file-path>
-                --id <service/client-id>
+                [--id <service/client-id>]
                 [-p | --package <package-location>]
                 [--module <module-name>]
                 [--mode <mode-type>]
@@ -164,7 +164,7 @@ bal openapi add -i | --input <openapi-contract-file-path>
 | Option                  | Description                                                                 | Required |
 |-------------------------|-----------------------------------------------------------------------------|----------|
 | `-i`, `--input`         | Path of the OpenAPI contract file                                           | Yes      |
-| `--id`                  | Unique identifier for the service/client in `Ballerina.toml`                | Yes      |
+| `--id`                  | Unique identifier for the service/client in `Ballerina.toml`                | No       |
 | `-p`, `--package`       | Package location to update `Ballerina.toml` (defaults to current directory) | No       |
 | `--module`              | Module name for generated service/client                                    | No       |
 | `--mode`                | Generation mode: `service` or `client` (default: `client`)                  | No       |
