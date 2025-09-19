@@ -20,11 +20,6 @@ package io.ballerina.openapi.cmd;
 
 import picocli.CommandLine;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.Properties;
-
 /**
  * This class is to store the cli command options that are commonly used int parent and subcommands.
  *
