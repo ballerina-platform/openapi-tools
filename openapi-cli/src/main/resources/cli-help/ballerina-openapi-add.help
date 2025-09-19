@@ -5,7 +5,7 @@ NAME
 SYNOPSIS
        bal openapi add -h | --help
        bal openapi add -i | --input <openapi-contract-file-path>
-                       --id <service/client id>
+                       [--id <service/client id>]
                        [-p | --package <package-location>]
                        [--module <module-name-for-generated-service/client>]
                        [--mode <mode-type>]
@@ -32,10 +32,11 @@ OPTIONS
             contract. The OpenAPI contract can be either a YAML or a JSON.
 
        --id <service/client id>
-            This is a mandatory input. The given service/client ID will be used
+            This is an optional input. The given service/client ID will be used
             to identify the generated service/client in the `Ballerina.toml`
             file. This ID will be used to generate the Ballerina service/client
-            sources cache in the target.
+            sources cache in the target. The default ID will be generated uniquely
+            using the OpenAPI contract file name.
 
        --module <module-name-for-generated-service/client>
             This is a optional input. The given module name will be used to
