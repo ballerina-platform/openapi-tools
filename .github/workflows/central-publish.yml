@@ -1,4 +1,4 @@
-name: Publish to the Ballerina central
+name: Publish to the Ballerina Dev/Stage central
 
 on:
   workflow_dispatch:
