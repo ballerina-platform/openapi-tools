@@ -1,4 +1,4 @@
-name: Publish to the Ballerina central
+name: Publish to the Ballerina Dev/Stage central
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'ballerina-platform'
     steps:
-      -   uses: actions/checkout@v2
+      -   uses: actions/checkout@v4
       -   name: Set up JDK 21
           uses: actions/setup-java@v2
           with:
