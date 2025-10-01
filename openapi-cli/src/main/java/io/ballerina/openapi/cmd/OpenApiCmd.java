@@ -75,8 +75,8 @@ import static io.ballerina.openapi.cmd.CmdConstants.YAML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.YML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdUtils.addNewLine;
 import static io.ballerina.openapi.cmd.CmdUtils.searchEnum;
-import static io.ballerina.openapi.cmd.CmdUtils.validateBallerinaProject;
-import static io.ballerina.openapi.cmd.ErrorMessages.NOT_A_BALLERINA_PACKAGE;
+import static io.ballerina.openapi.cmd.CmdUtils.getBallerinaTomlPath;
+import static io.ballerina.openapi.cmd.ErrorMessages.SKIP_STATUS_CODE_BINDING;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 /**
@@ -256,13 +256,12 @@ public class OpenApiCmd implements BLauncherCmd {
                     exitError(this.exitWhenFinish);
                 }
 
-                Optional<Path> ballerinaTomlPath = validateBallerinaProject(executionPath, outStream,
-                        NOT_A_BALLERINA_PACKAGE, false);
-                if (ballerinaTomlPath.isEmpty()) {
-                    outStream.printf(NOT_A_BALLERINA_PACKAGE, executionPath.toAbsolutePath());
-                } else {
+                try {
+                    this.ballerinaTomlPath = getBallerinaTomlPath(executionPath);
                     statusCodeBinding = true;
-                    this.ballerinaTomlPath = ballerinaTomlPath.get();
+                } catch (OpenAPICmdToolException e) {
+                    String warningMessage = String.format(SKIP_STATUS_CODE_BINDING, e.getDiagnosticMessage());
+                    outStream.println(warningMessage);
                 }
             }
 

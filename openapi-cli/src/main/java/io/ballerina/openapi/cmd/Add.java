@@ -53,14 +53,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 import static io.ballerina.cli.cmd.CommandUtil.exitError;
 import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_CLIENT_ID;
 import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_ADD_CMD;
 import static io.ballerina.openapi.cmd.CmdUtils.searchEnum;
-import static io.ballerina.openapi.cmd.CmdUtils.validateBallerinaProject;
-import static io.ballerina.openapi.cmd.ErrorMessages.INVALID_BALLERINA_PACKAGE;
+import static io.ballerina.openapi.cmd.CmdUtils.getBallerinaTomlPath;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createToken;
@@ -118,42 +116,36 @@ public class Add implements BLauncherCmd {
                 return;
             }
             //check the given path is the Ballerina package
-            Optional<Path> ballerinaTomlPath = validateBallerinaProject(projectPath, outStream,
-                    INVALID_BALLERINA_PACKAGE, exitWhenFinish);
-            if (ballerinaTomlPath.isEmpty()) {
-                outStream.printf(INVALID_BALLERINA_PACKAGE, projectPath.toAbsolutePath());
-                exitError(this.exitWhenFinish);
-            } else {
-                validateInputPath();
-                Path tomlPath = projectPath.resolve(ballerinaTomlPath.get());
-                TextDocument configDocument = TextDocuments.from(Files.readString(tomlPath));
-                SyntaxTree syntaxTree = SyntaxTree.from(configDocument);
-                DocumentNode rootNode = syntaxTree.rootNode();
-                NodeList<DocumentMemberDeclarationNode> nodeList = rootNode.members();
-                NodeList<DocumentMemberDeclarationNode> moduleMembers = AbstractNodeFactory.createEmptyNodeList();
-                for (DocumentMemberDeclarationNode node: nodeList) {
-                    moduleMembers = moduleMembers.add(node);
-                }
-                //set default client id
-                createDefaultClientID();
-                CmdOptions options = collectCLIOptions();
-                moduleMembers = CmdUtils.addNewLine(moduleMembers, 1);
-                moduleMembers = populateOpenAPITomlConfig(options, moduleMembers);
-                Token eofToken = AbstractNodeFactory.createIdentifierToken("");
-                DocumentNode documentNode = NodeFactory.createDocumentNode(moduleMembers, eofToken);
-                TextDocument textDocument = TextDocuments.from(documentNode.toSourceCode());
-                String content = SyntaxTree.from(textDocument).toSourceCode();
-                //write toml file
-                try (FileWriter writer = new FileWriter(tomlPath.toString(), StandardCharsets.UTF_8)) {
-                    writer.write(content);
-                    outStream.print(ErrorMessages.TOML_UPDATED_MSG);
-                }
+            Path ballerinaTomlPath = getBallerinaTomlPath(projectPath);
+            validateInputPath();
+            Path tomlPath = projectPath.resolve(ballerinaTomlPath);
+            TextDocument configDocument = TextDocuments.from(Files.readString(tomlPath));
+            SyntaxTree syntaxTree = SyntaxTree.from(configDocument);
+            DocumentNode rootNode = syntaxTree.rootNode();
+            NodeList<DocumentMemberDeclarationNode> nodeList = rootNode.members();
+            NodeList<DocumentMemberDeclarationNode> moduleMembers = AbstractNodeFactory.createEmptyNodeList();
+            for (DocumentMemberDeclarationNode node: nodeList) {
+                moduleMembers = moduleMembers.add(node);
             }
-        } catch (IOException e) {
+            //set default client id
+            createDefaultClientID();
+            CmdOptions options = collectCLIOptions();
+            moduleMembers = CmdUtils.addNewLine(moduleMembers, 1);
+            moduleMembers = populateOpenAPITomlConfig(options, moduleMembers);
+            Token eofToken = AbstractNodeFactory.createIdentifierToken("");
+            DocumentNode documentNode = NodeFactory.createDocumentNode(moduleMembers, eofToken);
+            TextDocument textDocument = TextDocuments.from(documentNode.toSourceCode());
+            String content = SyntaxTree.from(textDocument).toSourceCode();
+            //write toml file
+            try (FileWriter writer = new FileWriter(tomlPath.toString(), StandardCharsets.UTF_8)) {
+                writer.write(content);
+                outStream.print(ErrorMessages.TOML_UPDATED_MSG);
+            }
+        } catch (OpenAPICmdToolException | IOException e) {
             outStream.println(e.getMessage());
             exitError(exitWhenFinish);
         }
-        if (this.exitWhenFinish) {
+        if (exitWhenFinish) {
             Runtime.getRuntime().exit(0);
         }
     }
