@@ -21,6 +21,8 @@ import io.ballerina.openapi.core.generators.common.ErrorMessages;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
+import io.ballerina.projects.TomlDocument;
+import io.ballerina.projects.util.ProjectPaths;
 import io.ballerina.toml.syntax.tree.AbstractNodeFactory;
 import io.ballerina.toml.syntax.tree.DocumentMemberDeclarationNode;
 import io.ballerina.toml.syntax.tree.NodeList;
@@ -34,16 +36,11 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
 
-import static io.ballerina.cli.cmd.CommandUtil.exitError;
 import static io.ballerina.openapi.cmd.CmdConstants.BALLERINA_TOML;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.LINE_SEPARATOR;
 
@@ -116,21 +113,26 @@ public class CmdUtils {
                 gFile.getFileName().split("\\.")[1]);
     }
 
-    public static Optional<Path> validateBallerinaProject(Path projectPath, PrintStream outStream, String diagnostic,
-                                                          boolean exitOnException) {
-        Optional<Path> ballerinaToml;
-        try (Stream<Path> stream = Files.list(projectPath)) {
-            ballerinaToml = stream.filter(file -> !Files.isDirectory(file))
-                    .map(Path::getFileName)
-                    .filter(Objects::nonNull)
-                    .filter(file -> BALLERINA_TOML.equals(file.toString()))
-                    .findFirst();
+    public static Path getBallerinaTomlPath(Path projectPath) throws OpenAPICmdToolException {
+        try {
+            // ProjectPaths class has an option to check whether the project is a workspace or not.
+            // But we need to get the path of the Ballerina.toml file here. Hence, the workspace
+            // check is done manually here.
+            Path ballerinaToml = projectPath.resolve(BALLERINA_TOML);
+            if (!Files.exists(ballerinaToml)) {
+                throw new OpenAPICmdToolException(OpenAPICmdToolDiagnostic.OAS_CLI_002,
+                        projectPath.toAbsolutePath().toString());
+            }
+            TomlDocument tomlDocument = TomlDocument.from(BALLERINA_TOML, Files.readString(ballerinaToml));
+            if (tomlDocument.toml().getTable(ProjectPaths.WORKSPACE_KEY).isPresent()) {
+                throw new OpenAPICmdToolException(OpenAPICmdToolDiagnostic.OAS_CLI_001,
+                        projectPath.toAbsolutePath().toString());
+            } else {
+                return ballerinaToml;
+            }
         } catch (IOException e) {
-            outStream.printf(diagnostic, projectPath.toAbsolutePath());
-            exitError(exitOnException);
-            return Optional.empty();
+            throw new OpenAPICmdToolException(e, OpenAPICmdToolDiagnostic.OAS_CLI_000);
         }
-        return ballerinaToml;
     }
 
     public static NodeList<DocumentMemberDeclarationNode> addNewLine(NodeList moduleMembers, int n) {
