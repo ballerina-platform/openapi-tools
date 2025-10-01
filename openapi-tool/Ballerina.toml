@@ -5,3 +5,4 @@ version = "2.4.0"
 authors = ["Ballerina"]
 keywords = ["openapi", "openapi tool", "swagger", "oas", "openapi generator"]
 license = ["Apache-2.0"]
+distribution = "2201.13.0"
