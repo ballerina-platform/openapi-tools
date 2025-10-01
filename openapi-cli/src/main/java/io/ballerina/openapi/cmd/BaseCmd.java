@@ -72,8 +72,12 @@ public class BaseCmd {
      * @param exit Whether to exit or not.
      */
     public static void exitError(boolean exit) {
+        exit(1, exit);
+    }
+
+    static void exit(int code, boolean exit) {
         if (exit) {
-            Runtime.getRuntime().exit(1);
+            Runtime.getRuntime().exit(code);
         }
     }
 }

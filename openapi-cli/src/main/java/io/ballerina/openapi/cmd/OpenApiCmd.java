@@ -64,6 +64,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import static io.ballerina.openapi.cmd.BaseCmd.exit;
 import static io.ballerina.openapi.cmd.BaseCmd.exitError;
 import static io.ballerina.openapi.cmd.CmdConstants.BAL_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
@@ -89,6 +90,7 @@ import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getVali
 )
 public class OpenApiCmd implements BLauncherCmd {
     private static final String CMD_NAME = "openapi";
+    private static final int EXIT_CODE_2 = 2;
     private PrintStream outStream;
     private Path executionPath = Paths.get(System.getProperty("user.dir"));
     private Path targetOutputPath;
@@ -162,13 +164,25 @@ public class OpenApiCmd implements BLauncherCmd {
         this.executionPath = executionDir;
         this.exitWhenFinish = exitWhenFinish;
     }
+
     @Override
     public void execute() {
-        if (isHelp()) {
+        // Print help text and exit with code 0 if help flag is present
+        if (baseCmd.helpFlag) {
             String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName(), OpenApiCmd.class.getClassLoader());
             outStream.println(commandUsageInfo);
             return;
         }
+
+        // Print help text and exit with code 2 if no subcommand or options are provided
+        if (argList == null && baseCmd.inputPath == null) {
+            String commandUsageInfo = BLauncherCmd.getCommandUsageInfo(getName(), OpenApiCmd.class
+                    .getClassLoader());
+            outStream.println(commandUsageInfo);
+            exit(EXIT_CODE_2, this.exitWhenFinish);
+            return;
+        }
+
         //Check if cli input argument is present
         //Check if an OpenApi definition is provided
         if (baseCmd.inputPath == null || baseCmd.inputPath.isBlank()) {
@@ -280,11 +294,6 @@ public class OpenApiCmd implements BLauncherCmd {
         if (this.exitWhenFinish) {
             Runtime.getRuntime().exit(0);
         }
-    }
-
-    private boolean isHelp() {
-        return baseCmd.helpFlag || (argList != null && argList.get(0).equals("help"))
-                || (argList == null && baseCmd.inputPath == null);
     }
 
     /**
