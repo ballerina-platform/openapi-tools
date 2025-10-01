@@ -122,6 +122,9 @@ public final class BallerinaTypeExtensioner {
     }
 
     public static Optional<BallerinaPackage> getExtension(Schema schema) {
+        if (Objects.isNull(schema)) {
+            return Optional.empty();
+        }
         Map<?, ?> extensions = schema.getExtensions();
         if (Objects.isNull(extensions)) {
             return Optional.empty();
