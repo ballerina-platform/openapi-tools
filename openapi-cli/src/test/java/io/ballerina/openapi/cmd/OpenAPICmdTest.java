@@ -38,6 +38,8 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.ballerina.openapi.cmd.ErrorMessages.MISSING_CONTRACT_PATH;
+
 /**
  * OpenAPI command test suit.
  */
@@ -73,9 +75,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(openApiCommand).parseArgs(args);
         openApiCommand.execute();
         String output = readOutput(true);
-        Assert.assertTrue(output.contains("NAME") &&
-                output.contains("bal openapi - Generate Ballerina services and clients from OpenAPI") &&
-                output.contains("contracts, or export OpenAPI specifications from Ballerina services."));
+        Assert.assertTrue(output.contains(MISSING_CONTRACT_PATH));
     }
 
     @Test(description = "Test openapi command without help flag")
