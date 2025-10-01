@@ -163,4 +163,19 @@ public class NegativeCmdTests extends OpenAPICommandTest {
         Assert.assertTrue(output.contains("WARNING: Swagger version 2.0 found in the OpenAPI definition. The " +
                 "generated OpenAPI definition will be in OpenAPI version 3.0.x"));
     }
+
+    @Test(description = "Test add command inside a workspace")
+    public void testAddCommandInsideWorkspace() throws IOException {
+        Path workspaceDir = Paths.get(System.getProperty("user.dir")).resolve("build/resources/test/cmd/workspace");
+        String[] addArgs = {"--input", "petstore.yaml", "-p", workspaceDir.toString(),
+                "--module", "delivery", "--nullable", "--license", "license.txt", "--mode", "client",
+                "--client-methods", "resource"};
+        Add add = new Add(printStream,  false);
+        new CommandLine(add).parseArgs(addArgs);
+        add.execute();
+        String output = readOutput(true);
+        Assert.assertTrue(output.contains("ERROR: provided directory: "));
+        Assert.assertTrue(output.contains(" is a Ballerina workspace which is not supported by the tool. " +
+                "Please provide a Ballerina package directory"));
+    }
 }
