@@ -83,7 +83,7 @@ public class TypeHandler {
     private static BallerinaTypesGenerator ballerinaTypesGenerator;
     private HashMap<String, TypeDefinitionNode> typeDefinitionNodes = new HashMap<>();
     private final Set<String> imports = new LinkedHashSet<>();
-    private static List<Diagnostic> constraintDiagnostics;
+    private static List<Diagnostic> diagnostics;
 
 
     private TypeHandler() {}
@@ -91,7 +91,7 @@ public class TypeHandler {
     public static void createInstance(OpenAPI openAPI, boolean isNullable) {
         typeHandlerInstance = new TypeHandler();
         ballerinaTypesGenerator = new BallerinaTypesGenerator(openAPI, isNullable);
-        constraintDiagnostics = new ArrayList<>();
+        diagnostics = ballerinaTypesGenerator.getDiagnostics();
         GeneratorUtils.initializeRecordCountMap();
     }
 
@@ -100,8 +100,7 @@ public class TypeHandler {
     }
 
     public List<Diagnostic> getDiagnostics() {
-        constraintDiagnostics.addAll(ballerinaTypesGenerator.getDiagnostics());
-        return constraintDiagnostics;
+        return diagnostics;
     }
 
     public void addTypeDefinitionNode(String key, TypeDefinitionNode typeDefinitionNode) {
@@ -135,8 +134,10 @@ public class TypeHandler {
             if (isConstraintAvailable) {
                 imports.add("import ballerina/constraint;");
             }
-            constraintDiagnostics.addAll(constraintResult.diagnostics());
+            diagnostics.addAll(constraintResult.diagnostics());
         }
+        TypeFixer typeFixer = new TypeFixer(typeDefinitionNodes, diagnostics);
+        typeFixer.apply();
         return AbstractNodeFactory.createNodeList(
                 typeDefinitionNodes.values().toArray(new TypeDefinitionNode[typeDefinitionNodes.size()]));
     }
