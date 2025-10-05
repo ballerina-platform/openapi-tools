@@ -660,6 +660,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedServiceType = (generatedServiceType.trim()).replaceAll("\\s+", "");
             expectedServiceTypeContent = (expectedServiceTypeContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles(false, projectDir, true);
             Assert.assertEquals(generatedServiceType, expectedServiceTypeContent,
                     "Expected content and actual generated content is mismatched for: " + petstoreYaml.toString());
         } else {
