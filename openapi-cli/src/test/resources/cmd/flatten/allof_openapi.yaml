@@ -1,0 +1,62 @@
+openapi: 3.0.1
+info:
+  title: Api
+  version: 0.0.0
+servers:
+  - url: "{server}:{port}/api"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9090"
+paths:
+  /employee:
+    get:
+      operationId: getEmployee
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                title: Employee
+                allOf:
+                  - $ref: "#/components/schemas/Person"
+                  - $ref: "#/components/schemas/User"
+                  - required:
+                      - department
+                    type: object
+                    properties:
+                      department:
+                        type: string
+                    additionalProperties: false
+components:
+  schemas:
+    Person:
+      required:
+        - age
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+          format: int64
+      additionalProperties: false
+    User:
+      required:
+        - id
+        - mail
+        - Name
+      type: object
+      properties:
+        id:
+          type: string
+        Name:
+          type: string
+          x-ballerina-name: name
+        mail:
+          type: string
+      additionalProperties: false
