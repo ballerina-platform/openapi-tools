@@ -90,7 +90,8 @@ public class TypeFixer {
     private void processIncludedType(TypeReferenceNode typeRef, Map<String, List<RecordFieldNode>> includedFields) {
         String typeName = extractTypeName(typeRef);
         if (typeName != null) {
-            Map<String, List<RecordFieldNode>> fields = collectRecordFields(typeName, new ArrayList<>());
+            Map<String, List<RecordFieldNode>> fields = collectRecordFields(typeName,
+                    new ArrayList<>(List.of(typeName)));
             mergeFields(fields, includedFields);
         }
     }
