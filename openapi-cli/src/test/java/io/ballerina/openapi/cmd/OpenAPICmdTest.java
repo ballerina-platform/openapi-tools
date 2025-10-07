@@ -660,6 +660,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
             }
             generatedServiceType = (generatedServiceType.trim()).replaceAll("\\s+", "");
             expectedServiceTypeContent = (expectedServiceTypeContent.trim()).replaceAll("\\s+", "");
+            deleteGeneratedFiles(false, projectDir, true);
             Assert.assertEquals(generatedServiceType, expectedServiceTypeContent,
                     "Expected content and actual generated content is mismatched for: " + petstoreYaml.toString());
         } else {
@@ -926,6 +927,16 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         new CommandLine(flatten).parseArgs(args);
         flatten.execute();
         compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.json"));
+    }
+
+    @Test(description = "Test openapi flatten sub command with allOf schema with only one inline schema")
+    public void testFlattenWithAllOf() throws IOException {
+        Path expectedFilePath = resourceDir.resolve(Paths.get("cmd/flatten/flattened_allof_openapi_expected.yaml"));
+        String[] args = {"-i", resourceDir + "/cmd/flatten/allof_openapi.yaml", "-o", tmpDir.toString()};
+        Flatten flatten = new Flatten();
+        new CommandLine(flatten).parseArgs(args);
+        flatten.execute();
+        compareFiles(expectedFilePath, tmpDir.resolve("flattened_openapi.yaml"));
     }
 
     private void compareFiles(Path expectedFilePath, Path generatedFilePath) throws IOException {

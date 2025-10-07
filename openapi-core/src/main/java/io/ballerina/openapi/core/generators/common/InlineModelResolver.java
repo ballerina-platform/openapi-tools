@@ -319,7 +319,7 @@ public class InlineModelResolver {
                 String inlineModelName = "";
                 List<Schema> list = null;
                 if (composedSchema.getAllOf() != null) {
-                    list = composedSchema.getAllOf();
+                    list = getEffectiveAllOfSchemas(modelName, composedSchema);
                     inlineModelName = "AllOf";
                 } else if (composedSchema.getAnyOf() != null) {
                     list = composedSchema.getAnyOf();
@@ -569,12 +569,28 @@ public class InlineModelResolver {
         }
     }
 
+    private List<Schema> getEffectiveAllOfSchemas(String key, ComposedSchema composedSchema) {
+        List<Schema> list = composedSchema.getAllOf();
+        if (list == null) {
+            return List.of();
+        }
+
+        // If only one of the allOf schemas is inline, then do not flatten it since
+        // it will be record fields in the generated Ballerina record.
+        long inlineCount = list.stream().filter(schema -> schema.get$ref() == null).count();
+        if (inlineCount == 1) {
+            openAPI.getComponents().addSchemas(key, composedSchema);
+            return List.of();
+        }
+        return list;
+    }
+
     private void flattenComposedSchema(ComposedSchema composedSchema, String key) {
         String inlineModelName = "";
 
         List<Schema> list = null;
         if (composedSchema.getAllOf() != null) {
-            list = composedSchema.getAllOf();
+            list = getEffectiveAllOfSchemas(key, composedSchema);
             inlineModelName = "AllOf";
         } else if (composedSchema.getAnyOf() != null) {
             list = composedSchema.getAnyOf();

@@ -61,7 +61,6 @@ import java.util.stream.Collectors;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.HEADER;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.PATH;
 import static io.ballerina.openapi.core.generators.common.GeneratorConstants.QUERY;
-import static io.ballerina.openapi.core.generators.common.GeneratorConstants.SLASH;
 import static io.ballerina.openapi.core.generators.common.GeneratorUtils.extractReferenceType;
 
 /**
@@ -627,11 +626,11 @@ public class OASModifier {
                 }
                 composedSchema.setAnyOf(modifiedAnyOf);
             }
-        } 
-        if (Objects.nonNull(typeSchema.getAdditionalProperties()) && 
+        }
+        if (Objects.nonNull(typeSchema.getAdditionalProperties()) &&
                 typeSchema.getAdditionalProperties() instanceof Schema<?> addtionalSchema) {
             updateSchemaWithReference(schemaName, modifiedName, addtionalSchema);
-        } 
+        }
     }
 
     private static void updateRef(String schemaName, String modifiedName, Schema value) {
@@ -660,20 +659,19 @@ public class OASModifier {
     }
 
     private static String getValidStringFromIdentifier(String identifier, String prefix) {
-        if (!identifier.matches("\\b[0-9]*\\b") && identifier.matches(".*[a-zA-Z].*")) {
-            String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
-            StringBuilder validName = new StringBuilder();
-            for (String part : split) {
-                if (!part.isBlank()) {
-                    if (split.length > 1) {
-                        part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) + part.substring(1);
-                    }
-                    validName.append(part);
+        String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
+        StringBuilder validName = new StringBuilder();
+        for (String part : split) {
+            if (!part.isBlank()) {
+                if (part.length() > 1) {
+                    part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) + part.substring(1);
                 }
+                validName.append(part);
             }
-            identifier = validName.toString();
-        } else {
-            identifier = prefix + GeneratorUtils.escapeIdentifier(identifier);
+        }
+        identifier = GeneratorUtils.escapeIdentifier(validName.toString());
+        if (identifier.startsWith("'")) {
+            identifier = prefix + identifier.substring(1);
         }
         return identifier;
     }

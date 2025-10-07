@@ -993,7 +993,7 @@ public class CodeGeneratorTest {
         } catch (IOException | BallerinaOpenApiException | FormatterException e) {
             Assert.fail("Error while generating the service contract: " + e.getMessage());
         } finally {
-            deleteGeneratedFiles("bal_name_ext_sanitized_service.bal");
+            deleteGeneratedFiles("bal_name_ext_service.bal");
         }
     }
 
