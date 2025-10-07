@@ -577,18 +577,8 @@ public class InlineModelResolver {
 
         // If only one of the allOf schemas is inline, then do not flatten it since
         // it will be record fields in the generated Ballerina record.
-        boolean hasOnlyOneInline = false;
-        for (Schema schema : list) {
-            if (schema.get$ref() != null) {
-                continue;
-            }
-            if (hasOnlyOneInline) {
-                hasOnlyOneInline = false;
-                break;
-            }
-            hasOnlyOneInline = true;
-        }
-        if (hasOnlyOneInline) {
+        long inlineCount = list.stream().filter(schema -> schema.get$ref() == null).count();
+        if (inlineCount == 1) {
             openAPI.getComponents().addSchemas(key, composedSchema);
             return List.of();
         }
