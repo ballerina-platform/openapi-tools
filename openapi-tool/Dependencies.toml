@@ -5,12 +5,12 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.13.0-20250825-150500-2c7270f2"
+distribution-version = "2201.13.0-20250924-081800-3dae8c03"
 
 [[package]]
 org = "ballerina"
 name = "tool.openapi"
-version = "2.4.0"
+version = "2.4.1"
 modules = [
 	{org = "ballerina", packageName = "tool.openapi", moduleName = "tool.openapi"}
 ]
