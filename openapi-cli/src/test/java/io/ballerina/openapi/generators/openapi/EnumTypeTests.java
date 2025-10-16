@@ -27,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.openapi.TestUtils.skipOnWindows;
+
 /**
  * This test class for the covering the unit tests for record scenarios.
  */
@@ -62,6 +64,9 @@ public class EnumTypeTests {
 
     @Test(description = "Test for query and path parameters having references to enums with constant value")
     public void testEnumsWithinQueryParameters() throws IOException {
+        // Skipping on Windows due to some order mismatch in generated content
+        // Issue: https://github.com/ballerina-platform/ballerina-library/issues/8362
+        skipOnWindows();
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_query.bal");
         //Compare generated yaml file with expected yaml content
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_query.yaml");

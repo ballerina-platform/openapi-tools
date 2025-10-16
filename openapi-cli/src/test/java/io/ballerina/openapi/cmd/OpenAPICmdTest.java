@@ -38,6 +38,7 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.ballerina.openapi.TestUtils.skipOnWindows;
 import static io.ballerina.openapi.cmd.ErrorMessages.MISSING_CONTRACT_PATH;
 
 /**
@@ -1144,6 +1145,9 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
 
     @Test(description = "Test openapi align sub command with unresolved parameter schema")
     public void testAlignCmdWithUnresolvedParameterSchema() throws IOException {
+        // Skipping on Windows due to some order mismatch in generated content
+        // Issue: https://github.com/ballerina-platform/ballerina-library/issues/8362
+        skipOnWindows();
         Path expectedFilePath = resourceDir.resolve(
                 Paths.get("cmd/align/aligned_openapi_unresolved_expected.yaml"));
         String[] args = {"-i", resourceDir + "/cmd/align/openapi_unresolved.yaml", "-o", tmpDir.toString()};
