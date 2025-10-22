@@ -659,12 +659,32 @@ public class OASModifier {
     }
 
     private static String getValidStringFromIdentifier(String identifier, String prefix) {
-        String[] split = identifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
+        // Check if identifier starts with a special character and encode it
+        StringBuilder encodedPrefix = new StringBuilder();
+        int startIndex = 0;
+        while (startIndex < identifier.length()) {
+            String charAtStart = String.valueOf(identifier.charAt(startIndex));
+            if (GeneratorConstants.SPECIAL_CHAR_ENCODING.containsKey(charAtStart)) {
+                encodedPrefix.append(GeneratorConstants.SPECIAL_CHAR_ENCODING.get(charAtStart));
+                startIndex++;
+            } else {
+                break;
+            }
+        }
+        // Get the remaining part of the identifier after leading special characters
+        String remainingIdentifier = startIndex < identifier.length() ? identifier.substring(startIndex) : "";
+        // Remove invalid characters and apply camel case
+        String[] split = remainingIdentifier.split(GeneratorConstants.ESCAPE_PATTERN_FOR_MODIFIER);
         StringBuilder validName = new StringBuilder();
+        if (!encodedPrefix.isEmpty()) {
+            validName.append(encodedPrefix);
+        }
         for (String part : split) {
             if (!part.isBlank()) {
                 if (part.length() > 1) {
                     part = part.substring(0, 1).toUpperCase(Locale.ENGLISH) + part.substring(1);
+                } else {
+                    part = part.toUpperCase(Locale.ENGLISH);
                 }
                 validName.append(part);
             }

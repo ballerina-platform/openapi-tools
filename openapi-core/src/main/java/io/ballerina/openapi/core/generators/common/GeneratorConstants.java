@@ -134,6 +134,45 @@ public class GeneratorConstants {
     public static final String REGEX_WORDS_STARTING_WITH_NUMBERS = "^[0-9].*";
     public static final String REGEX_ONLY_NUMBERS_OR_NUMBERS_WITH_SPECIAL_CHARACTERS = "\\b[0-9([\\[\\]\\\\?!<>@#&~'`" +
             "*\\-=^+();:\\/{}\\s|.$])]*\\b";
+
+    // Map for encoding special characters at the beginning of identifiers to ensure uniqueness
+    public static final Map<String, String> SPECIAL_CHAR_ENCODING;
+    static {
+        Map<String, String> encodingMap = new HashMap<>();
+        encodingMap.put("+", "Plus");
+        encodingMap.put("-", "Minus");
+        encodingMap.put("*", "Star");
+        encodingMap.put("/", "Slash");
+        encodingMap.put("\\", "Backslash");
+        encodingMap.put("@", "At");
+        encodingMap.put("#", "Hash");
+        encodingMap.put("&", "And");
+        encodingMap.put("~", "Tilde");
+        encodingMap.put("`", "Backtick");
+        encodingMap.put("!", "Exclamation");
+        encodingMap.put("?", "Question");
+        encodingMap.put("<", "LessThan");
+        encodingMap.put(">", "GreaterThan");
+        encodingMap.put("=", "Equals");
+        encodingMap.put("^", "Caret");
+        encodingMap.put("%", "Percent");
+        encodingMap.put("$", "Dollar");
+        encodingMap.put("|", "Pipe");
+        encodingMap.put(".", "Dot");
+        encodingMap.put(":", "Colon");
+        encodingMap.put(";", "Semicolon");
+        encodingMap.put(",", "Comma");
+        encodingMap.put("'", "Quote");
+        encodingMap.put("\"", "DoubleQuote");
+        encodingMap.put("[", "OpenBracket");
+        encodingMap.put("]", "CloseBracket");
+        encodingMap.put("{", "OpenBrace");
+        encodingMap.put("}", "CloseBrace");
+        encodingMap.put("(", "OpenParen");
+        encodingMap.put(")", "CloseParen");
+        SPECIAL_CHAR_ENCODING = Collections.unmodifiableMap(encodingMap);
+    }
+
     //ClientCode generator
     public static final String HTTP = "http";
     public static final String J_BALLERINA = "jballerina.java";
