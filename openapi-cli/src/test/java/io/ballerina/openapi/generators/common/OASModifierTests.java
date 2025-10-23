@@ -85,4 +85,86 @@ public class OASModifierTests {
     // request section
     // response section
     // recursive section
+
+    @Test(description = "Test parameter name generation with special characters at the beginning")
+    public void testParameterNameWithLeadingSpecialChars() {
+        // Test that different leading special characters generate unique parameter names
+        String plusOne = OASModifier.getValidNameForParameter("+1");
+        String minusOne = OASModifier.getValidNameForParameter("-1");
+        String starOne = OASModifier.getValidNameForParameter("*1");
+        String slashOne = OASModifier.getValidNameForParameter("/1");
+
+        // Verify uniqueness
+        Assert.assertNotEquals(plusOne, minusOne, "+1 and -1 should generate different parameter names");
+        Assert.assertNotEquals(plusOne, starOne, "+1 and *1 should generate different parameter names");
+        Assert.assertNotEquals(minusOne, starOne, "-1 and *1 should generate different parameter names");
+        Assert.assertNotEquals(slashOne, plusOne, "/1 and +1 should generate different parameter names");
+
+        // Verify expected format
+        Assert.assertEquals(plusOne, "plus1", "+1 should generate 'plus1'");
+        Assert.assertEquals(minusOne, "minus1", "-1 should generate 'minus1'");
+        Assert.assertEquals(starOne, "star1", "*1 should generate 'star1'");
+        Assert.assertEquals(slashOne, "slash1", "/1 should generate 'slash1'");
+    }
+
+    @Test(description = "Test parameter name generation preserves current behavior for special chars in middle")
+    public void testParameterNameWithMiddleSpecialChars() {
+        // Test that special characters in the middle are handled as before
+        String userName = OASModifier.getValidNameForParameter("user_name");
+        String userId = OASModifier.getValidNameForParameter("user-id");
+        String userCount = OASModifier.getValidNameForParameter("user.count");
+
+        // Verify current behavior is preserved (special chars removed, parts capitalized)
+        Assert.assertEquals(userName, "userName", "user_name should generate 'userName'");
+        Assert.assertEquals(userId, "userId", "user-id should generate 'userId'");
+        Assert.assertEquals(userCount, "userCount", "user.count should generate 'userCount'");
+    }
+
+    @Test(description = "Test type name generation with special characters at the beginning")
+    public void testTypeNameWithLeadingSpecialChars() {
+        // Test that different leading special characters generate unique type names
+        String plusType = OASModifier.getValidNameForType("+Response");
+        String minusType = OASModifier.getValidNameForType("-Response");
+        String atType = OASModifier.getValidNameForType("@Response");
+        String hashType = OASModifier.getValidNameForType("#Response");
+
+        // Verify uniqueness
+        Assert.assertNotEquals(plusType, minusType, "+Response and -Response should generate different names");
+        Assert.assertNotEquals(atType, hashType, "@Response and #Response should generate different names");
+
+        // Verify expected format (first letter should be uppercase)
+        Assert.assertEquals(plusType, "PlusResponse", "+Response should generate 'PlusResponse'");
+        Assert.assertEquals(minusType, "MinusResponse", "-Response should generate 'MinusResponse'");
+        Assert.assertEquals(atType, "AtResponse", "@Response should generate 'AtResponse'");
+        Assert.assertEquals(hashType, "HashResponse", "#Response should generate 'HashResponse'");
+    }
+
+    @Test(description = "Test type name generation preserves current behavior for special chars in middle")
+    public void testTypeNameWithMiddleSpecialChars() {
+        // Test that special characters in the middle are handled as before
+        String userInfo = OASModifier.getValidNameForType("user_info");
+        String apiResponse = OASModifier.getValidNameForType("api-response");
+
+        // Verify current behavior is preserved
+        Assert.assertEquals(userInfo, "UserInfo", "user_info should generate 'UserInfo'");
+        Assert.assertEquals(apiResponse, "ApiResponse", "api-response should generate 'ApiResponse'");
+    }
+
+    @Test(description = "Test multiple leading special characters")
+    public void testMultipleLeadingSpecialChars() {
+        // Test identifiers with multiple leading special characters
+        String multiSpecial1 = OASModifier.getValidNameForParameter("++counter");
+        String multiSpecial2 = OASModifier.getValidNameForParameter("--value");
+        String multiSpecial3 = OASModifier.getValidNameForParameter("+-mixed");
+
+        // Verify they generate unique names
+        Assert.assertNotEquals(multiSpecial1, multiSpecial2);
+        Assert.assertNotEquals(multiSpecial1, multiSpecial3);
+        Assert.assertNotEquals(multiSpecial2, multiSpecial3);
+
+        // Verify expected format
+        Assert.assertEquals(multiSpecial1, "plusPlusCounter", "++counter should generate 'plusPlusCounter'");
+        Assert.assertEquals(multiSpecial2, "minusMinusValue", "--value should generate 'minusMinusValue'");
+        Assert.assertEquals(multiSpecial3, "plusMinusMixed", "+-mixed should generate 'plusMinusMixed'");
+    }
 }
