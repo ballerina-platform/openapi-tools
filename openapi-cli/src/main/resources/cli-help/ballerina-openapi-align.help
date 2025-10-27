@@ -26,6 +26,8 @@ DESCRIPTION
        The alignments can be filtered using the `--include` and `--exclude` options.
        The `--include` option has higher priority than the `--exclude` option.
 
+       This also removes any unused component schemas from the OpenAPI contract.
+
 OPTIONS
        -h, --help
             Print help information about the `bal openapi align` command.

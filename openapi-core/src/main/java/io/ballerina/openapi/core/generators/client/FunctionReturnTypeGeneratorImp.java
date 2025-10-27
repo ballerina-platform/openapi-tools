@@ -21,6 +21,7 @@ package io.ballerina.openapi.core.generators.client;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -59,6 +60,8 @@ import static io.ballerina.openapi.core.generators.common.GeneratorConstants.OPT
  * @since 1.9.0
  */
 public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerator {
+
+    public static final String HEAD = "HEAD";
     protected OpenAPI openAPI;
     protected Operation operation;
     protected String httpMethod;
@@ -103,6 +106,13 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
     }
 
     public ReturnTypesInfo getReturnTypeInfo() {
+        // HEAD method in the http:Client only supports http:Response as the return type
+        if (this.httpMethod.equalsIgnoreCase(HEAD)) {
+            TypeDescriptorNode httpResponse = createSimpleNameReferenceNode(createIdentifierToken(
+                    GeneratorConstants.HTTP_RESPONSE));
+            returnTypesInfo = new ReturnTypesInfo(new ArrayList<>(List.of(httpResponse)), false);
+            return returnTypesInfo;
+        }
         List<TypeDescriptorNode> returnTypes = new ArrayList<>();
         HashSet<String> returnTypesSet = new HashSet<>();
         boolean noContentResponseFound = false;

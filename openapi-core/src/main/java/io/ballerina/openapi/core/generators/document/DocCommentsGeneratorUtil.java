@@ -263,6 +263,11 @@ public class DocCommentsGeneratorUtil {
     }
 
     public static Optional<String> getSchemaDescription(Schema<?> schema, Components components) {
+        return getSchemaDescription(schema, components, new ArrayList<>());
+    }
+
+    private static Optional<String> getSchemaDescription(Schema<?> schema, Components components,
+                                                         List<String> visitedRefs) {
         if (Objects.nonNull(schema.getDescription()) && !schema.getDescription().isBlank()) {
             return Optional.of(schema.getDescription());
         }
@@ -272,13 +277,18 @@ public class DocCommentsGeneratorUtil {
         try {
             String refName = GeneratorUtils.extractReferenceType(schema.get$ref());
             String refSection = GeneratorUtils.extractReferenceSection(schema.get$ref());
-            return getDescriptionFromReference(refName, refSection, components);
+            return getDescriptionFromReference(refName, refSection, components, visitedRefs);
         } catch (InvalidReferenceException exp) {
             return Optional.empty();
         }
     }
 
     public static Optional<String> getParameterDescription(Parameter parameter, Components components) {
+        return getParameterDescription(parameter, components, new ArrayList<>());
+    }
+
+    private static Optional<String> getParameterDescription(Parameter parameter, Components components,
+                                                            List<String> visitedRefs) {
         if (Objects.nonNull(parameter.getDescription()) && !parameter.getDescription().isBlank()) {
             return Optional.of(parameter.getDescription());
         }
@@ -288,13 +298,18 @@ public class DocCommentsGeneratorUtil {
         try {
             String refName = GeneratorUtils.extractReferenceType(parameter.get$ref());
             String refSection = GeneratorUtils.extractReferenceSection(parameter.get$ref());
-            return getDescriptionFromReference(refName, refSection, components);
+            return getDescriptionFromReference(refName, refSection, components, visitedRefs);
         } catch (InvalidReferenceException exp) {
             return Optional.empty();
         }
     }
 
     public static Optional<String> getResponseDescription(ApiResponse response, Components components) {
+        return getResponseDescription(response, components, new ArrayList<>());
+    }
+
+    private static Optional<String> getResponseDescription(ApiResponse response, Components components,
+                                                           List<String> visitedRefs) {
         if (Objects.nonNull(response.getDescription()) && !response.getDescription().isBlank()) {
             return Optional.of(response.getDescription());
         }
@@ -304,13 +319,18 @@ public class DocCommentsGeneratorUtil {
         try {
             String refName = GeneratorUtils.extractReferenceType(response.get$ref());
             String refSection = GeneratorUtils.extractReferenceSection(response.get$ref());
-            return getDescriptionFromReference(refName, refSection, components);
+            return getDescriptionFromReference(refName, refSection, components, visitedRefs);
         } catch (InvalidReferenceException exp) {
             return Optional.empty();
         }
     }
 
     public static Optional<String> getRequestBodyDescription(RequestBody requestBody, Components components) {
+        return getRequestBodyDescription(requestBody, components, new ArrayList<>());
+    }
+
+    private static Optional<String> getRequestBodyDescription(RequestBody requestBody, Components components,
+                                                              List<String> visitedRefs) {
         if (Objects.nonNull(requestBody.getDescription()) && !requestBody.getDescription().isBlank()) {
             return Optional.of(requestBody.getDescription());
         }
@@ -320,44 +340,63 @@ public class DocCommentsGeneratorUtil {
         try {
             String refName = GeneratorUtils.extractReferenceType(requestBody.get$ref());
             String refSection = GeneratorUtils.extractReferenceSection(requestBody.get$ref());
-            return getDescriptionFromReference(refName, refSection, components);
+            return getDescriptionFromReference(refName, refSection, components, visitedRefs);
         } catch (InvalidReferenceException exp) {
             return Optional.empty();
         }
     }
 
     private static Optional<String> getDescriptionFromReference(String refName, String refSection,
-                                                                Components components)
+                                                                Components components, List<String> visitedRefs)
             throws InvalidReferenceException {
         if (Objects.isNull(components)) {
             return Optional.empty();
         }
-        switch (refSection) {
-            case "schemas" -> {
-                if (Objects.nonNull(components.getSchemas()) && components.getSchemas().containsKey(refName)) {
-                    return getSchemaDescription(components.getSchemas().get(refName), components);
-                }
-            }
-            case "parameters" -> {
-                if (Objects.nonNull(components.getParameters()) &&
-                        components.getParameters().containsKey(refName)) {
-                    return getParameterDescription(components.getParameters().get(refName), components);
-                }
-            }
-            case "responses" -> {
-                if (Objects.nonNull(components.getResponses()) &&
-                        components.getResponses().containsKey(refName)) {
-                    return getResponseDescription(components.getResponses().get(refName), components);
-                }
-            }
-            case "requestBodies" -> {
-                if (Objects.nonNull(components.getRequestBodies()) &&
-                        components.getRequestBodies().containsKey(refName)) {
-                    return getRequestBodyDescription(components.getRequestBodies().get(refName), components);
-                }
-            }
+
+        // Create a unique reference key to track visited references
+        String refKey = refSection + "/" + refName;
+
+        // Check if we've already visited this reference to prevent circular references
+        if (visitedRefs.contains(refKey)) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        // Add current reference to visited list
+        visitedRefs.add(refKey);
+
+        try {
+            switch (refSection) {
+                case "schemas" -> {
+                    if (Objects.nonNull(components.getSchemas()) && components.getSchemas().containsKey(refName)) {
+                        return getSchemaDescription(components.getSchemas().get(refName), components, visitedRefs);
+                    }
+                }
+                case "parameters" -> {
+                    if (Objects.nonNull(components.getParameters()) &&
+                            components.getParameters().containsKey(refName)) {
+                        return getParameterDescription(components.getParameters().get(refName), components,
+                                visitedRefs);
+                    }
+                }
+                case "responses" -> {
+                    if (Objects.nonNull(components.getResponses()) &&
+                            components.getResponses().containsKey(refName)) {
+                        return getResponseDescription(components.getResponses().get(refName), components, visitedRefs);
+                    }
+                }
+                case "requestBodies" -> {
+                    if (Objects.nonNull(components.getRequestBodies()) &&
+                            components.getRequestBodies().containsKey(refName)) {
+                        return getRequestBodyDescription(components.getRequestBodies().get(refName), components,
+                                visitedRefs);
+                    }
+                }
+            }
+            return Optional.empty();
+        } finally {
+            // Remove current reference from visited list to allow other paths to visit it
+            visitedRefs.remove(refKey);
+        }
     }
 
     public static String unescapeIdentifier(String parameterName) {

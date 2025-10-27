@@ -48,6 +48,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -93,6 +94,7 @@ public class OASModifier {
     }
 
     public OpenAPI modify(OpenAPI openAPI, List<String> alignmentTypes) throws BallerinaOpenApiException {
+        removeUnusedSchemasFromComponents(openAPI);
         if (alignmentTypes.contains(NAME)) {
             openAPI = modifyWithBallerinaNamingConventions(openAPI);
         }
@@ -128,7 +130,7 @@ public class OASModifier {
     }
 
     public static Map<String, String> getResolvedNameMapping(Map<String, String> nameMap) {
-        Map<String, String> resolvedNames = new HashMap<>();
+        Map<String, String> resolvedNames = new LinkedHashMap<>();
         Map<String, Integer> nameCount = new HashMap<>();
 
         for (Map.Entry<String, String> entry : nameMap.entrySet()) {
@@ -136,13 +138,20 @@ public class OASModifier {
             String newName = entry.getValue();
             String resolvedName = newName;
 
-            while (resolvedNames.containsValue(resolvedName)) {
+            if (resolvedNames.containsValue(resolvedName)) {
+                // Conflict detected - need to add numbered entry at the front
                 int count = nameCount.getOrDefault(newName, 1);
                 resolvedName = newName + count;
                 nameCount.put(newName, count + 1);
-            }
 
-            resolvedNames.put(currentName, resolvedName);
+                // Create new map with conflict entry at the front
+                Map<String, String> newResolvedNames = new LinkedHashMap<>();
+                newResolvedNames.put(currentName, resolvedName);
+                newResolvedNames.putAll(resolvedNames);
+                resolvedNames = newResolvedNames;
+            } else {
+                resolvedNames.put(currentName, resolvedName);
+            }
         }
 
         return resolvedNames;
@@ -299,6 +308,29 @@ public class OASModifier {
             return openapi;
         }
         return modifyWithBallerinaNamingConventions(openapi, proposedNameMapping);
+    }
+
+    private static void removeUnusedSchemasFromComponents(OpenAPI openAPI) {
+        Components components = openAPI.getComponents();
+        if (components == null || components.getSchemas() == null || components.getSchemas().isEmpty()) {
+            return;
+        }
+
+        String openApiJson = Json.pretty(openAPI);
+        Map<String, Schema> schemas = components.getSchemas();
+        Map<String, Schema> usedSchemas = new HashMap<>();
+
+        for (Map.Entry<String, Schema> schemaEntry : schemas.entrySet()) {
+            String schemaName = schemaEntry.getKey();
+            String patternString = COMPONENT_REF_REGEX_PATTERN.formatted(schemaName, schemaName);
+            Pattern pattern = Pattern.compile(patternString);
+            Matcher matcher = pattern.matcher(openApiJson);
+            if (matcher.find()) {
+                usedSchemas.put(schemaName, schemaEntry.getValue());
+            }
+        }
+        components.setSchemas(usedSchemas);
+        openAPI.setComponents(components);
     }
 
     private static OpenAPI modifyOASWithSchemaName(OpenAPI openapi, Map<String, String> nameMap)

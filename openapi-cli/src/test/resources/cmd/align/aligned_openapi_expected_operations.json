@@ -135,29 +135,6 @@
   },
   "components": {
     "schemas": {
-      "AlbumARTIST": {
-        "required": [
-          "albums",
-          "id",
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "albums": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Album"
-            }
-          },
-          "name": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
       "ErrorPayload": {
         "required": [
           "message",
