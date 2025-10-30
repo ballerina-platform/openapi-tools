@@ -123,7 +123,8 @@ public class UnionTypeMapper extends AbstractTypeMapper {
     }
 
     static Schema getSingletonUnionTypeSchema(UnionTypeSymbol typeSymbol, List<OpenAPIMapperDiagnostic> diagnostics) {
-        List<TypeSymbol> memberTypeSymbols = typeSymbol.userSpecifiedMemberTypes();
+        List<TypeSymbol> memberTypeSymbols = typeSymbol.userSpecifiedMemberTypes().stream().filter(
+                symbol -> symbol.typeKind() != TypeDescKind.NIL).toList();
         List<Object> enumValues = new ArrayList<>();
         boolean nullable = hasNilableType(typeSymbol);
         TypeDescKind enumType = getEnumType(memberTypeSymbols);
