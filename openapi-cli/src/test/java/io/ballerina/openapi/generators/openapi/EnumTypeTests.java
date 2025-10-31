@@ -72,6 +72,13 @@ public class EnumTypeTests {
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_query.yaml");
     }
 
+    @Test(description = "Test for having union type query parameter")
+    public void testUnionTypeAsQueryParameter() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("data_type/union_type.bal");
+        //Compare generated yaml file with expected yaml content
+        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/union_type.yaml");
+    }
+
     @Test(description = "Test for header parameters having references to enums with constant values")
     public void testEnumsWithinHeaderParameters() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_header.bal");
