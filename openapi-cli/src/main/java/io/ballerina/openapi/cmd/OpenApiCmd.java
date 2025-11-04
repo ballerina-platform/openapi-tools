@@ -62,7 +62,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import static io.ballerina.openapi.cmd.BaseCmd.exit;
 import static io.ballerina.openapi.cmd.BaseCmd.exitError;
@@ -77,7 +76,6 @@ import static io.ballerina.openapi.cmd.CmdUtils.addNewLine;
 import static io.ballerina.openapi.cmd.CmdUtils.searchEnum;
 import static io.ballerina.openapi.cmd.CmdUtils.getBallerinaTomlPath;
 import static io.ballerina.openapi.cmd.ErrorMessages.SKIP_STATUS_CODE_BINDING;
-import static io.ballerina.openapi.core.generators.common.GeneratorUtils.getValidName;
 
 /**
  * Main class to implement "openapi" command for ballerina. Commands for Client Stub, Service file and OpenApi contract
@@ -211,11 +209,7 @@ public class OpenApiCmd implements BLauncherCmd {
                 tag.addAll(Arrays.asList(baseCmd.tags.split(",")));
             }
             if (baseCmd.operations != null) {
-                String[] ids = baseCmd.operations.split(",");
-                List<String> normalizedOperationIds =
-                        Arrays.stream(ids).map(operationId -> getValidName(operationId, false))
-                                .collect(Collectors.toList());
-                operation.addAll(normalizedOperationIds);
+                operation.addAll(Arrays.asList(baseCmd.operations.split(",")));
             }
 
             Filter filter = new Filter(tag, operation);
