@@ -7,6 +7,6 @@ distribution = "2201.11.0-20241117-133400-a3054b77"
 [[platform.java21.dependency]]
 groupId = "io.ballerina.openapi"
 artifactId = "client-native"
-version = "1.3.0-SNAPSHOT"
-path = "../build/libs/openapi-client-native-1.3.0-SNAPSHOT.jar"
+version = "1.3.0"
+path = "../build/libs/openapi-client-native-1.3.0.jar"
 graalvmCompatible = true
