@@ -50,11 +50,43 @@ There is no structured metadata to reliably represent an operation’s intent.
 
 ## Description
 
-In [an earlier implementation](https://github.com/ballerina-platform/openapi-tools/pull/1731#:~:text=As%20the%20first%20phase%2C%20we%20only%20support%20the%20below%20attribute%20metadata%20in%20suggested%20annotation), **[resource-level annotations](https://github.com/ballerina-platform/openapi-tools/blob/39737116ea05470dc6637af4b3f1a3b6cff021d7/module-ballerina-openapi/annotation.bal#L74)** were introduced to capture OpenAPI metadata (such as operationId, summary, and description) within Ballerina resource methods. 
-This capability was originally designed to support the Ballerina code → OpenAPI specification generation flow, allowing OpenAPI metadata to be preserved when exporting a specification from Ballerina services.
+An existing implementation[1] already provides a resource-level annotation[2] mechanism to capture OpenAPI metadata (e.g., operationId, summary, and description) in Ballerina resource methods.
+This capability was originally designed to support the Ballerina code → OpenAPI definition generation flow, allowing OpenAPI metadata to be preserved when exporting a definition from Ballerina services.
+
+1. openAPI definition example
+```yaml
+...
+/api/3/issue:
+    post:
+      operationId: createIssue
+      parameters:
+      - name: updateHistory
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueUpdateDetails'
+        required: true
+      responses:
+        "201":
+          description: Returned if the request is successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedIssue'
+...
+```
+
+2. Expected generated ballerina client code
 
 ```ballerina
-
 //usage
 ...
 @openapi:ResourceInfo {
@@ -67,8 +99,12 @@ This capability was originally designed to support the Ballerina code → OpenAP
 }
 ...
 ```
-However, this support is not available when generating Ballerina client code from an OpenAPI specification (OAS → Ballerina).
+However, this support is not available when generating Ballerina client code from an OpenAPI definition (OAS → Ballerina).
 
 ### Solution
 
 With this proposal, the same resource-level annotation mechanism should be enabled and extended for the client code generation flow.
+
+[1] [https://github.com/ballerina-platform/openapi-tools/pull/1731#:~:text=As%20the%20first%20phase%2C%20we%20only%20support%20the%20below%20attribute%20metadata%20in%20suggested%20annotation](https://github.com/ballerina-platform/openapi-tools/pull/1731#:~:text=As%20the%20first%20phase%2C%20we%20only%20support%20the%20below%20attribute%20metadata%20in%20suggested%20annotation)
+
+[2] [https://github.com/ballerina-platform/openapi-tools/blob/39737116ea05470dc6637af4b3f1a3b6cff021d7/module-ballerina-openapi/annotation.bal#L74](https://github.com/ballerina-platform/openapi-tools/blob/39737116ea05470dc6637af4b3f1a3b6cff021d7/module-ballerina-openapi/annotation.bal#L74)
