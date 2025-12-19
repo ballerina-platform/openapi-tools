@@ -105,6 +105,10 @@ However, this support is not available when generating Ballerina client code fro
 
 With this proposal, the same resource-level annotation mechanism should be enabled and extended for the client code generation flow.
 
+
+
+**References**
+
 [1] [https://github.com/ballerina-platform/openapi-tools/pull/1731#:~:text=As%20the%20first%20phase%2C%20we%20only%20support%20the%20below%20attribute%20metadata%20in%20suggested%20annotation](https://github.com/ballerina-platform/openapi-tools/pull/1731#:~:text=As%20the%20first%20phase%2C%20we%20only%20support%20the%20below%20attribute%20metadata%20in%20suggested%20annotation)
 
 [2] [https://github.com/ballerina-platform/openapi-tools/blob/39737116ea05470dc6637af4b3f1a3b6cff021d7/module-ballerina-openapi/annotation.bal#L74](https://github.com/ballerina-platform/openapi-tools/blob/39737116ea05470dc6637af4b3f1a3b6cff021d7/module-ballerina-openapi/annotation.bal#L74)
