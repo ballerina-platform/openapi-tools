@@ -1,7 +1,7 @@
 # [WIP]Proposal: Bring Operation ID Support to Ballerina Client Resource Function Generation
 
-_Owners_: @lnash94  
-_Reviewers_: @daneshk    
+_Owners_:   
+_Reviewers_:   
 _Created_: 2025/12/18
 _Updated_: - 
 _Issue_: -
