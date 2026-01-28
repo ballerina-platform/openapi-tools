@@ -167,4 +167,31 @@ public class OASModifierTests {
         Assert.assertEquals(multiSpecial2, "minusMinusValue", "--value should generate 'minusMinusValue'");
         Assert.assertEquals(multiSpecial3, "plusMinusMixed", "+-mixed should generate 'plusMinusMixed'");
     }
+
+    @Test(description = "Test that paths with similar but different version segments are handled correctly")
+    public void testBasePathWithVersionMismatch() throws IOException, BallerinaOpenApiException {
+        // Test case from https://github.com/ballerina-platform/ballerina-library/issues/8574
+        // When paths have /v2/ and /v2.1/, the common base path extraction should not incorrectly
+        // match /v2 as a prefix of /v2.1, causing paths to become .1/organizations/... instead of /...
+        Path definitionPath = RES_DIR.resolve("basepath_version_mismatch.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASModifier oasModifier = new OASModifier();
+        OpenAPI modifiedOAS = oasModifier.modifyWithCommonBasePath(openAPI);
+
+        // Verify all paths still start with /
+        io.swagger.v3.oas.models.Paths paths = modifiedOAS.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Assert.assertTrue(pathKey.startsWith("/"),
+                    "Path '" + pathKey + "' should start with '/' after base path modification");
+        }
+
+        // The paths should either be unchanged (if no common base path found) or properly modified
+        // In this case, /v2/ and /v2.1/ should not share a common base path
+        // since they are different path segments
+        Assert.assertTrue(paths.containsKey("/v2/organizations") || paths.containsKey("/organizations"),
+                "Path /v2/organizations should be present (original or with common path removed)");
+        Assert.assertTrue(paths.containsKey("/v2.1/organizations/{organizationId}/accounts") ||
+                        paths.containsKey("/organizations/{organizationId}/accounts"),
+                "Path /v2.1/organizations/{organizationId}/accounts should be present (original or with common path removed)");
+    }
 }
