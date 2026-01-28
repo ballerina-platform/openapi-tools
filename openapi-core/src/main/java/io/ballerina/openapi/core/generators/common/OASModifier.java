@@ -1017,7 +1017,7 @@ public class OASModifier {
         for (int i = 1; i < pathValues.size(); i++) {
             String path = pathValues.get(i);
             String nonParameterizedPath = getNonParameterizedPath(path);
-            if (nonParameterizedPath.startsWith(commonPath)) {
+            if (startsWithPathSegment(nonParameterizedPath, commonPath)) {
                 continue;
             }
             commonPath = calculateCommonPath(getPathWithoutLastSegment(nonParameterizedPath), commonPath);
@@ -1026,6 +1026,10 @@ public class OASModifier {
             }
         }
         return (commonPath.isEmpty() || commonPath.equals(SLASH)) ? Optional.empty() : Optional.of(commonPath);
+    }
+
+    private static boolean startsWithPathSegment(String path, String prefix) {
+        return path.startsWith(prefix + SLASH) || path.equals(prefix);
     }
 
     private static String calculateCommonPath(String path, String commonPath) {
