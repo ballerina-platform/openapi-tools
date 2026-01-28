@@ -1029,6 +1029,10 @@ public class OASModifier {
     }
 
     private static boolean startsWithPathSegment(String path, String prefix) {
+        if (prefix.endsWith(SLASH)) {
+            // If prefix already ends with /, just check startsWith or equality without the trailing slash
+            return path.startsWith(prefix) || path.equals(prefix.substring(0, prefix.length() - 1));
+        }
         return path.startsWith(prefix + SLASH) || path.equals(prefix);
     }
 
@@ -1056,7 +1060,10 @@ public class OASModifier {
     }
 
     private static String removeCommonPath(String path, String commonPath) {
-        return path.replace(commonPath, EMPTY);
+        if (path.startsWith(commonPath)) {
+            return path.substring(commonPath.length());
+        }
+        return path;
     }
 
     private static String getNonParameterizedPath(String path) {
