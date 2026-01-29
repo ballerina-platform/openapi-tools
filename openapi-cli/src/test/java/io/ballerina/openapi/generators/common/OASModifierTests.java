@@ -170,28 +170,45 @@ public class OASModifierTests {
 
     @Test(description = "Test that paths with similar but different version segments are handled correctly")
     public void testBasePathWithVersionMismatch() throws IOException, BallerinaOpenApiException {
-        // Test case from https://github.com/ballerina-platform/ballerina-library/issues/8574
-        // When paths have /v2/ and /v2.1/, the common base path extraction should not incorrectly
-        // match /v2 as a prefix of /v2.1, causing paths to become .1/organizations/... instead of /...
         Path definitionPath = RES_DIR.resolve("basepath_version_mismatch.yaml");
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
         OASModifier oasModifier = new OASModifier();
         OpenAPI modifiedOAS = oasModifier.modifyWithCommonBasePath(openAPI);
+        OpenAPI expectedOAS = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        Assert.assertEquals(modifiedOAS, expectedOAS);
+    }
 
-        // Verify all paths still start with /
-        io.swagger.v3.oas.models.Paths paths = modifiedOAS.getPaths();
-        for (String pathKey : paths.keySet()) {
-            Assert.assertTrue(pathKey.startsWith("/"),
-                    "Path '" + pathKey + "' should start with '/' after base path modification");
-        }
+    @Test(description = "Test that paths with similar but version segment has a parameter. " +
+            "No common base path should be set.")
+    public void testBasePathWithParameter1() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("basepath_with_parameter_1.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASModifier oasModifier = new OASModifier();
+        OpenAPI modifiedOAS = oasModifier.modifyWithCommonBasePath(openAPI);
+        OpenAPI expectedOAS = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        Assert.assertEquals(modifiedOAS, expectedOAS);
+    }
 
-        // The paths should either be unchanged (if no common base path found) or properly modified
-        // In this case, /v2/ and /v2.1/ should not share a common base path
-        // since they are different path segments
-        Assert.assertTrue(paths.containsKey("/v2/organizations") || paths.containsKey("/organizations"),
-                "Path /v2/organizations should be present (original or with common path removed)");
-        Assert.assertTrue(paths.containsKey("/v2.1/organizations/{organizationId}/accounts") ||
-                        paths.containsKey("/organizations/{organizationId}/accounts"),
-                "Path /v2.1/organizations/{organizationId}/accounts should be present (original or with common path removed)");
+    @Test(description = "Test that paths with similar but version segment has a parameter, " +
+            "but there is a common base path segment.")
+    public void testBasePathWithParameter2() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("basepath_with_parameter_2.yaml");
+        Path expectedPath = RES_DIR.resolve("expected/modified_basepath_with_parameter_2.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASModifier oasModifier = new OASModifier();
+        OpenAPI modifiedOAS = oasModifier.modifyWithCommonBasePath(openAPI);
+        OpenAPI expectedOAS = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(expectedPath);
+        Assert.assertEquals(modifiedOAS, expectedOAS);
+    }
+
+    @Test(description = "Test that paths with similar but the segment has a parameter. " +
+            "No common base path should be set.")
+    public void testBasePathWithParameter3() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("basepath_with_parameter_3.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASModifier oasModifier = new OASModifier();
+        OpenAPI modifiedOAS = oasModifier.modifyWithCommonBasePath(openAPI);
+        OpenAPI expectedOAS = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        Assert.assertEquals(modifiedOAS, expectedOAS);
     }
 }
