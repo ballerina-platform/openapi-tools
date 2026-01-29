@@ -86,7 +86,7 @@ public class OASModifier {
     public static final String DOC = "doc";
     public static final String BASEPATH = "basepath";
     public static final List<String> DEFAULT_ALIGNMENT_TYPES = List.of(NAME, DOC, BASEPATH);
-    public static final String PARAMETERISED_PATH_REGEX = ".*\\{[^}]+}.*";
+    private static final Pattern PARAMETERISED_PATH_PATTERN = Pattern.compile(".*\\{[^}]+}.*");
 
     List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -1070,7 +1070,7 @@ public class OASModifier {
     private static String getNonParameterizedPath(String path) {
         StringJoiner nonParameterizedPath = new StringJoiner(SLASH);
         for (String part : path.split(SLASH)) {
-            if (part.matches(PARAMETERISED_PATH_REGEX)) {
+            if (PARAMETERISED_PATH_PATTERN.matcher(part).matches()) {
                 break;
             }
             nonParameterizedPath.add(part);
