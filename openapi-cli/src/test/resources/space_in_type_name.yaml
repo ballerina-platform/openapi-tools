@@ -1,0 +1,26 @@
+openapi: 3.0.1
+info:
+  title: Space In Type Name Repro
+  version: 1.0.0
+servers:
+  - url: http://localhost:9090/
+paths:
+  /permissions:
+    get:
+      summary: Get permissions
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: "Collection of permission"
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: string
+                  "@odata.nextLink":
+                    type: string
+                    nullable: true
