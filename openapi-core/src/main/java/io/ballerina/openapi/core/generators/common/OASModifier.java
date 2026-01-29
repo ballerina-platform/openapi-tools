@@ -86,7 +86,7 @@ public class OASModifier {
     public static final String DOC = "doc";
     public static final String BASEPATH = "basepath";
     public static final List<String> DEFAULT_ALIGNMENT_TYPES = List.of(NAME, DOC, BASEPATH);
-    public static final String PARAMETERISED_PATH_REGEX = ".*\\{.+}.*";
+    public static final String PARAMETERISED_PATH_REGEX = ".*\\{[^}]+}.*";
 
     List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -1017,11 +1017,11 @@ public class OASModifier {
         String commonPath = getPathWithoutLastSegment(pathValues.getFirst());
         for (int i = 1; i < pathValues.size(); i++) {
             String path = pathValues.get(i);
-            String nonParameterizedPath = getNonParameterizedPath(path);
+            String nonParameterizedPath = getNonParameterizedPath(getPathWithoutLastSegment(path));
             if (startsWithPathSegment(nonParameterizedPath, commonPath)) {
                 continue;
             }
-            commonPath = calculateCommonPath(getPathWithoutLastSegment(nonParameterizedPath), commonPath);
+            commonPath = calculateCommonPath(nonParameterizedPath, commonPath);
             if (commonPath.isEmpty()) {
                 break;
             }
