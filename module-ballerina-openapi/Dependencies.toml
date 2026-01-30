@@ -10,7 +10,7 @@ distribution-version = "2201.13.0"
 [[package]]
 org = "ballerina"
 name = "openapi"
-version = "2.4.0"
+version = "2.4.1"
 modules = [
 	{org = "ballerina", packageName = "openapi", moduleName = "openapi"}
 ]
