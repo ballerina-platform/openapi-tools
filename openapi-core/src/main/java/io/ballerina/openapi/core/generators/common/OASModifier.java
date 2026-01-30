@@ -86,6 +86,7 @@ public class OASModifier {
     public static final String DOC = "doc";
     public static final String BASEPATH = "basepath";
     public static final List<String> DEFAULT_ALIGNMENT_TYPES = List.of(NAME, DOC, BASEPATH);
+    private static final Pattern PARAMETERISED_PATH_PATTERN = Pattern.compile(".*\\{[^}]+}.*");
 
     List<Diagnostic> diagnostics = new ArrayList<>();
 
@@ -1016,16 +1017,24 @@ public class OASModifier {
         String commonPath = getPathWithoutLastSegment(pathValues.getFirst());
         for (int i = 1; i < pathValues.size(); i++) {
             String path = pathValues.get(i);
-            String nonParameterizedPath = getNonParameterizedPath(path);
-            if (nonParameterizedPath.startsWith(commonPath)) {
+            String nonParameterizedPath = getNonParameterizedPath(getPathWithoutLastSegment(path));
+            if (startsWithPathSegment(nonParameterizedPath, commonPath)) {
                 continue;
             }
-            commonPath = calculateCommonPath(getPathWithoutLastSegment(nonParameterizedPath), commonPath);
+            commonPath = calculateCommonPath(nonParameterizedPath, commonPath);
             if (commonPath.isEmpty()) {
                 break;
             }
         }
         return (commonPath.isEmpty() || commonPath.equals(SLASH)) ? Optional.empty() : Optional.of(commonPath);
+    }
+
+    private static boolean startsWithPathSegment(String path, String prefix) {
+        if (prefix.endsWith(SLASH)) {
+            // If prefix already ends with /, just check startsWith or equality without the trailing slash
+            return path.startsWith(prefix) || path.equals(prefix.substring(0, prefix.length() - 1));
+        }
+        return path.startsWith(prefix + SLASH) || path.equals(prefix);
     }
 
     private static String calculateCommonPath(String path, String commonPath) {
@@ -1052,13 +1061,16 @@ public class OASModifier {
     }
 
     private static String removeCommonPath(String path, String commonPath) {
-        return path.replace(commonPath, EMPTY);
+        if (path.startsWith(commonPath)) {
+            return path.substring(commonPath.length());
+        }
+        return path;
     }
 
     private static String getNonParameterizedPath(String path) {
         StringJoiner nonParameterizedPath = new StringJoiner(SLASH);
         for (String part : path.split(SLASH)) {
-            if (part.startsWith(OPEN_BRACE) && part.endsWith(CLOSED_BRACE)) {
+            if (PARAMETERISED_PATH_PATTERN.matcher(part).matches()) {
                 break;
             }
             nonParameterizedPath.add(part);
