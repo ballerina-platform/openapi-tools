@@ -997,6 +997,33 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test
+    public void testSpaceInTypeName() {
+        String definitionPath = RES_DIR.resolve("space_in_type_name.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        try {
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                                 new ClientGeneratorOptions(false, true, false, false, true, true));
+            Path typesPath = resourcePath.resolve("types.bal");
+            Path clientPath = resourcePath.resolve("client.bal");
+            String generatedContent = "";
+            if (Files.exists(typesPath)) {
+                generatedContent += getStringFromGivenBalFile(resourcePath, "types.bal");
+            }
+            if (Files.exists(clientPath)) {
+                generatedContent += getStringFromGivenBalFile(resourcePath, "client.bal");
+            }
+            Assert.assertTrue(generatedContent.contains("CollectionOfPermission"));
+            Assert.assertFalse(generatedContent.contains("Collection\\ of \\permission"));
+        } catch (IOException | BallerinaOpenApiException |
+                 OASTypeGenException | FormatterException e) {
+            Assert.fail("Error while generating the client: " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+            deleteGeneratedFiles("types.bal");
+        }
+    }
+
     private String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
 
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
