@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+  title: Test API with version mismatch in paths
+  version: "1.0.0"
+servers:
+  - url: https://api.example.com
+paths:
+  /v2/organizations:
+    get:
+      operationId: getOrganizations
+      responses:
+        "200":
+          description: Ok
+  /v2/users:
+    get:
+      operationId: getUsers
+      responses:
+        "200":
+          description: Ok
+  /v2.1/organizations/{organizationId}/accounts:
+    get:
+      operationId: getAccounts
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+  /v2.1/organizations/{organizationId}/dsgroups:
+    get:
+      operationId: getDsGroups
+      parameters:
+        - name: organizationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok

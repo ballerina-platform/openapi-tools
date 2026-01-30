@@ -167,4 +167,48 @@ public class OASModifierTests {
         Assert.assertEquals(multiSpecial2, "minusMinusValue", "--value should generate 'minusMinusValue'");
         Assert.assertEquals(multiSpecial3, "plusMinusMixed", "+-mixed should generate 'plusMinusMixed'");
     }
+
+    @Test(description = "Test that paths with similar but different version segments are handled correctly")
+    public void testBasePathWithVersionMismatch() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("basepath_version_mismatch.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASModifier oasModifier = new OASModifier();
+        OpenAPI modifiedOAS = oasModifier.modifyWithCommonBasePath(openAPI);
+        OpenAPI expectedOAS = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        Assert.assertEquals(modifiedOAS, expectedOAS);
+    }
+
+    @Test(description = "Test that paths with similar but version segment has a parameter. " +
+            "No common base path should be set.")
+    public void testBasePathWithParameter1() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("basepath_with_parameter_1.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASModifier oasModifier = new OASModifier();
+        OpenAPI modifiedOAS = oasModifier.modifyWithCommonBasePath(openAPI);
+        OpenAPI expectedOAS = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        Assert.assertEquals(modifiedOAS, expectedOAS);
+    }
+
+    @Test(description = "Test that paths with similar but version segment has a parameter, " +
+            "but there is a common base path segment.")
+    public void testBasePathWithParameter2() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("basepath_with_parameter_2.yaml");
+        Path expectedPath = RES_DIR.resolve("expected/modified_basepath_with_parameter_2.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASModifier oasModifier = new OASModifier();
+        OpenAPI modifiedOAS = oasModifier.modifyWithCommonBasePath(openAPI);
+        OpenAPI expectedOAS = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(expectedPath);
+        Assert.assertEquals(modifiedOAS, expectedOAS);
+    }
+
+    @Test(description = "Test that paths with similar but the segment has a parameter. " +
+            "No common base path should be set.")
+    public void testBasePathWithParameter3() throws IOException, BallerinaOpenApiException {
+        Path definitionPath = RES_DIR.resolve("basepath_with_parameter_3.yaml");
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        OASModifier oasModifier = new OASModifier();
+        OpenAPI modifiedOAS = oasModifier.modifyWithCommonBasePath(openAPI);
+        OpenAPI expectedOAS = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
+        Assert.assertEquals(modifiedOAS, expectedOAS);
+    }
 }
