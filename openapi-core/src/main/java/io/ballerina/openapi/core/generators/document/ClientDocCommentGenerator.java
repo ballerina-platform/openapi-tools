@@ -313,7 +313,7 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                                              HashMap<String, ParameterNode> collection) {
         List<Node> deprecatedParamDocComments = new ArrayList<>();
         boolean hasQueryParams = operation.getParameters().stream().anyMatch(
-                parameter -> parameter.getIn().equals("query"));
+                parameter -> "query".equals(parameter.getIn()));
         operation.getParameters().forEach(parameter -> {
             if (parameter.get$ref() != null) {
                 try {
