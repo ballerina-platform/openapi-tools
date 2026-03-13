@@ -188,6 +188,12 @@ public class OpenApiCmd implements BLauncherCmd {
             exitError(this.exitWhenFinish);
             return;
         }
+
+        if (baseCmd.useSanitized) {
+            outStream.println("WARNING: the '--use-sanitized-oas' option is deprecated and will be removed " +
+                    "in a future release. Please use the 'bal openapi align' command moving forward.");
+        }
+
         if (baseCmd.mode != null) {
             mode = searchEnum(CmdConstants.Mode.class, baseCmd.mode);
             if (mode == null) {
