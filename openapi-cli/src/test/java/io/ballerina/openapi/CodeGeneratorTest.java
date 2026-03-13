@@ -894,6 +894,32 @@ public class CodeGeneratorTest {
         }
     }
 
+    @Test(description = "Test that $ref query parameters are detected for generating queries doc comment")
+    public void testRefQueryParameters() {
+        String definitionPath = RES_DIR.resolve("ref_query_parameters.yaml").toString();
+        BallerinaCodeGenerator generator = new BallerinaCodeGenerator();
+        try {
+            String expectedClientContent = getStringFromGivenBalFile(
+                    expectedDirPath, "ref_query_parameters.bal");
+            generator.generateClient(definitionPath, resourcePath.toString(), filter,
+                    new ClientGeneratorOptions(false, true, false, false,
+                            true, false));
+            if (Files.exists(resourcePath.resolve("client.bal"))) {
+                String generatedClient = getStringFromGivenBalFile(resourcePath, "client.bal");
+                generatedClient = (generatedClient.trim()).replaceAll("\\s+", "");
+                expectedClientContent = (expectedClientContent.trim()).replaceAll("\\s+", "");
+                Assert.assertTrue(generatedClient.contains(expectedClientContent));
+            } else {
+                Assert.fail("Client was not generated");
+            }
+        } catch (IOException | BallerinaOpenApiException |
+                 OASTypeGenException | FormatterException e) {
+            Assert.fail("Error while generating the client: " + e.getMessage());
+        } finally {
+            deleteGeneratedFiles("client.bal");
+        }
+    }
+
     @Test
     public void testDefaultHeadersNameConflictWithQuery() {
         String definitionPath = RES_DIR.resolve("default_headers_conflict_with_query.yaml").toString();
