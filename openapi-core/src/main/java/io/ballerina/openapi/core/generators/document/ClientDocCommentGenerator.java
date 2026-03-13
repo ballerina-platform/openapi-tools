@@ -312,8 +312,17 @@ public class ClientDocCommentGenerator implements DocCommentsGenerator {
                                              List<Node> updatedParamsRequired, List<Node> updatedParamsDefault,
                                              HashMap<String, ParameterNode> collection) {
         List<Node> deprecatedParamDocComments = new ArrayList<>();
-        boolean hasQueryParams = operation.getParameters().stream().anyMatch(
-                parameter -> parameter.getIn().equals("query"));
+        boolean hasQueryParams = operation.getParameters().stream().anyMatch(parameter -> {
+            if (parameter.get$ref() != null) {
+                try {
+                    parameter = GeneratorMetaData.getInstance().getOpenAPI().getComponents()
+                            .getParameters().get(extractReferenceType(parameter.get$ref()));
+                } catch (InvalidReferenceException e) {
+                    return false;
+                }
+            }
+            return "query".equals(parameter.getIn());
+        });
         operation.getParameters().forEach(parameter -> {
             if (parameter.get$ref() != null) {
                 try {
