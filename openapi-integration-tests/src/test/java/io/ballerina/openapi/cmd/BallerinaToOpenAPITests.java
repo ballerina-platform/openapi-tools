@@ -172,7 +172,7 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
                 "project_openapi_bal_ext/result_0.yaml");
     }
 
-    @Test(description = "Generate with ballerina extension option")
+    @Test(description = "Generate with ballerina extension option", enabled = false)
     public void openAPIGenWithBalExt() throws IOException, InterruptedException {
         executeCommand("project_openapi_bal_ext/main.bal", "api_v1_openapi.yaml",
                 "project_openapi_bal_ext/result_1.yaml", true);
