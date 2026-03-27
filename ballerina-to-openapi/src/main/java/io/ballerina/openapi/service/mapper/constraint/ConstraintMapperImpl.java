@@ -252,6 +252,11 @@ public class ConstraintMapperImpl implements ConstraintMapper {
             properties.addAllOfItem(refSchema);
             properties.setType(null);
         }
+        
+        if (constraintAnnot.getDate().isPresent() && properties.getFormat() == null) {
+            properties.setFormat("date");
+        }
+
         if (constraintAnnot.getLength().isPresent()) {
             properties.setMinLength(Integer.valueOf(constraintAnnot.getLength().get()));
             properties.setMaxLength(Integer.valueOf(constraintAnnot.getLength().get()));
@@ -342,12 +347,11 @@ public class ConstraintMapperImpl implements ConstraintMapper {
                 .filter(this::isConstraintAnnotation)
                 .filter(annotation -> annotation.annotValue().isPresent())
                 .forEach(annotation -> {
+
                     if (isDateConstraint(annotation)) {
-                        ExceptionDiagnostic error = new ExceptionDiagnostic(DiagnosticMessages.OAS_CONVERTOR_120,
-                                annotation.location(), annotation.toString());
-                        diagnostics.add(error);
-                        return;
+                        constraintBuilder.withDate("date");
                     }
+                    
                     MappingConstructorExpressionNode annotationValue = annotation.annotValue().orElse(null);
                     if (Objects.isNull(annotationValue)) {
                         return;
@@ -371,11 +375,8 @@ public class ConstraintMapperImpl implements ConstraintMapper {
         return false;
     }
 
-    /*
+    /**
      * This util is used to check whether an annotation is a constraint:Date annotation.
-     * Currently, we don't have support for mapping Date constraints to OAS hence we skip them.
-     * {@link <a href="https://github.com/ballerina-platform/ballerina-standard-library/issues/5049">...</a>}
-     * Once the above improvement is completed this method should be removed!
      */
     private boolean isDateConstraint(AnnotationNode annotation) {
         return annotation.annotReference().toString().trim().equals(DATE_CONSTRAINT_ANNOTATION);
@@ -395,7 +396,11 @@ public class ConstraintMapperImpl implements ConstraintMapper {
         SyntaxKind syntaxKind = exprNode.kind();
         switch (syntaxKind) {
             case NUMERIC_LITERAL:
+            case STRING_LITERAL:
+            case QUALIFIED_NAME_REFERENCE:
+            case SIMPLE_NAME_REFERENCE:
                 return Optional.of(exprNode.toString().trim());
+                
             case REGEX_TEMPLATE_EXPRESSION:
                 String regexContent = ((TemplateExpressionNode) exprNode).content().get(0).toString();
                 if (regexContent.matches(REGEX_INTERPOLATION_PATTERN)) {

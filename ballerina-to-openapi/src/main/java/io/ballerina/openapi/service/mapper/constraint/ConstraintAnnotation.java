@@ -33,6 +33,7 @@ public class ConstraintAnnotation {
     private final String minValueExclusive;
     private final String maxValueExclusive;
     private final String pattern;
+    private final String date;
 
     public ConstraintAnnotation(ConstraintAnnotationBuilder builder) {
         this.minValue = builder.minValue;
@@ -43,11 +44,12 @@ public class ConstraintAnnotation {
         this.minValueExclusive = builder.minValueExclusive;
         this.maxValueExclusive = builder.maxValueExclusive;
         this.pattern = builder.pattern;
+        this.date = builder.date;
     }
 
     public boolean hasConstraints() {
         return minValue != null || maxValue != null || length != null || minLength != null || maxLength != null
-                || minValueExclusive != null || maxValueExclusive != null || pattern != null;
+                || minValueExclusive != null || maxValueExclusive != null || pattern != null || date != null;
     }
 
     public Optional<String> getMinValue() {
@@ -82,6 +84,10 @@ public class ConstraintAnnotation {
         return Optional.ofNullable(pattern);
     }
 
+    public Optional<String> getDate() {
+        return Optional.ofNullable(date);
+    }
+
     /**
      * This is the builder class for the {@link ConstraintAnnotation}.
      */
@@ -94,6 +100,7 @@ public class ConstraintAnnotation {
         private String minValueExclusive;
         private String maxValueExclusive;
         private String pattern;
+        private String date;
 
         public void withMinValue(String minValue) {
             this.minValue = minValue;
@@ -125,6 +132,10 @@ public class ConstraintAnnotation {
 
         public void withPattern(String pattern) {
             this.pattern = pattern;
+        }
+
+        public void withDate(String date) {
+            this.date = date;
         }
 
         public ConstraintAnnotation build() {
