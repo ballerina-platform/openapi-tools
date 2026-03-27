@@ -350,6 +350,7 @@ public class ConstraintMapperImpl implements ConstraintMapper {
 
                     if (isDateConstraint(annotation)) {
                         constraintBuilder.withDate("date");
+                        return;
                     }
                     
                     MappingConstructorExpressionNode annotationValue = annotation.annotValue().orElse(null);
