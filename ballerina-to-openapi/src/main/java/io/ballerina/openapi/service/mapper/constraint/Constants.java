@@ -44,4 +44,7 @@ public final class Constants {
     public static final String LENGTH = "length";
     public static final String MIN_LENGTH = "minLength";
     public static final String MAX_LENGTH = "maxLength";
+
+    public static final String MESSAGE = "message";
+    public static final String OPTION = "option";
 }

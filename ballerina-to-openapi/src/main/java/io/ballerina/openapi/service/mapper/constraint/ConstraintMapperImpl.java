@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.HashMap;
 
 import static io.ballerina.openapi.service.mapper.Constants.DATE_CONSTRAINT_ANNOTATION;
 import static io.ballerina.openapi.service.mapper.Constants.REGEX_INTERPOLATION_PATTERN;
@@ -252,9 +253,22 @@ public class ConstraintMapperImpl implements ConstraintMapper {
             properties.addAllOfItem(refSchema);
             properties.setType(null);
         }
-        
-        if (constraintAnnot.getDate().isPresent() && properties.getFormat() == null) {
-            properties.setFormat("date");
+
+        String description = "";
+        if (constraintAnnot.getRootMessage().isPresent()) {
+            description += constraintAnnot.getRootMessage().get();
+        }
+        if (constraintAnnot.getOptionMessage().isPresent()) {
+            description += (description.isEmpty() ? "" : " ") + constraintAnnot.getOptionMessage().get();
+        }
+        if (!description.isEmpty()) {
+            properties.setDescription(description.trim());
+        }
+
+        if (constraintAnnot.getDateOption().isPresent()) {
+            Map<String, Object> optionMap = new java.util.HashMap<>();
+            optionMap.put("option", constraintAnnot.getDateOption().get());
+            properties.addExtension("x-ballerina-constraint", optionMap);
         }
 
         if (constraintAnnot.getLength().isPresent()) {
@@ -346,12 +360,7 @@ public class ConstraintMapperImpl implements ConstraintMapper {
         annotations.stream()
                 .filter(this::isConstraintAnnotation)
                 .filter(annotation -> annotation.annotValue().isPresent())
-                .forEach(annotation -> {
-
-                    if (isDateConstraint(annotation)) {
-                        constraintBuilder.withDate("date");
-                    }
-                    
+                .forEach(annotation -> {                    
                     MappingConstructorExpressionNode annotationValue = annotation.annotValue().orElse(null);
                     if (Objects.isNull(annotationValue)) {
                         return;
@@ -376,31 +385,99 @@ public class ConstraintMapperImpl implements ConstraintMapper {
     }
 
     /**
-     * This util is used to check whether an annotation is a constraint:Date annotation.
+     * This util is used to route the constraint annotation field to the appropriate handler
+     * based on the field name.
      */
-    private boolean isDateConstraint(AnnotationNode annotation) {
-        return annotation.annotReference().toString().trim().equals(DATE_CONSTRAINT_ANNOTATION);
+    private void processConstraintAnnotation(SpecificFieldNode specificFieldNode, String fieldName,
+                                            ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+        if (Constants.MESSAGE.equals(fieldName)) {
+            extractRootMessage(specificFieldNode, constraintBuilder);
+        } else if (Constants.OPTION.equals(fieldName)) {
+            extractDateOption(specificFieldNode, constraintBuilder);
+        } else {
+            specificFieldNode.valueExpr()
+                    .flatMap(this::extractFieldValue)
+                    .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));
+        }
     }
 
     /**
-     * This util is used to process the content of a constraint annotation.
+     * This util is used to extract the root message from a constraint annotation field.
      */
-    private void processConstraintAnnotation(SpecificFieldNode specificFieldNode, String fieldName,
-                                             ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
-        specificFieldNode.valueExpr()
-                .flatMap(this::extractFieldValue)
-                .ifPresent(fieldValue -> fillConstraintValue(constraintBuilder, fieldName, fieldValue));
+    private void extractRootMessage(SpecificFieldNode specificFieldNode,
+                                    ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+        specificFieldNode.valueExpr().ifPresent(expr -> {
+            if (expr.kind() == SyntaxKind.STRING_LITERAL) {
+                constraintBuilder.withRootMessage(sanitizeStringLiteral(expr.toString()));
+            }
+        });
+    }
+
+    /**
+     * This util is used to extract the date option from a constraint annotation field.
+     */
+    private void extractDateOption(SpecificFieldNode specificFieldNode,
+                                ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+        specificFieldNode.valueExpr().ifPresent(expr -> {
+            if (expr.kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
+                extractSimpleDateOption((QualifiedNameReferenceNode) expr, constraintBuilder);
+            } else if (expr.kind() == SyntaxKind.MAPPING_CONSTRUCTOR) {
+                extractStructuredDateOption((MappingConstructorExpressionNode) expr, constraintBuilder);
+            }
+        });
+    }
+
+    /**
+     * This util is used to extract the date option from a simple qualified name reference.
+     */
+    private void extractSimpleDateOption(QualifiedNameReferenceNode refNode,
+                                        ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+        constraintBuilder.withDateOption(refNode.identifier().text().trim());
+    }
+
+    /**
+     * This util is used to extract the date option and option message from a structured mapping constructor.
+     */
+    private void extractStructuredDateOption(MappingConstructorExpressionNode mapNode,
+                                            ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+        mapNode.fields().stream()
+                .filter(field -> field.kind() == SyntaxKind.SPECIFIC_FIELD)
+                .map(field -> (SpecificFieldNode) field)
+                .forEach(specField -> processDateOptionField(specField, constraintBuilder));
+    }
+
+    /**
+     * This util is used to process each specific field within a structured date option mapping.
+     */
+    private void processDateOptionField(SpecificFieldNode specField,
+                                        ConstraintAnnotation.ConstraintAnnotationBuilder constraintBuilder) {
+        String specName = specField.fieldName().toString().trim();
+        specField.valueExpr().ifPresent(valExpr -> {
+            if (Constants.VALUE.equals(specName) && valExpr.kind() == SyntaxKind.QUALIFIED_NAME_REFERENCE) {
+                constraintBuilder.withDateOption(
+                        ((QualifiedNameReferenceNode) valExpr).identifier().text().trim());
+            } else if (Constants.MESSAGE.equals(specName) && valExpr.kind() == SyntaxKind.STRING_LITERAL) {
+                constraintBuilder.withOptionMessage(sanitizeStringLiteral(valExpr.toString()));
+            }
+        });
+    }
+
+    /**
+     * This util is used to sanitize a string literal by trimming whitespace and removing surrounding quotes.
+     */
+    private String sanitizeStringLiteral(String raw) {
+        return raw.trim().replaceAll("^\"|\"$", "");
     }
 
     private Optional<String> extractFieldValue(ExpressionNode exprNode) {
         SyntaxKind syntaxKind = exprNode.kind();
         switch (syntaxKind) {
             case NUMERIC_LITERAL:
-            case STRING_LITERAL:
-            case QUALIFIED_NAME_REFERENCE:
-            case SIMPLE_NAME_REFERENCE:
                 return Optional.of(exprNode.toString().trim());
-                
+            case STRING_LITERAL: 
+                return Optional.of(exprNode.toString().trim().replaceAll("^\"|\"$", ""));
+            case QUALIFIED_NAME_REFERENCE:
+                return Optional.of(((QualifiedNameReferenceNode) exprNode).identifier().text().trim());                
             case REGEX_TEMPLATE_EXPRESSION:
                 String regexContent = ((TemplateExpressionNode) exprNode).content().get(0).toString();
                 if (regexContent.matches(REGEX_INTERPOLATION_PATTERN)) {

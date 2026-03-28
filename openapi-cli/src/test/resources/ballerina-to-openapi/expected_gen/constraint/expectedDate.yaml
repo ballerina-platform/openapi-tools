@@ -61,7 +61,10 @@ components:
           type: string
     MyDate:
       type: string
+      description: Event date cannot be past!
       format: date
+      x-ballerina-constraint:
+        option: FUTURE
     RegDate:
       required:
       - date
@@ -71,4 +74,7 @@ components:
           $ref: "#/components/schemas/MyDate"
         lastLogin:
           type: string
+          description: Invalid date found for last login! Last login should be past!
           format: date
+          x-ballerina-constraint:
+            option: PAST
