@@ -123,7 +123,7 @@ public class ConstraintTests {
 
     @Test(description = "Test OpenAPI mapping for Ballerina @constraint:Date annotations")
     public void testDateConstraintMapping() throws IOException {
-        Path ballerinaFilePath = RES_DIR.resolve("constraint/date_constraint.bal");
+        Path ballerinaFilePath = RES_DIR.resolve("constraint/dateConstraint.bal");
         TestUtils.compareWithGeneratedFile(ballerinaFilePath, "constraint/expectedDate.yaml");
     }
 }
