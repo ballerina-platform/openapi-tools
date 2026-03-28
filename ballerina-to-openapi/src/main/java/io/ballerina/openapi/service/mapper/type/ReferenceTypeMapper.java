@@ -26,6 +26,8 @@ import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
+
 
 import java.util.Objects;
 
@@ -58,6 +60,9 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
         if (isBuiltInSubTypes(typeSymbol)) {
             return SimpleTypeMapper.getTypeSchema(typeSymbol.typeDescriptor(), additionalData);
         }
+        if (isTimeDateType(typeSymbol)) {
+            return new StringSchema().format("date");
+        }
         if (!AbstractTypeMapper.hasMapping(components, typeSymbol)) {
             createComponentMapping(typeSymbol, components, additionalData);
             if (!AbstractTypeMapper.hasFullMapping(components, typeSymbol)) {
@@ -77,6 +82,13 @@ public class ReferenceTypeMapper extends AbstractTypeMapper {
             default -> false;
         };
     }
+
+   public static boolean isTimeDateType(TypeReferenceTypeSymbol typeSymbol) {
+    return typeSymbol.getModule()
+            .filter(module -> module.getName().orElse("").equals("time"))
+            .isPresent()
+            && typeSymbol.getName().orElse("").equals("Date");
+}
 
     public static TypeSymbol getReferredType(TypeSymbol typeSymbol) {
         if (typeSymbol.typeKind().equals(TypeDescKind.TYPE_REFERENCE)) {
