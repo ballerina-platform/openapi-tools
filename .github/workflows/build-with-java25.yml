@@ -1,0 +1,9 @@
+name: Build with Java 25
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ballerina-platform/ballerina-library/.github/workflows/build-with-java25-template.yml@java-25
+    secrets: inherit
