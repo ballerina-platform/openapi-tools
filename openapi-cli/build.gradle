@@ -16,7 +16,7 @@
  */
 
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
 }
 
 apply from: "$rootDir/gradle/javaProject.gradle"
@@ -57,13 +57,13 @@ dependencies {
     }
 }
 
-def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
+def bDistribution = file("${project.layout.buildDirectory.get().asFile}/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
 task jBallerinaPack {
     doLast {
         configurations.balTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             copy {
                 from project.zipTree(artifact.getFile())
-                into new File(project.buildDir, "extracted-distribution/")
+                into new File(project.layout.buildDirectory.get().asFile, "extracted-distribution/")
             }
         }
     }
@@ -76,7 +76,7 @@ task unpackStdLibs() {
         configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             copy {
                 from project.zipTree(artifact.getFile())
-                into new File("${project.buildDir}/extracted-distribution/" + artifact.name + "-zip")
+                into new File("${project.layout.buildDirectory.get().asFile}/extracted-distribution/" + artifact.name + "-zip")
             }
         }
     }
@@ -84,13 +84,13 @@ task unpackStdLibs() {
 
 task copyStdlibs(type: Copy) {
     dependsOn(unpackStdLibs)
-    def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
+    def ballerinaDist = "${project.layout.buildDirectory.get().asFile}/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
     into ballerinaDist
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     /* Standard Libraries */
     configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        def artifactExtractedPath = "${project.buildDir}/extracted-distribution/" + artifact.name + "-zip"
+        def artifactExtractedPath = "${project.layout.buildDirectory.get().asFile}/extracted-distribution/" + artifact.name + "-zip"
         into("repo/bala") {
             from "${artifactExtractedPath}/bala/"
         }

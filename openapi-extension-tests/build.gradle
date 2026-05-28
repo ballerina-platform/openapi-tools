@@ -19,7 +19,7 @@
 description = 'Ballerina - OpenAPI Extension Tests'
 apply from: "$rootDir/gradle/javaProject.gradle"
 
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.gradleup.shadow'
 apply plugin: 'java'
 
 
@@ -27,7 +27,7 @@ def ballerinaOpenApiModulePath = "${project.rootDir}/module-ballerina-openapi/"
 def openApiExtensionJar = "${project.rootDir}/openapi-extension/build/libs/openapi-extension-${version}.jar"
 def openApiServiceJar = "${project.rootDir}/ballerina-to-openapi/build/libs/ballerina-to-openapi-${version}.jar"
 def ballerinaDistPath = "${ballerinaOpenApiModulePath}/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
-def ballerinaDist = "${buildDir}/target/ballerina-distribution"
+def ballerinaDist = "${layout.buildDirectory.get().asFile}/target/ballerina-distribution"
 
 dependencies {
     testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
@@ -66,7 +66,7 @@ task copyPackageBala {
 test {
     systemProperties =  [ jacocoAgentLine: "-javaagent:${configurations.jacocoRuntime.asPath}=destfile=${test.jacoco.destinationFile.absolutePath},append=true,inclnolocationclasses=true,exclclassloader=jdk.internal.reflect.DelegatingClassLoader" ,
                           "distributions.dir": ballerinaDistPath,
-                          "target.dir": "$project.buildDir"
+                          "target.dir": "${project.layout.buildDirectory.get().asFile}"
     ]
 
     useTestNG() {
@@ -95,9 +95,9 @@ jacocoTestReport {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
-        html.outputLocation = file("${buildDir}/reports/jacoco/report.html")
-        csv.outputLocation = file("${buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml")
+        html.outputLocation = layout.buildDirectory.dir("reports/jacoco/html")
+        csv.outputLocation = layout.buildDirectory.file("reports/jacoco/report.csv")
     }
 }
 copyPackageBala.dependsOn copyDistribution

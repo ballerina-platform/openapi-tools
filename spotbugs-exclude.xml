@@ -42,4 +42,17 @@
         <Class name="io.ballerina.openapi.cmd.ErrorMessages" />
         <Bug pattern="CT_CONSTRUCTOR_THROW" />
     </Match>
+    <!-- Pre-existing issues surfaced by SpotBugs 4.9.x (bundled in plugin >= 6.2.0) -->
+    <Match>
+        <BugCode name="THROWS"/>
+    </Match>
+    <Match>
+        <BugCode name="AT"/>
+    </Match>
+    <Match>
+        <BugCode name="USELESS_STRING"/>
+    </Match>
+    <Match>
+        <BugCode name="DM"/>
+    </Match>
 </FindBugsFilter>

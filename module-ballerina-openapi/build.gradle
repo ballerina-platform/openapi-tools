@@ -15,6 +15,50 @@
  *
  */
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
+import javax.inject.Inject
+
+abstract class BallerinaOpenAPIExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
+
+abstract class PatchBallerinaOpenAPIScriptsTask extends DefaultTask {
+    @Inject abstract JavaToolchainService getJavaToolchainService()
+
+    @TaskAction
+    void patch() {
+        def launcher = javaToolchainService.launcherFor { spec ->
+            spec.languageVersion.set(JavaLanguageVersion.of(25))
+        }.get()
+        def java25Home = launcher.executablePath.asFile.parentFile.parentFile.absolutePath
+
+        def binDirs = [
+            project.layout.buildDirectory.dir("target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${project.ballerinaLangVersion}/bin").get().asFile,
+            new File("${project.rootDir}/target/ballerina-runtime/bin")
+        ]
+        binDirs.each { binDir ->
+            if (binDir.exists()) {
+                binDir.eachFile { file ->
+                    file.setExecutable(true)
+                    if (!file.name.endsWith('.bat') && !file.name.endsWith('.cmd')) {
+                        def original = file.text
+                        def lines = original.split('\n').toList()
+                        lines = lines.findAll { !it.contains('--sun-misc-unsafe-memory-access=allow') }
+                        def shebangIdx = lines.findIndexOf { it.startsWith('#!') }
+                        if (shebangIdx >= 0) {
+                            lines.add(shebangIdx + 1, "export JAVA_HOME='${java25Home}'")
+                        }
+                        def patched = lines.join('\n') + '\n'
+                        if (patched != original) { file.text = patched }
+                    }
+                }
+            }
+        }
+    }
+}
+
 description = 'Ballerina - OpenAPI Ballerina Generator'
 
 configurations {
@@ -46,17 +90,17 @@ jar {
 
 def packageName = "openapi"
 def packageOrg = "ballerina"
-def platform = "java21"
+def platform = "java25"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaConfigFilePlaceHolder = new File("${project.rootDir}/config/resources/Ballerina.toml")
 def ballerinaCompileConfigFilePlaceHolder = new File("${project.rootDir}/config/resources/CompilerPlugin.toml")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaCompileConfigFile = new File("$project.projectDir/CompilerPlugin.toml")
-def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
-def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
-def artifactLibParent = file("$project.projectDir/build/lib_parent/")
+def artifactBallerinaDocs = file("${project.layout.buildDirectory.get().asFile}/docs_parent/")
+def artifactCacheParent = file("${project.layout.buildDirectory.get().asFile}/cache_parent/")
+def artifactLibParent = file("${project.layout.buildDirectory.get().asFile}/lib_parent/")
 def targetNativeJar = file("""$project.rootDir/${packageName}-validator/build/libs/${packageName}-validator-${project.version}.jar""")
-def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
+def distributionPath = "${project.layout.buildDirectory.get().asFile}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
 def originalCompilerConfig = ballerinaCompileConfigFile.text
@@ -80,7 +124,7 @@ def stripBallerinaExtensionVersion(String extVersion) {
 task unpackJballerinaTools(type: Copy) {
     configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
         from zipTree(artifact.getFile())
-        into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
+        into new File("${layout.buildDirectory.get().asFile}/target/extracted-distributions", "jballerina-tools-zip")
     }
 }
 
@@ -89,7 +133,7 @@ task unpackStdLibs() {
         configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             copy {
                 from project.zipTree(artifact.getFile())
-                into new File("${buildDir}/target/extracted-distributions", artifact.name + "-zip")
+                into new File("${layout.buildDirectory.get().asFile}/target/extracted-distributions", artifact.name + "-zip")
             }
         }
     }
@@ -102,7 +146,7 @@ task copyStdlibs(type: Copy) {
 
     /* Standard Libraries */
     configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        def artifactExtractedPath = "${buildDir}/target/extracted-distributions/" + artifact.name + "-zip"
+        def artifactExtractedPath = "${layout.buildDirectory.get().asFile}/target/extracted-distributions/" + artifact.name + "-zip"
         into("repo/bala") {
             from "${artifactExtractedPath}/bala/"
         }
@@ -182,11 +226,12 @@ task initializeVariables {
 }
 
 task ballerinaBuild {
+    def execHelper = project.objects.newInstance(BallerinaOpenAPIExecHelper)
     inputs.dir file(project.projectDir)
     doNotTrackState("build needs to run every time")
     doLast {
         // Build and populate caches
-        exec {
+        execHelper.execOperations.exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -218,7 +263,7 @@ task ballerinaBuild {
         }
 
         // Doc creation and packing
-        exec {
+        execHelper.execOperations.exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -229,7 +274,7 @@ task ballerinaBuild {
         }
         copy {
             from file("$project.projectDir/target/apidocs/${packageName}")
-            into file("$project.projectDir/build/docs_parent/docs/${packageName}")
+            into file("${project.layout.buildDirectory.get().asFile}/docs_parent/docs/${packageName}")
         }
 
         if (needPublishToCentral) {
@@ -239,7 +284,7 @@ task ballerinaBuild {
             }
             if (ballerinaCentralAccessToken != null) {
                 println("Publishing to the ballerina central..")
-                exec {
+                execHelper.execOperations.exec {
                     workingDir project.projectDir
                     environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
                     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -253,7 +298,7 @@ task ballerinaBuild {
             }
         } else if (needPublishToLocalCentral) {
             println("Publishing to the ballerina local central repository..")
-            exec {
+            execHelper.execOperations.exec {
                 workingDir project.projectDir
                 environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
                 if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -273,7 +318,7 @@ task ballerinaBuild {
 }
 
 task createArtifactZip(type: Zip) {
-    destinationDirectory = file("${buildDir}/distributions")
+    destinationDirectory = layout.buildDirectory.dir("distributions")
     from ballerinaBuild
 }
 
@@ -296,8 +341,13 @@ publishing {
     }
 }
 
+task patchBallerinaScripts(type: PatchBallerinaOpenAPIScriptsTask) {
+    dependsOn 'unpackJballerinaTools'
+}
+
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
+copyStdlibs.dependsOn patchBallerinaScripts
 copyOpenApiTool.dependsOn unpackJballerinaTools
 copyOpenApiTool.dependsOn ':openapi-tool:build'
 updateTomlFile.dependsOn copyStdlibs
@@ -319,6 +369,8 @@ ballerinaBuild.dependsOn jar
 ballerinaBuild.finalizedBy revertTomlFile
 ballerinaBuild.dependsOn test
 build.dependsOn ballerinaBuild
+build.dependsOn patchBallerinaScripts
+test.dependsOn patchBallerinaScripts
 
 publishToMavenLocal.dependsOn build
 publish.dependsOn build

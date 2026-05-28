@@ -16,6 +16,12 @@
  *  under the License.
  */
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
+
+abstract class ClientNativeExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
 
 plugins {
     id 'java'
@@ -114,8 +120,9 @@ task updateTomlFile {
 }
 
 task commitTomlFiles {
+    def execHelper = project.objects.newInstance(ClientNativeExecHelper)
     doLast {
-        project.exec {
+        execHelper.execOperations.exec {
             ignoreExitValue true
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the toml files for client native tests\" ballerina-tests/Ballerina.toml ballerina-tests/Dependencies.toml"
@@ -127,13 +134,14 @@ task commitTomlFiles {
 }
 
 task ballerinaTests {
+    def execHelper = project.objects.newInstance(ClientNativeExecHelper)
     dependsOn(":module-ballerina-openapi:build")
     dependsOn(updateTomlFile)
     dependsOn(jar)
     finalizedBy(commitTomlFiles)
 
     doLast {
-        exec {
+        execHelper.execOperations.exec {
             workingDir "${project.projectDir}/ballerina-tests"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test --offline && exit " +

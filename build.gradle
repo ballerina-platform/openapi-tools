@@ -18,15 +18,12 @@ plugins {
     id 'base'
     id 'maven-publish'
     id 'com.github.spotbugs'
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
     id 'de.undercouch.download'
     id 'net.researchgate.release'
-    id 'org.javamodularity.moduleplugin' apply false
     id 'org.sonarqube'
     id 'jacoco'
 }
-
-apply plugin: "org.javamodularity.moduleplugin"
 
 jacoco {
     toolVersion = "${jacocoVersion}"
@@ -87,6 +84,13 @@ subprojects {
     if (project.name != 'openapi-tool') {
         apply plugin: 'java'
     }
+    plugins.withId('java') {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(25)
+            }
+        }
+    }
     configurations {
         ballerinaStdLibs
     }
@@ -120,16 +124,12 @@ subprojects {
     }
 }
 
-task createProperties(dependsOn: processResources) {
+task createProperties {
     doLast {
         def clientNativeVersionFile = 
             new File("$project.rootDir/openapi-cli/src/main/resources/openapi-client-native-version.properties")
         clientNativeVersionFile.text = "version=${clientNativeVersion}"
     }
-}
-
-classes {
-    dependsOn createProperties
 }
 
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
@@ -176,9 +176,9 @@ task codeCoverageReport(type: JacocoReport) {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
-        html.outputLocation = file("${buildDir}/reports/jacoco/report.html")
-        csv.outputLocation = file("${buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml")
+        html.outputLocation = layout.buildDirectory.dir("reports/jacoco/html")
+        csv.outputLocation = layout.buildDirectory.file("reports/jacoco/report.csv")
     }
 
     onlyIf = {
