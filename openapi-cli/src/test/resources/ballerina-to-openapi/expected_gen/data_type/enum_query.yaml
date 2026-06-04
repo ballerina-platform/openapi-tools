@@ -48,11 +48,11 @@ paths:
           in: query
           schema:
             type: string
-            default: live
             enum:
               - scheduled
               - live
               - upcoming
+            default: live
         - name: q-default-ref
           in: query
           schema:

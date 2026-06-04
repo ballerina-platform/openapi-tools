@@ -915,12 +915,12 @@ paths:
           explode: true
           schema:
             type: string
-            default: minute
             enum:
               - minute
               - hour
               - day
               - month
+            default: minute
       responses:
         "2XX":
           description: OK
@@ -1362,10 +1362,10 @@ components:
       explode: true
       schema:
         type: string
-        default: backwards
         enum:
           - forwards
           - backwards
+        default: backwards
     filterEnd:
       name: end
       in: query

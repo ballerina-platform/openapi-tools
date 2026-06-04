@@ -790,6 +790,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
         if (isServiceTypeGenerated) {
             File serviceTypeFile = new File(folderPath.resolve("service_type.bal").toString());
             File utilFile = new File(folderPath.resolve("utils.bal").toString());
+            serviceTypeFile.delete();
             utilFile.delete();
         }
         FileUtils.deleteDirectory(testDir);
