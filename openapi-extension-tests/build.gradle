@@ -46,18 +46,21 @@ task copyDistribution(type: Copy) {
 
 task copyPackageBala {
     doLast {
+        def repoDir = "${ballerinaDistDir.get().asFile}/repo"
         copy {
             from "${ballerinaOpenApiModulePath}/build/cache_parent"
-            into "${ballerinaDistDir.get().asFile}/repo"
+            into repoDir
+        }
+        if (file("bala/ballerina").exists()) {
             copy {
-                into("bala/ballerina") {
-                    from "bala/ballerina"
-                }
+                from "bala/ballerina"
+                into "${repoDir}/bala/ballerina"
             }
+        }
+        if (file("cache/ballerina").exists()) {
             copy {
-                into("cache/ballerina/") {
-                    from "cache/ballerina"
-                }
+                from "cache/ballerina"
+                into "${repoDir}/cache/ballerina"
             }
         }
     }
