@@ -126,9 +126,11 @@ subprojects {
 
 task createProperties {
     doLast {
-        def clientNativeVersionFile = 
-            new File("$project.rootDir/openapi-cli/src/main/resources/openapi-client-native-version.properties")
-        clientNativeVersionFile.text = "version=${clientNativeVersion}"
+        def propContent = "version=${clientNativeVersion}"
+        new File("$project.rootDir/openapi-cli/src/main/resources/openapi-client-native-version.properties")
+                .text = propContent
+        new File("$project.rootDir/openapi-bal-task-plugin/src/main/resources/openapi-client-native-version.properties")
+                .text = propContent
     }
 }
 

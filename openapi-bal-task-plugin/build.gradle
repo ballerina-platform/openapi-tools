@@ -59,6 +59,8 @@ shadowJar {
     archiveFileName = "openapi-bal-task-plugin-${project.version}.jar"
 }
 
+processResources.dependsOn(':createProperties')
+
 compileJava {
     doFirst {
         options.compilerArgs = [

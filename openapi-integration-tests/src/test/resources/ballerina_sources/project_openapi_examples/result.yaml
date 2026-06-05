@@ -30,13 +30,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
     post:
       operationId: postUsersId
       parameters:
@@ -61,7 +61,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
             examples:
               john:
                 value:
@@ -84,13 +84,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /users:
     get:
       operationId: getUsers
@@ -100,7 +100,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Users'
+                $ref: "#/components/schemas/Users"
   /developers:
     post:
       operationId: postDevelopers
@@ -135,7 +135,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /developers/new:
     post:
       operationId: postDevelopersNew
@@ -169,7 +169,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
   /users/{id}/address:
     get:
       operationId: getUsersIdAddress
@@ -186,13 +186,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Address'
+                $ref: "#/components/schemas/Address"
         "400":
           description: BadRequest
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: "#/components/schemas/ErrorPayload"
 components:
   schemas:
     Address:
@@ -259,7 +259,7 @@ components:
           format: int64
           example: 30
         address:
-          $ref: '#/components/schemas/Address'
+          $ref: "#/components/schemas/Address"
         friends:
           type: array
           example:
@@ -269,7 +269,7 @@ components:
                 street: 10 Downing Street
                 city: London
           items:
-            $ref: '#/components/schemas/User'
+            $ref: "#/components/schemas/User"
       additionalProperties: false
     Users:
       type: array
@@ -280,4 +280,4 @@ components:
             street: 10 Downing Street
             city: London
       items:
-        $ref: '#/components/schemas/User'
+        $ref: "#/components/schemas/User"

@@ -137,6 +137,8 @@ shadowJar {
     }
 }
 
+processResources.dependsOn(':createProperties')
+
 compileJava {
     doFirst {
         options.compilerArgs = [
