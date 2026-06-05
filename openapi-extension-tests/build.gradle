@@ -27,7 +27,7 @@ def ballerinaOpenApiModulePath = "${project.rootDir}/module-ballerina-openapi/"
 def openApiExtensionJar = "${project.rootDir}/openapi-extension/build/libs/openapi-extension-${version}.jar"
 def openApiServiceJar = "${project.rootDir}/ballerina-to-openapi/build/libs/ballerina-to-openapi-${version}.jar"
 def ballerinaDistPath = "${ballerinaOpenApiModulePath}/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
-def ballerinaDist = "${layout.buildDirectory.get().asFile}/target/ballerina-distribution"
+def ballerinaDistDir = project.layout.buildDirectory.dir("target/ballerina-distribution")
 
 dependencies {
     testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
@@ -40,7 +40,7 @@ dependencies {
 
 task copyDistribution(type: Copy) {
     from ballerinaDistPath
-    into ballerinaDist
+    into ballerinaDistDir
 }
 
 
@@ -48,7 +48,7 @@ task copyPackageBala {
     doLast {
         copy {
             from "${ballerinaOpenApiModulePath}/build/cache_parent"
-            into "${ballerinaDist}/repo"
+            into "${ballerinaDistDir.get().asFile}/repo"
             copy {
                 into("bala/ballerina") {
                     from "bala/ballerina"
