@@ -17,10 +17,15 @@
  */
 package io.ballerina.openapi.service.mapper.model;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
+import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +39,39 @@ public class OASResult {
     private OpenAPI openAPI;
     private String serviceName; // added base path for key to definition
     private final List<OpenAPIMapperDiagnostic> diagnostics;
+
+    private static boolean yamlMapperPatched = false;
+
+    private static void patchYamlMapperForSchemaOrder() {
+        if (!yamlMapperPatched) {
+            yamlMapperPatched = true;
+            Yaml.mapper().setSerializerFactory(
+                    Yaml.mapper().getSerializerFactory().withSerializerModifier(new BeanSerializerModifier() {
+                        @Override
+                        public List<BeanPropertyWriter> orderProperties(SerializationConfig config,
+                                BeanDescription beanDesc, List<BeanPropertyWriter> beanProperties) {
+                            if (Schema.class.isAssignableFrom(beanDesc.getBeanClass())) {
+                                ensureDefaultBeforeEnum(beanProperties);
+                            }
+                            return beanProperties;
+                        }
+                    })
+            );
+        }
+    }
+
+    private static void ensureDefaultBeforeEnum(List<BeanPropertyWriter> props) {
+        int defaultIdx = -1, enumIdx = -1;
+        for (int i = 0; i < props.size(); i++) {
+            String name = props.get(i).getName();
+            if ("default".equals(name)) { defaultIdx = i; }
+            else if ("enum".equals(name)) { enumIdx = i; }
+        }
+        if (enumIdx != -1 && defaultIdx != -1 && enumIdx < defaultIdx) {
+            BeanPropertyWriter defaultProp = props.remove(defaultIdx);
+            props.add(enumIdx, defaultProp);
+        }
+    }
 
     /**
      * This constructor is used to store the details that Map of {@code OpenAPI} objects and diagnostic list.
@@ -56,6 +94,7 @@ public class OASResult {
     }
 
     public Optional<String> getYaml() {
+        patchYamlMapperForSchemaOrder();
         return Optional.ofNullable(Yaml.pretty(this.openAPI));
     }
 

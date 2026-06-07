@@ -17,6 +17,10 @@
  */
 package io.ballerina.openapi.cmd;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
+import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import io.ballerina.cli.BLauncherCmd;
 import io.ballerina.openapi.core.generators.common.InlineModelResolver;
 import io.ballerina.openapi.core.generators.common.model.Filter;
@@ -25,6 +29,7 @@ import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -98,6 +103,39 @@ public abstract class SubCmdBase implements BLauncherCmd {
             "writing the %s OpenAPI definition file%n";
     private static final String WARNING_SWAGGER_V2_FOUND = "WARNING: Swagger version 2.0 found in the OpenAPI " +
             "definition. The generated OpenAPI definition will be in OpenAPI version 3.0.x";
+
+    private static boolean yamlMapperPatched = false;
+
+    private static void patchYamlMapperForSchemaOrder() {
+        if (!yamlMapperPatched) {
+            yamlMapperPatched = true;
+            Yaml.mapper().setSerializerFactory(
+                    Yaml.mapper().getSerializerFactory().withSerializerModifier(new BeanSerializerModifier() {
+                        @Override
+                        public List<BeanPropertyWriter> orderProperties(SerializationConfig config,
+                                BeanDescription beanDesc, List<BeanPropertyWriter> beanProperties) {
+                            if (Schema.class.isAssignableFrom(beanDesc.getBeanClass())) {
+                                ensureDefaultBeforeEnum(beanProperties);
+                            }
+                            return beanProperties;
+                        }
+                    })
+            );
+        }
+    }
+
+    private static void ensureDefaultBeforeEnum(List<BeanPropertyWriter> props) {
+        int defaultIdx = -1, enumIdx = -1;
+        for (int i = 0; i < props.size(); i++) {
+            String name = props.get(i).getName();
+            if ("default".equals(name)) { defaultIdx = i; }
+            else if ("enum".equals(name)) { enumIdx = i; }
+        }
+        if (enumIdx != -1 && defaultIdx != -1 && enumIdx < defaultIdx) {
+            BeanPropertyWriter defaultProp = props.remove(defaultIdx);
+            props.add(enumIdx, defaultProp);
+        }
+    }
 
     private static final PrintStream infoStream = System.out;
     private PrintStream errorStream = System.err;
@@ -292,6 +330,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
     private void writeGeneratedOpenAPIFile(OpenAPI openAPI) {
         String outputFileNameWithExt = getOutputFileName();
         try {
+            patchYamlMapperForSchemaOrder();
             CodegenUtils.writeFile(targetPath.resolve(outputFileNameWithExt),
                     outputFileNameWithExt.endsWith(JSON_EXTENSION) ? Json.pretty(openAPI) : Yaml.pretty(openAPI));
             infoStream.printf(INFO_OUTPUT_WRITTEN_MSG, infoMsgPrefix, targetPath.resolve(outputFileNameWithExt));
