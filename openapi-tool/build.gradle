@@ -181,6 +181,7 @@ task patchBallerinaToolScripts(type: PatchBallerinaToolScriptsTask) {
     dependsOn unpackJballerinaTools
 }
 test.dependsOn patchBallerinaToolScripts
+build.dependsOn patchBallerinaToolScripts
 copyStdlibs.dependsOn unpackJballerinaTools
 updateTomlFiles.dependsOn copyStdlibs
 updateTomlFiles.dependsOn ":openapi-cli:build"

@@ -128,8 +128,11 @@ public abstract class SubCmdBase implements BLauncherCmd {
         int defaultIdx = -1, enumIdx = -1;
         for (int i = 0; i < props.size(); i++) {
             String name = props.get(i).getName();
-            if ("default".equals(name)) { defaultIdx = i; }
-            else if ("enum".equals(name)) { enumIdx = i; }
+            if ("default".equals(name)) {
+                defaultIdx = i;
+            } else if ("enum".equals(name)) {
+                enumIdx = i;
+            }
         }
         if (enumIdx != -1 && defaultIdx != -1 && enumIdx < defaultIdx) {
             BeanPropertyWriter defaultProp = props.remove(defaultIdx);
