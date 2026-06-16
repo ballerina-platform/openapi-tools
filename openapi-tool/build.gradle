@@ -37,7 +37,7 @@ abstract class PatchBallerinaToolScriptsTask extends DefaultTask {
             spec.languageVersion.set(JavaLanguageVersion.of(25))
         }.get()
         def java25Home = launcher.executablePath.asFile.parentFile.parentFile.absolutePath
-        def binDir = project.layout.buildDirectory.dir("jballerina-tools-${project.ballerinaLangVersion}/bin").get().asFile
+        def binDir = project.layout.buildDirectory.dir("target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${project.ballerinaLangVersion}/bin").get().asFile
         if (!binDir.exists()) { return }
         binDir.eachFile { file ->
             file.setExecutable(true)

@@ -25,7 +25,6 @@ module io.ballerina.openapi {
     requires io.ballerina.formatter.core;
     requires io.ballerina.openapi.core;
     requires io.ballerina.openapi.service;
-    requires com.fasterxml.jackson.databind;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires java.ws.rs;

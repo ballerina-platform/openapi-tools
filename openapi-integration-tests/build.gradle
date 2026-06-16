@@ -127,6 +127,7 @@ compileJava {
         classpath = files()
     }
 }
+jBallerinaPack.dependsOn ':module-ballerina-openapi:patchBallerinaScripts'
 copyOpenAPI.dependsOn jBallerinaPack
 test.dependsOn copyOpenAPI
 test.dependsOn ":module-ballerina-openapi:build"
