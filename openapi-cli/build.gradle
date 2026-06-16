@@ -104,6 +104,12 @@ test {
     dependsOn {
         copyStdlibs
     }
+    // The full suite runs all ~890 tests in a single JVM (TestNG suite XML; forkEvery has no
+    // effect in suite mode). Each test does a full Ballerina compile that caches large stdlib
+    // modules in-JVM. The default ~4g heap is too tight, so G1 occasionally evicts the
+    // soft-referenced compiler cache mid-suite, intermittently breaking service type resolution
+    // ("Yaml was not generated"). Give it headroom.
+    maxHeapSize = '6g'
     systemProperty "ballerina.home", bDistribution
 
     useTestNG() {
