@@ -22,6 +22,7 @@ import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectEnvironmentBuilder;
 import org.testng.Assert;
 
 import java.io.File;
@@ -40,6 +41,7 @@ import java.util.stream.Stream;
 public class TestUtils {
 
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
+    private static final ProjectEnvironmentBuilder SHARED_ENV_BUILDER = ProjectEnvironmentBuilder.getDefaultBuilder();
 
     private static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
@@ -64,6 +66,7 @@ public class TestUtils {
                                                                       List<String> yamlFiles) throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         OASContractGenerator openApiConverter = new OASContractGenerator();
+        openApiConverter.setEnvironmentBuilder(SHARED_ENV_BUILDER);
         try {
             openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
             for (String yamlFile : yamlFiles) {
@@ -91,6 +94,7 @@ public class TestUtils {
     public static List<OpenAPIMapperDiagnostic> compareWithGeneratedFile(OASContractGenerator openApiConverter,
                                                                          Path ballerinaFilePath, String yamlFile)
             throws IOException {
+        openApiConverter.setEnvironmentBuilder(SHARED_ENV_BUILDER);
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         try {
             String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
