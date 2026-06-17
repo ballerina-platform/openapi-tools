@@ -23,8 +23,6 @@ import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectEnvironmentBuilder;
-import io.ballerina.projects.environment.Environment;
-import io.ballerina.projects.environment.EnvironmentBuilder;
 import org.testng.Assert;
 
 import java.io.File;
@@ -43,18 +41,7 @@ import java.util.stream.Stream;
 public class TestUtils {
 
     private static final Path RES_DIR = Paths.get("src/test/resources/ballerina-to-openapi/").toAbsolutePath();
-    private static final ProjectEnvironmentBuilder SHARED_ENV_BUILDER = createSharedEnvironmentBuilder();
-
-    private static ProjectEnvironmentBuilder createSharedEnvironmentBuilder() {
-        String ballerinaHome = System.getProperty("ballerina.home");
-        if (ballerinaHome == null || ballerinaHome.isBlank()) {
-            return null;
-        }
-        Environment environment = EnvironmentBuilder.getBuilder()
-                .setBallerinaHome(Paths.get(ballerinaHome))
-                .build();
-        return ProjectEnvironmentBuilder.getBuilder(environment);
-    }
+    private static final ProjectEnvironmentBuilder SHARED_ENV_BUILDER = ProjectEnvironmentBuilder.getDefaultBuilder();
 
     private static String getStringFromGivenBalFile(Path expectedServiceFile, String s) throws IOException {
         Stream<String> expectedServiceLines = Files.lines(expectedServiceFile.resolve(s));
