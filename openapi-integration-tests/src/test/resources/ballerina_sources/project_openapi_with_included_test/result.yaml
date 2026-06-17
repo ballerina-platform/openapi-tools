@@ -21,7 +21,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pod'
+                  $ref: "#/components/schemas/Pod"
   /Services:
     get:
       operationId: getServices
@@ -33,7 +33,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Service'
+                  $ref: "#/components/schemas/Service"
 components:
   schemas:
     Metadata:
@@ -50,17 +50,17 @@ components:
     Pod:
       type: object
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: "#/components/schemas/Resource"
         - required:
             - spec
           type: object
           properties:
             kind:
               allOf:
-                - $ref: '#/components/schemas/ResourceKind'
+                - $ref: "#/components/schemas/ResourceKind"
               default: Pod
             spec:
-              $ref: '#/components/schemas/PodSpec'
+              $ref: "#/components/schemas/PodSpec"
     PodSpec:
       required:
         - nodeName
@@ -71,7 +71,7 @@ components:
     Resource:
       type: object
       allOf:
-        - $ref: '#/components/schemas/ResourceBase'
+        - $ref: "#/components/schemas/ResourceBase"
         - required:
             - spec
           type: object
@@ -80,7 +80,7 @@ components:
               type: object
               properties: {}
             status:
-              $ref: '#/components/schemas/Status'
+              $ref: "#/components/schemas/Status"
     ResourceBase:
       required:
         - group
@@ -94,9 +94,9 @@ components:
         version:
           type: string
         kind:
-          $ref: '#/components/schemas/ResourceKind'
+          $ref: "#/components/schemas/ResourceKind"
         metadata:
-          $ref: '#/components/schemas/Metadata'
+          $ref: "#/components/schemas/Metadata"
     ResourceKind:
       type: string
       enum:
@@ -105,17 +105,17 @@ components:
     Service:
       type: object
       allOf:
-        - $ref: '#/components/schemas/Resource'
+        - $ref: "#/components/schemas/Resource"
         - required:
             - spec
           type: object
           properties:
             kind:
               allOf:
-                - $ref: '#/components/schemas/ResourceKind'
+                - $ref: "#/components/schemas/ResourceKind"
               default: Service
             spec:
-              $ref: '#/components/schemas/ServiceSpec'
+              $ref: "#/components/schemas/ServiceSpec"
     ServiceSpec:
       required:
         - clusterIP
