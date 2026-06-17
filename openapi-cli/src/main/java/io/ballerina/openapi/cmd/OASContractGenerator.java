@@ -33,6 +33,7 @@ import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.directory.ProjectLoader;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -61,12 +62,17 @@ public class OASContractGenerator {
     private List<OpenAPIMapperDiagnostic> diagnostics = new ArrayList<>();
     private PrintStream outStream = System.out;
     private Boolean ballerinaExtension = false;
+    private ProjectEnvironmentBuilder environmentBuilder = null;
 
     /**
      * Initialize constructor.
      */
     public OASContractGenerator() {
 
+    }
+
+    public void setEnvironmentBuilder(ProjectEnvironmentBuilder environmentBuilder) {
+        this.environmentBuilder = environmentBuilder;
     }
 
     public void setBallerinaExtension(Boolean ballerinaExtension) {
@@ -89,7 +95,9 @@ public class OASContractGenerator {
     public void generateOAS3DefinitionsAllService(Path servicePath, Path outPath, String serviceName,
                                                   Boolean needJson) {
         // Load project instance for single ballerina file
-        project = ProjectLoader.load(servicePath).project();
+        project = environmentBuilder != null
+                ? ProjectLoader.load(servicePath, environmentBuilder).project()
+                : ProjectLoader.load(servicePath).project();
         DiagnosticResult diagnosticsFromCodeGenAndModify = project.currentPackage().runCodeGenAndModifyPlugins();
         boolean hasErrorsFromCodeGenAndModify = diagnosticsFromCodeGenAndModify.diagnostics().stream()
                 .anyMatch(d -> DiagnosticSeverity.ERROR.equals(d.diagnosticInfo().severity()));
