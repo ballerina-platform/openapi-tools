@@ -21,6 +21,7 @@ import io.ballerina.cli.BLauncherCmd;
 import io.ballerina.openapi.core.generators.common.InlineModelResolver;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.service.mapper.utils.CodegenUtils;
+import io.ballerina.openapi.service.mapper.utils.YamlSchemaOrderPatch;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
@@ -292,6 +293,7 @@ public abstract class SubCmdBase implements BLauncherCmd {
     private void writeGeneratedOpenAPIFile(OpenAPI openAPI) {
         String outputFileNameWithExt = getOutputFileName();
         try {
+            YamlSchemaOrderPatch.applyIfNeeded();
             CodegenUtils.writeFile(targetPath.resolve(outputFileNameWithExt),
                     outputFileNameWithExt.endsWith(JSON_EXTENSION) ? Json.pretty(openAPI) : Yaml.pretty(openAPI));
             infoStream.printf(INFO_OUTPUT_WRITTEN_MSG, infoMsgPrefix, targetPath.resolve(outputFileNameWithExt));

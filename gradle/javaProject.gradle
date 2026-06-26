@@ -53,8 +53,6 @@ dependencies {
     checkstyle "com.puppycrawl.tools:checkstyle:${project.checkstylePluginVersion}"
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
-
 def excludePattern = '**/module-info.java'
 tasks.withType(Checkstyle) {
     exclude excludePattern
@@ -75,7 +73,7 @@ jacoco {
 }
 
 test {
-    systemProperty "ballerina.home", "$buildDir"
+    systemProperty "ballerina.home", layout.buildDirectory.get().asFile
     systemProperty "org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog"
     testLogging {
         showStackTraces = true
@@ -85,7 +83,7 @@ test {
     }
     jacoco {
         enabled = true
-        destinationFile = file("$buildDir/coverage-reports/jacoco.exec")
+        destinationFile = layout.buildDirectory.file("coverage-reports/jacoco.exec").get().asFile
         includeNoLocationClasses = true
         excludes = ['jdk.internal.*']
     }
@@ -112,13 +110,13 @@ spotbugsMain {
     effort = SpotBugsEffort.MAX
     reportLevel = SpotBugsConfidence.LOW
     ignoreFailures = true
-    reportsDir = file("$project.buildDir/reports/spotbugs")
+    reportsDir = layout.buildDirectory.dir("reports/spotbugs").get().asFile
     def excludeFile = file("${rootDir}/spotbugs-exclude.xml")
     if (excludeFile.exists()) {
         it.excludeFilter = excludeFile
     }
     reports {
-        text.enabled = true
+        text.required = true
     }
 }
 
@@ -131,9 +129,9 @@ jacocoTestReport {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.outputLocation = file("${project.buildDir}/reports/jacoco/report.xml")
-        html.outputLocation = file("${project.buildDir}/reports/jacoco/report.html")
-        csv.outputLocation = file("${project.buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml")
+        html.outputLocation = layout.buildDirectory.dir("reports/jacoco/html")
+        csv.outputLocation = layout.buildDirectory.file("reports/jacoco/report.csv")
     }
 }
 

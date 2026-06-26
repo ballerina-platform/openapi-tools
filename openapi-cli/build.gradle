@@ -16,7 +16,7 @@
  */
 
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
 }
 
 apply from: "$rootDir/gradle/javaProject.gradle"
@@ -57,13 +57,13 @@ dependencies {
     }
 }
 
-def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
+def bDistribution = file("${project.layout.buildDirectory.get().asFile}/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
 task jBallerinaPack {
     doLast {
         configurations.balTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             copy {
                 from project.zipTree(artifact.getFile())
-                into new File(project.buildDir, "extracted-distribution/")
+                into new File(project.layout.buildDirectory.get().asFile, "extracted-distribution/")
             }
         }
     }
@@ -76,7 +76,7 @@ task unpackStdLibs() {
         configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
             copy {
                 from project.zipTree(artifact.getFile())
-                into new File("${project.buildDir}/extracted-distribution/" + artifact.name + "-zip")
+                into new File("${project.layout.buildDirectory.get().asFile}/extracted-distribution/" + artifact.name + "-zip")
             }
         }
     }
@@ -84,13 +84,13 @@ task unpackStdLibs() {
 
 task copyStdlibs(type: Copy) {
     dependsOn(unpackStdLibs)
-    def ballerinaDist = "$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
+    def ballerinaDist = "${project.layout.buildDirectory.get().asFile}/extracted-distribution/jballerina-tools-${ballerinaLangVersion}"
     into ballerinaDist
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     /* Standard Libraries */
     configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        def artifactExtractedPath = "${project.buildDir}/extracted-distribution/" + artifact.name + "-zip"
+        def artifactExtractedPath = "${project.layout.buildDirectory.get().asFile}/extracted-distribution/" + artifact.name + "-zip"
         into("repo/bala") {
             from "${artifactExtractedPath}/bala/"
         }
@@ -104,6 +104,12 @@ test {
     dependsOn {
         copyStdlibs
     }
+    // The full suite runs all ~890 tests in a single JVM (TestNG suite XML; forkEvery has no
+    // effect in suite mode). Each test does a full Ballerina compile that caches large stdlib
+    // modules in-JVM. With Java 25 + Ballerina 2201.14.0 the default ~4g heap is too tight, so
+    // G1 occasionally evicts the soft-referenced compiler cache mid-suite, intermittently
+    // breaking service type resolution ("Yaml was not generated"). Give it headroom.
+    maxHeapSize = '6g'
     systemProperty "ballerina.home", bDistribution
 
     useTestNG() {
@@ -136,6 +142,8 @@ shadowJar {
         exclude('META-INF/*.RSA')
     }
 }
+
+processResources.dependsOn(':createProperties')
 
 compileJava {
     doFirst {
