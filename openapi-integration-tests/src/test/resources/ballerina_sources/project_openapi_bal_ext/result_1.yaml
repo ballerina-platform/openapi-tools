@@ -45,7 +45,7 @@ components:
         name: BasicStudent
     Date:
       type: object
-      description: Date in proleptic Gregorian calendar.
+      description: A date in the proleptic Gregorian calendar.
       allOf:
         - $ref: "#/components/schemas/DateFields"
         - $ref: "#/components/schemas/OptionalTimeOfDayFields"
@@ -57,7 +57,7 @@ components:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.8.0
+        version: 2.8.1
         modulePrefix: time
         name: Date
     DateFields:
@@ -81,7 +81,7 @@ components:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.8.0
+        version: 2.8.1
         modulePrefix: time
         name: DateFields
     OptionalTimeOfDayFields:
@@ -95,12 +95,12 @@ components:
           format: int64
         second:
           $ref: "#/components/schemas/Seconds"
-      description: TimeOfDay with all the fields beign optional.
+      description: A time of day with optional fields.
       x-ballerina-type:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.8.0
+        version: 2.8.1
         modulePrefix: time
         name: OptionalTimeOfDayFields
     Seconds:
@@ -111,7 +111,7 @@ components:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.8.0
+        version: 2.8.1
         modulePrefix: time
         name: Seconds
     Student:
@@ -149,9 +149,11 @@ components:
       properties:
         hours:
           type: integer
+          description: The hour offset as an integer
           format: int64
         minutes:
           type: integer
+          description: The minute offset as an integer (default is 0)
           format: int64
         seconds:
           type: number
@@ -165,6 +167,6 @@ components:
         orgName: ballerina
         pkgName: time
         moduleName: time
-        version: 2.8.0
+        version: 2.8.1
         modulePrefix: time
         name: ZoneOffset
