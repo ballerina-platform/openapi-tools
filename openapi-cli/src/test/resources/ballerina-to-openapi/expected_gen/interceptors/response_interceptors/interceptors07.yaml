@@ -3,12 +3,12 @@ info:
   title: PayloadV
   version: 0.0.0
 servers:
-  - url: "{server}:{port}/payloadV"
-    variables:
-      server:
-        default: http://localhost
-      port:
-        default: "9090"
+- url: "{server}:{port}/payloadV"
+  variables:
+    server:
+      default: http://localhost
+    port:
+      default: "9090"
 paths:
   /person:
     post:
@@ -26,10 +26,10 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - type: object
-                    additionalProperties:
-                      type: string
-                  - $ref: "#/components/schemas/Person"
+                - type: object
+                  additionalProperties:
+                    type: string
+                - $ref: "#/components/schemas/Person"
   /persons:
     post:
       operationId: postPersons
@@ -48,21 +48,21 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - type: object
-                    additionalProperties:
-                      type: string
-                  - type: array
-                    items:
-                      $ref: "#/components/schemas/Person"
+                - type: object
+                  additionalProperties:
+                    type: string
+                - type: array
+                  items:
+                    $ref: "#/components/schemas/Person"
         "400":
           description: BadRequest
 components:
   schemas:
     Person:
       required:
-        - address
-        - age
-        - name
+      - address
+      - age
+      - name
       type: object
       properties:
         name:
