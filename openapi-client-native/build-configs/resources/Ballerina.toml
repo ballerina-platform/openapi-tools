@@ -2,7 +2,7 @@
 org = "ballerina"
 name = "client_native_test"
 version = "0.1.0"
-distribution = "2201.14.0-20260527-050400-74f7e6bf"
+distribution = "2201.14.0"
 
 [[platform.java25.dependency]]
 groupId = "io.ballerina.openapi"
