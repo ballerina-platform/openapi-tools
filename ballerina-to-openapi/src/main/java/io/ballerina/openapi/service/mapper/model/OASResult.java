@@ -18,7 +18,6 @@
 package io.ballerina.openapi.service.mapper.model;
 
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
-import io.ballerina.openapi.service.mapper.utils.YamlSchemaOrderPatch;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -57,7 +56,6 @@ public class OASResult {
     }
 
     public Optional<String> getYaml() {
-        YamlSchemaOrderPatch.applyIfNeeded();
         return Optional.ofNullable(Yaml.pretty(this.openAPI));
     }
 
