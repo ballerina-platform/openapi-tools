@@ -84,13 +84,6 @@ subprojects {
     if (project.name != 'openapi-tool') {
         apply plugin: 'java'
     }
-    plugins.withId('java') {
-        java {
-            toolchain {
-                languageVersion = JavaLanguageVersion.of(25)
-            }
-        }
-    }
     configurations {
         ballerinaStdLibs
     }
