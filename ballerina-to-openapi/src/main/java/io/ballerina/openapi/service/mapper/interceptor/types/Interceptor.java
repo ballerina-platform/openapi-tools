@@ -90,7 +90,7 @@ public abstract class Interceptor extends Resource {
 
     protected void setReturnType(TypeSymbol returnType) {
         TypeSymbol effectiveReturnType;
-        if (isSubTypeOfDefaultInterceptorReturnType(returnType, semanticModel)) {
+        if (isContinuationReturnType(returnType, semanticModel)) {
             continueExecution = true;
             effectiveReturnType = getEffectiveReturnType(returnType, semanticModel);
         } else {
@@ -104,6 +104,11 @@ public abstract class Interceptor extends Resource {
         extractErrorAndNonErrorReturnTypes(effectiveReturnType);
     }
 
+    private boolean isContinuationReturnType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+        return isSubTypeOfDefaultInterceptorReturnType(typeSymbol, semanticModel) ||
+                getType().equals(InterceptorType.REQUEST) && containsHttpNextServiceType(typeSymbol, semanticModel);
+    }
+
     private boolean isSubTypeOfDefaultInterceptorReturnType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
         Optional<Symbol> optNextServiceType = semanticModel.types().getTypeByName(BALLERINA, HTTP,
                 EMPTY, NEXT_SERVICE);
@@ -114,6 +119,20 @@ public abstract class Interceptor extends Resource {
         UnionTypeSymbol defaultInterceptorReturnType = semanticModel.types().builder().UNION_TYPE.withMemberTypes(
                 nextServiceType.typeDescriptor(), semanticModel.types().NIL).build();
         return defaultInterceptorReturnType.subtypeOf(typeSymbol);
+    }
+
+    private boolean containsHttpNextServiceType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
+        if (isSubTypeOfHttpNextServiceType(typeSymbol, semanticModel)) {
+            return true;
+        }
+        if (typeSymbol instanceof TypeReferenceTypeSymbol typeReference) {
+            return containsHttpNextServiceType(typeReference.typeDescriptor(), semanticModel);
+        }
+        if (typeSymbol instanceof UnionTypeSymbol unionType) {
+            return unionType.userSpecifiedMemberTypes().stream()
+                    .anyMatch(memberType -> containsHttpNextServiceType(memberType, semanticModel));
+        }
+        return false;
     }
 
     private boolean isSubTypeOfHttpNextServiceType(TypeSymbol typeSymbol, SemanticModel semanticModel) {
