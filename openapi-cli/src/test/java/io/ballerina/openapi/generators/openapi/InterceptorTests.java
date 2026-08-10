@@ -68,6 +68,13 @@ public class InterceptorTests {
         compareWithGeneratedFile(ballerinaFilePath, "interceptors/request_interceptors/interceptors11.yaml");
     }
 
+    @Test(description = "Test request interceptor return type with NextService and without nil")
+    public void testRequestInterceptorWithoutNilReturn() throws IOException {
+        Path ballerinaFilePath = INTERCEPTOR_DIR.resolve("request_interceptors/interceptors12.bal");
+        compareWithGeneratedFile(ballerinaFilePath,
+                "interceptors/request_interceptors/interceptors12.yaml");
+    }
+
     @Test(description = "Test with response interceptor")
     public void testResponseInterceptor() throws IOException {
         for (int i = 0; i <= 5; i++) {
