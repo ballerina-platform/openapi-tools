@@ -4,42 +4,8 @@ on:
   pull_request:
 
 jobs:
-  ubuntu-build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 21
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'temurin'
-          java-version: 21.0.3
-      - name: Build with Gradle
-        env:
-          packageUser: ${{ github.actor }}
-          packagePAT: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-            ./gradlew build codeCoverageReport --stacktrace --scan --console=plain --no-daemon
-#      - name: Generate Codecov Report
-#        if:  github.event_name == 'pull_request'
-#        uses: codecov/codecov-action@v1
-#  todo: uncomment this block when the issue with the code coverage report is resolved
-
-  windows-build:
-
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 21
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'temurin'
-          java-version: 21.0.3
-      - name: Build with Gradle
-        env:
-          packageUser: ${{ github.actor }}
-          packagePAT: ${{ secrets.GITHUB_TOKEN }}
-          JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
-        run: ./gradlew.bat build --stacktrace --scan --console=plain --no-daemon
+  call_workflow:
+    name: Run PR Build Workflow
+    if: ${{ github.repository_owner == 'ballerina-platform' }}
+    uses: ballerina-platform/ballerina-library/.github/workflows/pull-request-build-template.yml@main
+    secrets: inherit
