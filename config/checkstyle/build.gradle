@@ -26,7 +26,7 @@ task downloadCheckstyleRuleFiles(type: Download) {
     ])
     overwrite false
     onlyIfNewer true
-    dest buildDir
+    dest layout.buildDirectory.get().asFile
 }
 
 jar {
@@ -36,3 +36,5 @@ jar {
 clean {
     enabled = false
 }
+
+test.mustRunAfter(downloadCheckstyleRuleFiles)

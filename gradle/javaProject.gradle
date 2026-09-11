@@ -53,7 +53,6 @@ dependencies {
     checkstyle "com.puppycrawl.tools:checkstyle:${project.checkstylePluginVersion}"
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
 
 def excludePattern = '**/module-info.java'
 tasks.withType(Checkstyle) {
@@ -85,7 +84,7 @@ test {
     }
     jacoco {
         enabled = true
-        destinationFile = file("$buildDir/coverage-reports/jacoco.exec")
+        destinationFile = layout.buildDirectory.file("coverage-reports/jacoco.exec").get().asFile
         includeNoLocationClasses = true
         excludes = ['jdk.internal.*']
     }
@@ -94,9 +93,9 @@ test {
 task validateSpotbugs() {
     doLast {
         if (spotbugsMain.reports.size() > 0 &&
-                spotbugsMain.reports[0].destination.exists() &&
-                spotbugsMain.reports[0].destination.text.readLines().size() > 0) {
-            spotbugsMain.reports[0].destination?.eachLine {
+                spotbugsMain.reports.text.destination.exists() &&
+                spotbugsMain.reports.text.destination.text.readLines().size() > 0) {
+            spotbugsMain.reports.text.destination?.eachLine {
                 println 'Failure: ' + it
             }
             throw new GradleException("Spotbugs rule violations were found.")
@@ -112,13 +111,14 @@ spotbugsMain {
     effort = SpotBugsEffort.MAX
     reportLevel = SpotBugsConfidence.LOW
     ignoreFailures = true
-    reportsDir = file("$project.buildDir/reports/spotbugs")
+    reportsDir = layout.buildDirectory.dir("reports/spotbugs")
     def excludeFile = file("${rootDir}/spotbugs-exclude.xml")
     if (excludeFile.exists()) {
         it.excludeFilter = excludeFile
     }
     reports {
         text.enabled = true
+        html.enabled true
     }
 }
 
@@ -131,9 +131,9 @@ jacocoTestReport {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.outputLocation = file("${project.buildDir}/reports/jacoco/report.xml")
-        html.outputLocation = file("${project.buildDir}/reports/jacoco/report.html")
-        csv.outputLocation = file("${project.buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml").get().asFile
+        html.outputLocation = layout.buildDirectory.file("reports/jacoco/report.html").get().asFile
+        csv.outputLocation = layout.buildDirectory.file("reports/jacoco/report.csv").get().asFile
     }
 }
 
