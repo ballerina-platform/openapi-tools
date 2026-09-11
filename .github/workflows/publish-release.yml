@@ -7,68 +7,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish-release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 21
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'temurin'
-          java-version: 21.0.3
-      - name: Check for Ballerina to OpenAPI release
-        run: |
-          BAL_TO_OPENAPI_VERSION=$(grep -w "ballerinaToOpenAPIVersion" gradle.properties | cut -d= -f2)
-          if [[ $BAL_TO_OPENAPI_VERSION == *"-SNAPSHOT" ]]; then
-              echo "Ballerina to OpenAPI version - $BAL_TO_OPENAPI_VERSION is a snapshot version. Please release the Ballerina to OpenAPI package first."
-              exit 1
-          fi
-      - name: Set version env variable
-        run: echo "VERSION=$((grep -w "version" | cut -d= -f2) < gradle.properties | rev | cut --complement -d- -f1 | rev)" >> $GITHUB_ENV
-      - name: Pre release dependency version update
-        env:
-          GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
-        run: |
-          echo "Version: ${VERSION}"
-          git config user.name ${{ secrets.BALLERINA_BOT_USERNAME }}
-          git config user.email ${{ secrets.BALLERINA_BOT_EMAIL }}
-          git checkout -b release-${VERSION}
-          sed -i 's/ballerinaLangVersion=\(.*\)-SNAPSHOT/ballerinaLangVersion=\1/g' gradle.properties
-          sed -i 's/ballerinaLangVersion=\(.*\)-[0-9]\{8\}-[0-9]\{6\}-.*$/ballerinaLangVersion=\1/g' gradle.properties
-          sed -i 's/clientNativeVersion=\(.*\)-SNAPSHOT/clientNativeVersion=\1/g' gradle.properties
-          sed -i 's/clientNativeVersion=\(.*\)-[0-9]\{8\}-[0-9]\{6\}-.*$/clientNativeVersion=\1/g' gradle.properties
-          sed -i 's/stdlib\(.*\)=\(.*\)-SNAPSHOT/stdlib\1=\2/g' gradle.properties
-          sed -i 's/stdlib\(.*\)=\(.*\)-[0-9]\{8\}-[0-9]\{6\}-.*$/stdlib\1=\2/g' gradle.properties
-          sed -i 's/observe\(.*\)=\(.*\)-SNAPSHOT/observe\1=\2/g' gradle.properties
-          sed -i 's/observe\(.*\)=\(.*\)-[0-9]\{8\}-[0-9]\{6\}-.*$/observe\1=\2/g' gradle.properties
-          git add gradle.properties
-          git commit -m "Move dependencies to stable version" || echo "No changes to commit"
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Publish artifact
-        env:
-          GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
-          BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
-          packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
-          packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
-          nexusUser: ${{ secrets.NEXUS_USERNAME }}
-          nexusPassword: ${{ secrets.NEXUS_PASSWORD }}
-        run: |
-          ./gradlew release -Prelease.useAutomaticVersion=true
-          ./gradlew -Pversion=${VERSION} publish -x test -PpublishToCentral=true -x :ballerina-to-openapi:publish
-      - name: Create Github release from the release tag
-        run: |
-          curl --request POST 'https://api.github.com/repos/ballerina-platform/openapi-tools/releases' \
-          --header 'Accept: application/vnd.github.v3+json' \
-          --header 'Authorization: Bearer ${{ secrets.BALLERINA_BOT_TOKEN }}' \
-          --header 'Content-Type: application/json' \
-          --data-raw '{
-              "tag_name": "v'"$VERSION"'",
-              "name": "openapi-tools-v'"$VERSION"'"
-          }'
-      - name: Post release PR
-        env:
-          GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
-        run: |
-          curl -fsSL https://github.com/github/hub/raw/master/script/get | bash -s 2.14.1
-          bin/hub pull-request -m "[Automated] Sync master after $VERSION release"
+  call_workflow:
+    name: Run Release Workflow
+    if: ${{ github.repository_owner == 'ballerina-platform' }}
+    uses: ballerina-platform/ballerina-library/.github/workflows/release-package-template.yml@dev
+    secrets: inherit
+    with:
+      package-name: tool.openapi
+      package-org: ballerina
