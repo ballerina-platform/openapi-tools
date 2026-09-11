@@ -16,7 +16,7 @@
  */
 
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
 }
 
 apply from: "$rootDir/gradle/javaProject.gradle"
@@ -50,7 +50,7 @@ dependencies {
     }
 }
 
-def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
+def bDistribution = layout.buildDirectory.dir("extracted-distribution/jballerina-tools-${ballerinaLangVersion}").get().asFile
 
 task jBallerinaPack {
     doLast {
@@ -67,7 +67,7 @@ task jBallerinaPack {
 task copyOpenAPI() {
     doLast {
         copy {
-            from file("${project.buildDir}/libs")
+            from layout.buildDirectory.dir("libs").get().asFile
             into("${bDistribution}/bre/lib/")
         }
     }
