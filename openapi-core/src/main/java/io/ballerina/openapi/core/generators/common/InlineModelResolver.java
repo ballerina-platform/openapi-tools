@@ -480,8 +480,8 @@ public class InlineModelResolver {
             }
             count += 1;
             if (count > 1000000) {
-                throw new RuntimeException("ERROR: Too many models with the same name. Please check your OpenAPI " +
-                        "definition.");
+                throw new IllegalStateException("ERROR: Too many models with the same name. Please check your " +
+                        "OpenAPI definition.");
             }
         }
     }

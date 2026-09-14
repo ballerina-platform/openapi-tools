@@ -29,6 +29,7 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -45,28 +46,28 @@ public class ClientUtil {
                 cause, null);
     }
 
-    public static String getResourceImplFunctionName(String functionName, BObject client) throws RuntimeException {
+    public static String getResourceImplFunctionName(String functionName, BObject client) {
         ResourceMethodType resourceMethodNotFound = Arrays.stream(((ClientType) client.getOriginalType()).
                         getResourceMethods()).filter(resourceMethod -> resourceMethod.getName().equals(functionName)).
-                findFirst().orElseThrow(() -> new RuntimeException("Resource method not found"));
+                findFirst().orElseThrow(() -> new NoSuchElementException("Resource method not found"));
         return getImplFunctionName(resourceMethodNotFound);
     }
 
-    public static String getRemoteImplFunctionName(String functionName, BObject client) throws RuntimeException {
+    public static String getRemoteImplFunctionName(String functionName, BObject client) {
         RemoteMethodType remoteMethodNotFound = Arrays.stream(((ClientType) client.getOriginalType()).
                         getRemoteMethods()).filter(remoteMethod -> remoteMethod.getName().equals(functionName)).
-                findFirst().orElseThrow(() -> new RuntimeException("Remote method not found"));
+                findFirst().orElseThrow(() -> new NoSuchElementException("Remote method not found"));
         return getImplFunctionName(remoteMethodNotFound);
     }
 
     private static String getImplFunctionName(MethodType clientMethod) {
         BString methodImplKey = Arrays.stream(clientMethod.getAnnotations().getKeys()).
                 filter(key -> key.getValue().contains("MethodImpl")).
-                findFirst().orElseThrow(() -> new RuntimeException("Method implementation annotation not found"));
+                findFirst().orElseThrow(() -> new NoSuchElementException("Method implementation annotation not found"));
         BMap methodImplAnnotation = (BMap) clientMethod.getAnnotation(methodImplKey);
         BString implFunctionName = methodImplAnnotation.getStringValue(StringUtils.fromString("name"));
         if (Objects.isNull(implFunctionName)) {
-            throw new RuntimeException("Method implementation function name not found");
+            throw new NoSuchElementException("Method implementation function name not found");
         }
         return implFunctionName.getValue();
     }
