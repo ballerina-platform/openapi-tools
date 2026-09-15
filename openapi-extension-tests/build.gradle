@@ -44,23 +44,12 @@ task copyDistribution(type: Copy) {
 }
 
 
-task copyPackageBala {
-    doLast {
-        copy {
-            from "${ballerinaOpenApiModulePath}/build/cache_parent"
-            into "${ballerinaDist}/repo"
-            copy {
-                into("bala/ballerina") {
-                    from "bala/ballerina"
-                }
-            }
-            copy {
-                into("cache/ballerina/") {
-                    from "cache/ballerina"
-                }
-            }
-        }
+task copyPackageBala(type: Copy) {
+    from("${ballerinaOpenApiModulePath}/build/cache_parent") {
+        include "bala/ballerina/**"
+        include "cache/ballerina/**"
     }
+    into "${ballerinaDist}/repo"
 }
 
 test {
