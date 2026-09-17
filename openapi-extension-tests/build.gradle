@@ -19,7 +19,7 @@
 description = 'Ballerina - OpenAPI Extension Tests'
 apply from: "$rootDir/gradle/javaProject.gradle"
 
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.gradleup.shadow'
 apply plugin: 'java'
 
 
@@ -44,23 +44,12 @@ task copyDistribution(type: Copy) {
 }
 
 
-task copyPackageBala {
-    doLast {
-        copy {
-            from "${ballerinaOpenApiModulePath}/build/cache_parent"
-            into "${ballerinaDist}/repo"
-            copy {
-                into("bala/ballerina") {
-                    from "bala/ballerina"
-                }
-            }
-            copy {
-                into("cache/ballerina/") {
-                    from "cache/ballerina"
-                }
-            }
-        }
+task copyPackageBala(type: Copy) {
+    from("${ballerinaOpenApiModulePath}/build/cache_parent") {
+        include "bala/ballerina/**"
+        include "cache/ballerina/**"
     }
+    into "${ballerinaDist}/repo"
 }
 
 test {
@@ -95,12 +84,13 @@ jacocoTestReport {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
-        html.outputLocation = file("${buildDir}/reports/jacoco/report.html")
-        csv.outputLocation = file("${buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml").get().asFile
+        html.outputLocation = layout.buildDirectory.file("reports/jacoco/report.html").get().asFile
+        csv.outputLocation = layout.buildDirectory.file("reports/jacoco/report.csv").get().asFile
     }
 }
 copyPackageBala.dependsOn copyDistribution
+copyPackageBala.dependsOn(':module-ballerina-openapi:ballerinaBuild')
 test.dependsOn copyPackageBala
 copyDistribution.dependsOn(':module-ballerina-openapi:unpackJballerinaTools')
 copyDistribution.dependsOn(':module-ballerina-openapi:copyStdlibs')

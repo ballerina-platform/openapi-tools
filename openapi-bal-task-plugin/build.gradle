@@ -18,7 +18,7 @@
 
 
 apply from: "$rootDir/gradle/javaProject.gradle"
-apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: "com.gradleup.shadow"
 apply plugin: "java-library"
 
 description = "OpenAPI Tooling - OpenAPI to Ballerina"

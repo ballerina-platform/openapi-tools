@@ -18,7 +18,7 @@ plugins {
     id 'base'
     id 'maven-publish'
     id 'com.github.spotbugs'
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
     id 'de.undercouch.download'
     id 'net.researchgate.release'
     id 'org.javamodularity.moduleplugin' apply false
@@ -176,9 +176,9 @@ task codeCoverageReport(type: JacocoReport) {
         xml.required = true
         html.required = true
         csv.required = true
-        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
-        html.outputLocation = file("${buildDir}/reports/jacoco/report.html")
-        csv.outputLocation = file("${buildDir}/reports/jacoco/report.csv")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml").get().asFile
+        html.outputLocation = layout.buildDirectory.file("reports/jacoco/report.html").get().asFile
+        csv.outputLocation = layout.buildDirectory.file("reports/jacoco/report.csv").get().asFile
     }
 
     onlyIf = {

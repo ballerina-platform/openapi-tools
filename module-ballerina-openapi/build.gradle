@@ -15,6 +15,13 @@
  *
  */
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+
+import javax.inject.Inject
+
+abstract class BallerinaExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
 description = 'Ballerina - OpenAPI Ballerina Generator'
 
 configurations {
@@ -182,11 +189,12 @@ task initializeVariables {
 }
 
 task ballerinaBuild {
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     inputs.dir file(project.projectDir)
     doNotTrackState("build needs to run every time")
     doLast {
         // Build and populate caches
-        exec {
+        execHelper.execOperations.exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -218,7 +226,7 @@ task ballerinaBuild {
         }
 
         // Doc creation and packing
-        exec {
+        execHelper.execOperations.exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -239,7 +247,7 @@ task ballerinaBuild {
             }
             if (ballerinaCentralAccessToken != null) {
                 println("Publishing to the ballerina central..")
-                exec {
+                execHelper.execOperations.exec {
                     workingDir project.projectDir
                     environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
                     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -253,7 +261,7 @@ task ballerinaBuild {
             }
         } else if (needPublishToLocalCentral) {
             println("Publishing to the ballerina local central repository..")
-            exec {
+            execHelper.execOperations.exec {
                 workingDir project.projectDir
                 environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
                 if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -273,7 +281,7 @@ task ballerinaBuild {
 }
 
 task createArtifactZip(type: Zip) {
-    destinationDirectory = file("${buildDir}/distributions")
+    destinationDirectory = layout.buildDirectory.dir("distributions").get().asFile
     from ballerinaBuild
 }
 

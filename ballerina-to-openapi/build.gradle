@@ -17,7 +17,7 @@
  */
 
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
 }
 
 apply from: "$rootDir/gradle/javaProject.gradle"
@@ -57,7 +57,7 @@ dependencies {
     }
 }
 
-def bDistribution = file("$project.buildDir/extracted-distribution/jballerina-tools-${ballerinaLangVersion}")
+def bDistribution = layout.buildDirectory.dir("extracted-distribution/jballerina-tools-${ballerinaLangVersion}").get().asFile
 task jBallerinaPack {
     doLast {
         configurations.balTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
