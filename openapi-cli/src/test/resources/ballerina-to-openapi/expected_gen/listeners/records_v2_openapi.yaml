@@ -1,9 +1,9 @@
 openapi: 3.0.1
 info:
-  title: Record V2
+  title: Records V2
   version: 0.0.0
 servers:
-- url: "{server}:{port}/record/v2"
+- url: "{server}:{port}/records/v2"
   variables:
     server:
       default: http://localhost

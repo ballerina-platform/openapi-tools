@@ -358,6 +358,9 @@ public final class ServiceToOpenAPIMapper {
             existingServers.forEach(
                     server -> server.setUrl(server.getUrl() + basePath)
             );
+        } else if (basePath != null && !basePath.isEmpty()) {
+            // The contract paths are relative to its base path, so keep it as a relative server URL
+            existingServers = Collections.singletonList(new Server().url(basePath));
         }
         openApiFromServiceContract.setServers(existingServers);
         oasResult.setOpenAPI(openApiFromServiceContract);

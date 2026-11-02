@@ -1,11 +1,11 @@
 openapi: 3.0.1
 info:
-  title: Record V4
+  title: Records V5
   version: 0.0.0
 servers:
-- url: "{server}:{port}/record/v4"
+- url: "{server}:{port}/records/v5"
   variables:
     server:
       default: http://localhost
     port:
-      default: "9713"
+      default: "9715"

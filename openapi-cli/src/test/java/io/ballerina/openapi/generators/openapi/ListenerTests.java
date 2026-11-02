@@ -172,9 +172,9 @@ public class ListenerTests {
     public void testListenerPortWithRecordField() throws IOException {
         Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_record_field.bal");
         Path expectedFilePath = RES_DIR.resolve("expected_gen/listeners");
-        List<String> expectedYamlFiles = List.of("record_v1_openapi.yaml", "record_v2_openapi.yaml",
-                "record_v3_openapi.yaml", "record_v4_openapi.yaml", "record_v5_openapi.yaml",
-                "record_v6_openapi.yaml", "record_v7_openapi.yaml", "record_v8_openapi.yaml");
+        List<String> expectedYamlFiles = List.of("records_v1_openapi.yaml", "records_v2_openapi.yaml",
+                "records_v3_openapi.yaml", "records_v4_openapi.yaml", "records_v5_openapi.yaml",
+                "records_v6_openapi.yaml", "records_v7_openapi.yaml", "records_v8_openapi.yaml");
         List<OpenAPIMapperDiagnostic> diagnostics = TestUtils.compareGeneratedFiles(ballerinaFilePath,
                 expectedFilePath, expectedYamlFiles);
         List<String> locations = diagnostics.stream()
@@ -182,7 +182,7 @@ public class ListenerTests {
                 .map(diagnostic -> diagnostic.getLocation().orElseThrow().lineRange().toString())
                 .sorted()
                 .toList();
-        Assert.assertEquals(locations, List.of("(15:37,15:41)", "(16:43,16:47)", "(16:43,16:47)",
+        Assert.assertEquals(locations, List.of("(15:37,15:41)", "(16:44,16:48)", "(16:44,16:48)",
                 "(19:33,19:37)", "(3:15,3:19)", "(3:15,3:19)"));
     }
 
@@ -283,6 +283,8 @@ public class ListenerTests {
         OASResult result = generateWithOptionalServerInfo("listeners/listener_with_port_neg_7.bal");
 
         OpenAPI openAPI = result.getOpenAPI().orElseThrow();
+        Assert.assertEquals(openAPI.getServers().size(), 1);
+        Assert.assertEquals(openAPI.getServers().getFirst().getUrl(), "/api");
         Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
         Assert.assertTrue(result.getDiagnostics().stream().anyMatch(diagnostic ->
                 diagnostic.getCode().equals("OAS_CONVERTOR_143") &&
