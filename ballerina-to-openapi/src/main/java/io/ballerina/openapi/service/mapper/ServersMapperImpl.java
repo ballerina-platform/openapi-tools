@@ -40,6 +40,7 @@ import io.ballerina.compiler.syntax.tree.RecordFieldWithDefaultValueNode;
 import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SpreadFieldNode;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.openapi.service.mapper.diagnostic.DiagnosticMessages;
@@ -57,9 +58,11 @@ import io.swagger.v3.oas.models.servers.ServerVariables;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.openapi.service.mapper.Constants.DEFAULT_LISTENER_FUNCTION_NAME;
 import static io.ballerina.openapi.service.mapper.Constants.HTTP;
@@ -381,23 +384,49 @@ public class ServersMapperImpl implements ServersMapper {
             Node fieldType = recordField.map(ServersMapperImpl::getRecordFieldType).orElse(null);
             ExpressionNode fieldDefault = recordField.map(ServersMapperImpl::getRecordFieldDefault).orElse(null);
             ExpressionNode containerValue = container.value();
-            ExpressionNode fieldValue;
-            if (containerValue == null) {
-                fieldValue = fieldDefault;
-            } else if (containerValue.kind().equals(SyntaxKind.REQUIRED_EXPRESSION)) {
-                fieldValue = containerValue;
-            } else if (containerValue instanceof MappingConstructorExpressionNode mapping) {
-                fieldValue = getMappingFieldValue(mapping, fieldName).orElse(fieldDefault);
-            } else {
-                fieldValue = null;
+            if (containerValue != null && containerValue.kind().equals(SyntaxKind.REQUIRED_EXPRESSION)) {
+                return new ResolvedValue(containerValue, fieldType, container.moduleName(),
+                        container.isConfigurable());
             }
-            return new ResolvedValue(fieldValue, fieldType, container.moduleName(), container.isConfigurable());
+            if (containerValue instanceof MappingConstructorExpressionNode mapping) {
+                return resolveMappingField(mapping, fieldName, fieldDefault, fieldType, container);
+            }
+            return new ResolvedValue(null, fieldType, container.moduleName(), container.isConfigurable());
         });
     }
 
+    // A field that the mapping constructor leaves to a spread field is unresolvable, since the record default
+    // may not be the value that the spread supplies.
+    private ResolvedValue resolveMappingField(MappingConstructorExpressionNode mapping, String fieldName,
+                                              ExpressionNode fieldDefault, Node fieldType,
+                                              ResolvedValue container) {
+        for (MappingFieldNode field : mapping.fields()) {
+            if (!(field instanceof SpecificFieldNode specificField) || !fieldName.equals(
+                    unescapeIdentifier(specificField.fieldName().toString().trim().replaceAll("^\"|\"$", "")))) {
+                continue;
+            }
+            if (specificField.valueExpr().isPresent()) {
+                return new ResolvedValue(specificField.valueExpr().get(), fieldType, container.moduleName(),
+                        container.isConfigurable());
+            }
+            // The shorthand field `{port}` takes its value from the module variable of the same name
+            return packageMemberVisitor.getVariableDeclaredValue(container.moduleName(), fieldName)
+                    .map(variable -> new ResolvedValue(variable.value(), fieldType, container.moduleName(),
+                            container.isConfigurable() || variable.isConfigurable()))
+                    .orElse(new ResolvedValue(null, fieldType, container.moduleName(), container.isConfigurable()));
+        }
+        boolean hasSpreadField = mapping.fields().stream().anyMatch(SpreadFieldNode.class::isInstance);
+        return new ResolvedValue(hasSpreadField ? null : fieldDefault, fieldType, container.moduleName(),
+                container.isConfigurable());
+    }
+
     private Optional<Node> getRecordField(Node type, String moduleName, String fieldName) {
-        if (type instanceof SimpleNameReferenceNode typeRef) {
+        Set<String> visitedTypes = new HashSet<>();
+        while (type instanceof SimpleNameReferenceNode typeRef) {
             String typeName = unescapeIdentifier(typeRef.name().text().trim());
+            if (!visitedTypes.add(typeName)) {
+                return Optional.empty();
+            }
             type = packageMemberVisitor.getTypeDefinitionNode(moduleName, typeName)
                     .map(MapperCommonUtils::getTypeDescriptor)
                     .orElse(null);
@@ -429,17 +458,6 @@ public class ServersMapperImpl implements ServersMapper {
 
     private static ExpressionNode getRecordFieldDefault(Node field) {
         return field instanceof RecordFieldWithDefaultValueNode recordField ? recordField.expression() : null;
-    }
-
-    private static Optional<ExpressionNode> getMappingFieldValue(MappingConstructorExpressionNode mapping,
-                                                                 String fieldName) {
-        return mapping.fields().stream()
-                .filter(field -> field instanceof SpecificFieldNode)
-                .map(field -> (SpecificFieldNode) field)
-                .filter(field -> fieldName.equals(
-                        unescapeIdentifier(field.fieldName().toString().trim().replaceAll("^\"|\"$", ""))))
-                .findFirst()
-                .flatMap(SpecificFieldNode::valueExpr);
     }
 
     private static boolean hasHostField(MappingConstructorExpressionNode config) {

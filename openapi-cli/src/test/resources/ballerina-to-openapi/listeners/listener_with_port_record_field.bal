@@ -49,3 +49,20 @@ service /record/v5 on listener5 {
 service /record/v6 on listener6 {
     resource function get hello() returns string => "Hello from listener6";
 }
+
+type Alias Config;
+
+configurable Alias config7 = {};
+final int port = 9718;
+final Config config8 = {port};
+
+listener http:Listener listener7 = new (config7.port);
+listener http:Listener listener8 = new (config8.port);
+
+service /record/v7 on listener7 {
+    resource function get hello() returns string => "Hello from listener7";
+}
+
+service /record/v8 on listener8 {
+    resource function get hello() returns string => "Hello from listener8";
+}

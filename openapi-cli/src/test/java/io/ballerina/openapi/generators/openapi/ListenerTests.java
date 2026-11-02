@@ -174,7 +174,7 @@ public class ListenerTests {
         Path expectedFilePath = RES_DIR.resolve("expected_gen/listeners");
         List<String> expectedYamlFiles = List.of("record_v1_openapi.yaml", "record_v2_openapi.yaml",
                 "record_v3_openapi.yaml", "record_v4_openapi.yaml", "record_v5_openapi.yaml",
-                "record_v6_openapi.yaml");
+                "record_v6_openapi.yaml", "record_v7_openapi.yaml", "record_v8_openapi.yaml");
         List<OpenAPIMapperDiagnostic> diagnostics = TestUtils.compareGeneratedFiles(ballerinaFilePath,
                 expectedFilePath, expectedYamlFiles);
         List<String> locations = diagnostics.stream()
@@ -183,7 +183,7 @@ public class ListenerTests {
                 .sorted()
                 .toList();
         Assert.assertEquals(locations, List.of("(15:37,15:41)", "(16:43,16:47)", "(16:43,16:47)",
-                "(19:33,19:37)", "(3:15,3:19)"));
+                "(19:33,19:37)", "(3:15,3:19)", "(3:15,3:19)"));
     }
 
     private List<OpenAPIMapperDiagnostic> runNegativeListenerTest(Path ballerinaFilePath) throws IOException {
@@ -283,6 +283,9 @@ public class ListenerTests {
         OpenAPI openAPI = result.getOpenAPI().orElseThrow();
         Assert.assertNull(openAPI.getServers());
         Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
+        Assert.assertTrue(result.getDiagnostics().stream().anyMatch(diagnostic ->
+                diagnostic.getCode().equals("OAS_CONVERTOR_143") &&
+                        diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.WARNING));
     }
 
     private OASResult generateWithOptionalServerInfo(String ballerinaFile) {
@@ -305,6 +308,14 @@ public class ListenerTests {
                 .setServerInfoOptional(true)
                 .setProject(project);
         return ServiceToOpenAPIMapper.generateOAS(builder.build());
+    }
+
+    @Test
+    public void testListenerPortWithRecordFieldSuppliedBySpreadNegative() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_8.bal");
+        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_143", "Unsupported expression found for the" +
+                " server port value", "(9:41,9:49)");
     }
 
     @Test

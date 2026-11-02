@@ -282,6 +282,7 @@ public final class ServiceToOpenAPIMapper {
                 }
 
                 if (oasAvailableViaServiceContract(serviceDefinition)) {
+                    oasResult.getDiagnostics().addAll(diagnostics);
                     return updateOasResultWithServiceContract((ServiceDeclaration) serviceDefinition, currentPackage,
                             oasResult, semanticModel, packageMemberVisitor);
                 }
