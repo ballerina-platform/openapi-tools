@@ -349,9 +349,11 @@ public final class ServiceToOpenAPIMapper {
         // Copy servers
         String basePath = extractBasePath(openApiFromServiceContract);
         List<Server> existingServers = oasResult.getOpenAPI().get().getServers();
-        existingServers.forEach(
-                server -> server.setUrl(server.getUrl() + basePath)
-        );
+        if (existingServers != null) {
+            existingServers.forEach(
+                    server -> server.setUrl(server.getUrl() + basePath)
+            );
+        }
         openApiFromServiceContract.setServers(existingServers);
         oasResult.setOpenAPI(openApiFromServiceContract);
         return oasResult;

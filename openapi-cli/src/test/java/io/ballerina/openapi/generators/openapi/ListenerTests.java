@@ -264,7 +264,29 @@ public class ListenerTests {
     @Test(description = "Generate the definition without servers when the port cannot be resolved and the " +
             "server information is optional")
     public void testListenerPortWithServerInfoOptional() {
-        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_1.bal");
+        OASResult result = generateWithOptionalServerInfo("listeners/listener_with_port_neg_1.bal");
+
+        OpenAPI openAPI = result.getOpenAPI().orElseThrow();
+        Assert.assertNull(openAPI.getServers());
+        Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
+        Assert.assertEquals(result.getDiagnostics().stream().map(OpenAPIMapperDiagnostic::getCode).toList(),
+                List.of("OAS_CONVERTOR_143", "OAS_CONVERTOR_141"));
+        Assert.assertTrue(result.getDiagnostics().stream()
+                .allMatch(diagnostic -> diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.WARNING));
+    }
+
+    @Test(description = "Generate the definition of a service contract implementation without servers when the " +
+            "port cannot be resolved and the server information is optional")
+    public void testListenerPortWithServerInfoOptionalForServiceContract() {
+        OASResult result = generateWithOptionalServerInfo("listeners/listener_with_port_neg_7.bal");
+
+        OpenAPI openAPI = result.getOpenAPI().orElseThrow();
+        Assert.assertNull(openAPI.getServers());
+        Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
+    }
+
+    private OASResult generateWithOptionalServerInfo(String ballerinaFile) {
+        Path ballerinaFilePath = RES_DIR.resolve(ballerinaFile);
         Project project = ProjectLoader.load(ballerinaFilePath).project();
         Module module = project.currentPackage().getDefaultModule();
         SemanticModel semanticModel = project.currentPackage().getCompilation().getSemanticModel(module.moduleId());
@@ -282,15 +304,7 @@ public class ListenerTests {
                 .setOpenApiFileName("api_v1_openapi.yaml")
                 .setServerInfoOptional(true)
                 .setProject(project);
-        OASResult result = ServiceToOpenAPIMapper.generateOAS(builder.build());
-
-        OpenAPI openAPI = result.getOpenAPI().orElseThrow();
-        Assert.assertNull(openAPI.getServers());
-        Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
-        Assert.assertEquals(result.getDiagnostics().stream().map(OpenAPIMapperDiagnostic::getCode).toList(),
-                List.of("OAS_CONVERTOR_143", "OAS_CONVERTOR_141"));
-        Assert.assertTrue(result.getDiagnostics().stream()
-                .allMatch(diagnostic -> diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.WARNING));
+        return ServiceToOpenAPIMapper.generateOAS(builder.build());
     }
 
     @Test
