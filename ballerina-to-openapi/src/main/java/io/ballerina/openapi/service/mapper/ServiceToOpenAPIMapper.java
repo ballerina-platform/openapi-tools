@@ -60,6 +60,7 @@ import io.swagger.v3.oas.models.servers.Server;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -276,7 +277,10 @@ public final class ServiceToOpenAPIMapper {
                     if (!oasGenerationMetaInfo.isServerInfoOptional()) {
                         return new OASResult(openapi, diagnostics);
                     }
-                    openapi.setServers(null);
+                    // A relative server URL keeps the service base path, which the paths do not include
+                    String serviceBasePath = serviceDefinition.absoluteResourcePath();
+                    openapi.setServers(Objects.isNull(serviceBasePath) || serviceBasePath.equals("/") ?
+                            null : Collections.singletonList(new Server().url(serviceBasePath)));
                     diagnostics.replaceAll(diagnostic -> new ExceptionDiagnostic(diagnostic,
                             DiagnosticSeverity.WARNING));
                 }

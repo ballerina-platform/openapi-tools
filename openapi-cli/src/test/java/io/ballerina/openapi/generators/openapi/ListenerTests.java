@@ -267,7 +267,9 @@ public class ListenerTests {
         OASResult result = generateWithOptionalServerInfo("listeners/listener_with_port_neg_1.bal");
 
         OpenAPI openAPI = result.getOpenAPI().orElseThrow();
-        Assert.assertNull(openAPI.getServers());
+        Assert.assertEquals(openAPI.getServers().size(), 1);
+        Assert.assertEquals(openAPI.getServers().getFirst().getUrl(), "/api/v1");
+        Assert.assertNull(openAPI.getServers().getFirst().getVariables());
         Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
         Assert.assertEquals(result.getDiagnostics().stream().map(OpenAPIMapperDiagnostic::getCode).toList(),
                 List.of("OAS_CONVERTOR_143", "OAS_CONVERTOR_141"));
@@ -281,7 +283,6 @@ public class ListenerTests {
         OASResult result = generateWithOptionalServerInfo("listeners/listener_with_port_neg_7.bal");
 
         OpenAPI openAPI = result.getOpenAPI().orElseThrow();
-        Assert.assertNull(openAPI.getServers());
         Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
         Assert.assertTrue(result.getDiagnostics().stream().anyMatch(diagnostic ->
                 diagnostic.getCode().equals("OAS_CONVERTOR_143") &&
