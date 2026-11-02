@@ -271,10 +271,14 @@ public final class ServiceToOpenAPIMapper {
                 ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(serviceDefinition);
                 serversMapperImpl.setServers();
 
-                // Return if there are any errors while setting the servers
                 if (diagnostics.stream().anyMatch(diagnostic -> diagnostic.getDiagnosticSeverity()
                                 .equals(DiagnosticSeverity.ERROR))) {
-                    return new OASResult(openapi, diagnostics);
+                    if (!oasGenerationMetaInfo.isServerInfoOptional()) {
+                        return new OASResult(openapi, diagnostics);
+                    }
+                    openapi.setServers(null);
+                    diagnostics.replaceAll(diagnostic -> new ExceptionDiagnostic(diagnostic,
+                            DiagnosticSeverity.WARNING));
                 }
 
                 if (oasAvailableViaServiceContract(serviceDefinition)) {

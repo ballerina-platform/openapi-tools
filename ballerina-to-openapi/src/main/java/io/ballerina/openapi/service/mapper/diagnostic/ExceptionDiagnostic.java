@@ -44,6 +44,13 @@ public class ExceptionDiagnostic implements OpenAPIMapperDiagnostic {
         this(diagnostic, null, args);
     }
 
+    public ExceptionDiagnostic(OpenAPIMapperDiagnostic diagnostic, DiagnosticSeverity severity) {
+        this.code = diagnostic.getCode();
+        this.message = diagnostic.getMessage();
+        this.diagnosticSeverity = severity;
+        this.location = diagnostic.getLocation().orElse(null);
+    }
+
     @Override
     public String getCode() {
         return code;

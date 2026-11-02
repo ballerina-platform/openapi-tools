@@ -17,9 +17,21 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.cmd.OASContractGenerator;
 import io.ballerina.openapi.service.mapper.ServersMapperImpl;
+import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
+import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.model.ServiceDeclaration;
+import io.ballerina.projects.Module;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.directory.ProjectLoader;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -156,6 +168,24 @@ public class ListenerTests {
         Assert.assertEquals(diagnostic.getLocation().get().lineRange().toString(), "(4:26,4:30)");
     }
 
+    @Test(description = "Generate server details when the listener port is a field of a record variable")
+    public void testListenerPortWithRecordField() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_record_field.bal");
+        Path expectedFilePath = RES_DIR.resolve("expected_gen/listeners");
+        List<String> expectedYamlFiles = List.of("record_v1_openapi.yaml", "record_v2_openapi.yaml",
+                "record_v3_openapi.yaml", "record_v4_openapi.yaml", "record_v5_openapi.yaml",
+                "record_v6_openapi.yaml");
+        List<OpenAPIMapperDiagnostic> diagnostics = TestUtils.compareGeneratedFiles(ballerinaFilePath,
+                expectedFilePath, expectedYamlFiles);
+        List<String> locations = diagnostics.stream()
+                .peek(diagnostic -> Assert.assertEquals(diagnostic.getCode(), "OAS_CONVERTOR_145"))
+                .map(diagnostic -> diagnostic.getLocation().orElseThrow().lineRange().toString())
+                .sorted()
+                .toList();
+        Assert.assertEquals(locations, List.of("(15:37,15:41)", "(16:43,16:47)", "(16:43,16:47)",
+                "(19:33,19:37)", "(3:15,3:19)"));
+    }
+
     private List<OpenAPIMapperDiagnostic> runNegativeListenerTest(Path ballerinaFilePath) throws IOException {
         Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
         OASContractGenerator openApiConverter = new OASContractGenerator();
@@ -221,6 +251,46 @@ public class ListenerTests {
         validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_146", "The configurable value provided for the" +
                         " port should have a default value to generate the server details",
                 "(2:24,2:25)");
+    }
+
+    @Test
+    public void testListenerPortWithRecordFieldNegative() throws IOException {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_6.bal");
+        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(ballerinaFilePath);
+        validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_146", "The configurable value provided for the" +
+                " port should have a default value to generate the server details", "(6:29,6:30)");
+    }
+
+    @Test(description = "Generate the definition without servers when the port cannot be resolved and the " +
+            "server information is optional")
+    public void testListenerPortWithServerInfoOptional() {
+        Path ballerinaFilePath = RES_DIR.resolve("listeners/listener_with_port_neg_1.bal");
+        Project project = ProjectLoader.load(ballerinaFilePath).project();
+        Module module = project.currentPackage().getDefaultModule();
+        SemanticModel semanticModel = project.currentPackage().getCompilation().getSemanticModel(module.moduleId());
+        ModulePartNode modulePartNode = module.document(module.documentIds().iterator().next()).syntaxTree()
+                .rootNode();
+        ServiceDeclarationNode serviceNode = modulePartNode.members().stream()
+                .filter(ServiceDeclarationNode.class::isInstance)
+                .map(ServiceDeclarationNode.class::cast)
+                .findFirst()
+                .orElseThrow();
+        OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
+                new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
+        builder.setServiceNode(new ServiceDeclaration(serviceNode, semanticModel))
+                .setSemanticModel(semanticModel)
+                .setOpenApiFileName("api_v1_openapi.yaml")
+                .setServerInfoOptional(true)
+                .setProject(project);
+        OASResult result = ServiceToOpenAPIMapper.generateOAS(builder.build());
+
+        OpenAPI openAPI = result.getOpenAPI().orElseThrow();
+        Assert.assertNull(openAPI.getServers());
+        Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
+        Assert.assertEquals(result.getDiagnostics().stream().map(OpenAPIMapperDiagnostic::getCode).toList(),
+                List.of("OAS_CONVERTOR_143", "OAS_CONVERTOR_141"));
+        Assert.assertTrue(result.getDiagnostics().stream()
+                .allMatch(diagnostic -> diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.WARNING));
     }
 
     @Test

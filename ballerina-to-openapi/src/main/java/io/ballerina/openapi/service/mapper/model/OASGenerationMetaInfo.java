@@ -40,6 +40,7 @@ public class OASGenerationMetaInfo {
     private final Project project;
     private final Boolean ballerinaExtensionLevel;
     private final PackageMemberVisitor packageMemberVisitor;
+    private final boolean serverInfoOptional;
 
     public OASGenerationMetaInfo(OASGenerationMetaInfoBuilder builder) {
         this.openApiFileName = builder.openApiFileName;
@@ -53,6 +54,7 @@ public class OASGenerationMetaInfo {
         this.project = builder.project;
         this.ballerinaExtensionLevel = builder.ballerinaExtension;
         this.packageMemberVisitor = extractNodesFromProject(builder.project);
+        this.serverInfoOptional = builder.serverInfoOptional;
     }
 
     public String getOpenApiFileName() {
@@ -83,6 +85,10 @@ public class OASGenerationMetaInfo {
         return packageMemberVisitor;
     }
 
+    public boolean isServerInfoOptional() {
+        return serverInfoOptional;
+    }
+
     /**
      * This method is used to create a new {@link OASGenerationMetaInfoBuilder} instance.
      */
@@ -95,6 +101,7 @@ public class OASGenerationMetaInfo {
         private ServiceNode serviceNode;
         private Project project;
         private Boolean ballerinaExtension = false;
+        private boolean serverInfoOptional = false;
 
         public OASGenerationMetaInfoBuilder setBallerinaFilePath(Path ballerinaFilePath) {
             this.ballerinaFilePath = ballerinaFilePath;
@@ -128,6 +135,18 @@ public class OASGenerationMetaInfo {
 
         public OASGenerationMetaInfoBuilder setBallerinaExtension(Boolean balExt) {
             this.ballerinaExtension = balExt;
+            return this;
+        }
+
+        /**
+         * Generates the definition without the `servers` section when the listener details cannot be resolved,
+         * reporting those failures as warnings instead of errors.
+         *
+         * @param serverInfoOptional whether the `servers` section can be omitted
+         * @return this builder
+         */
+        public OASGenerationMetaInfoBuilder setServerInfoOptional(boolean serverInfoOptional) {
+            this.serverInfoOptional = serverInfoOptional;
             return this;
         }
 
