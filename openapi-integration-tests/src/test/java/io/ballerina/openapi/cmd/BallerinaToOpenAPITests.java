@@ -244,7 +244,14 @@ public class BallerinaToOpenAPITests extends OpenAPITest {
         Assert.assertTrue(Files.exists(TEST_RESOURCE.resolve(generatedFile)));
         String generatedOpenAPI = getStringFromGivenBalFile(TEST_RESOURCE.resolve(generatedFile));
         String expectedYaml = getStringFromGivenBalFile(TEST_RESOURCE.resolve(expectedPath));
-        Assert.assertEquals(expectedYaml, generatedOpenAPI);
+        Assert.assertEquals(maskBallerinaTypeVersions(expectedYaml), maskBallerinaTypeVersions(generatedOpenAPI));
+    }
+
+    // The dependency versions in `x-ballerina-type` follow the packages resolved from Central at test time,
+    // while the version of the project package itself stays checked
+    private static String maskBallerinaTypeVersions(String openApi) {
+        return openApi.replaceAll("(pkgName:(?!openapi_bal_ext)[^:]*?moduleName:[^:]*?version:)[^:]+?(modulePrefix:)",
+                "$1<version>$2");
     }
 
     public Process getProcessForOpenAPISpecGeneration(String ballerinaFilePath) throws IOException {

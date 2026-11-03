@@ -141,9 +141,17 @@ task ballerinaTests {
     dependsOn(jar)
     finalizedBy(commitTomlFiles)
 
+    def testTargetDir = file("${project.projectDir}/ballerina-tests/target")
+    def testBallerinaHome = file("${project.buildDir}/ballerina-home")
+
     doLast {
+        // Workaround for ballerina-lang#44813 and ballerina-lang#44845: a leftover target/build, or a newer stdlib
+        // patch cached in the user's Ballerina home, makes bal ignore the locked transitive versions
+        project.delete(testTargetDir, testBallerinaHome)
+        testBallerinaHome.mkdirs()
         execHelper.execOperations.exec {
             workingDir "${project.projectDir}/ballerina-tests"
+            environment "BALLERINA_HOME_DIR", testBallerinaHome.absolutePath
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "$distributionBinPath/bal.bat test --offline && exit " +
                         "%%ERRORLEVEL%%"
