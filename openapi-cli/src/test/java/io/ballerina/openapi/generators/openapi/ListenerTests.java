@@ -17,9 +17,21 @@
  */
 package io.ballerina.openapi.generators.openapi;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.openapi.cmd.OASContractGenerator;
 import io.ballerina.openapi.service.mapper.ServersMapperImpl;
+import io.ballerina.openapi.service.mapper.ServiceToOpenAPIMapper;
 import io.ballerina.openapi.service.mapper.diagnostic.OpenAPIMapperDiagnostic;
+import io.ballerina.openapi.service.mapper.model.OASGenerationMetaInfo;
+import io.ballerina.openapi.service.mapper.model.OASResult;
+import io.ballerina.openapi.service.mapper.model.ServiceDeclaration;
+import io.ballerina.projects.Module;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.directory.ProjectLoader;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -221,6 +233,89 @@ public class ListenerTests {
         validateCommonNegativeDiagnostics(diagnostics, "OAS_CONVERTOR_146", "The configurable value provided for the" +
                         " port should have a default value to generate the server details",
                 "(2:24,2:25)");
+    }
+
+    @Test(description = "Generate the definition without servers when the port cannot be resolved and the " +
+            "server information is optional")
+    public void testListenerPortWithServerInfoOptional() {
+        OASResult result = generateWithOptionalServerInfo("listeners/listener_with_port_neg_1.bal");
+
+        OpenAPI openAPI = result.getOpenAPI().orElseThrow();
+        Assert.assertEquals(openAPI.getServers().size(), 1);
+        Assert.assertEquals(openAPI.getServers().getFirst().getUrl(), "/api/v1");
+        Assert.assertNull(openAPI.getServers().getFirst().getVariables());
+        Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
+        Assert.assertEquals(result.getDiagnostics().stream().map(OpenAPIMapperDiagnostic::getCode).toList(),
+                List.of("OAS_CONVERTOR_143", "OAS_CONVERTOR_141"));
+        Assert.assertTrue(result.getDiagnostics().stream()
+                .allMatch(diagnostic -> diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.WARNING));
+    }
+
+    @Test(description = "Generate the definition of a service contract implementation without servers when the " +
+            "port cannot be resolved and the server information is optional")
+    public void testListenerPortWithServerInfoOptionalForServiceContract() {
+        OASResult result = generateWithOptionalServerInfo("listeners/listener_with_port_neg_7.bal");
+
+        OpenAPI openAPI = result.getOpenAPI().orElseThrow();
+        Assert.assertEquals(openAPI.getServers().size(), 1);
+        Assert.assertEquals(openAPI.getServers().getFirst().getUrl(), "/api");
+        Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
+        Assert.assertTrue(result.getDiagnostics().stream().anyMatch(diagnostic ->
+                diagnostic.getCode().equals("OAS_CONVERTOR_143") &&
+                        diagnostic.getDiagnosticSeverity() == DiagnosticSeverity.WARNING));
+    }
+
+    @Test(description = "Keep the resolved servers when one of the listener ports cannot be resolved and the " +
+            "server information is optional")
+    public void testListenerPortWithServerInfoOptionalForMultipleListeners() {
+        OASResult result = generateWithOptionalServerInfo("listeners/listener_with_port_neg_8.bal");
+
+        OpenAPI openAPI = result.getOpenAPI().orElseThrow();
+        Assert.assertEquals(openAPI.getServers().size(), 1);
+        Assert.assertEquals(openAPI.getServers().getFirst().getUrl(), "{server}:{port}/api");
+        Assert.assertEquals(openAPI.getServers().getFirst().getVariables().get("port").getDefault(), "9090");
+        Assert.assertEquals(result.getDiagnostics().stream().map(OpenAPIMapperDiagnostic::getCode).toList(),
+                List.of("OAS_CONVERTOR_143"));
+        Assert.assertEquals(result.getDiagnostics().getFirst().getDiagnosticSeverity(), DiagnosticSeverity.WARNING);
+    }
+
+    @Test(description = "Report the unresolved port of one of the listeners")
+    public void testListenerPortWithMultipleListenersNegative() throws IOException {
+        List<OpenAPIMapperDiagnostic> diagnostics = runNegativeListenerTest(
+                RES_DIR.resolve("listeners/listener_with_port_neg_8.bal"));
+        Assert.assertEquals(diagnostics.stream().map(OpenAPIMapperDiagnostic::getCode).toList(),
+                List.of("OAS_CONVERTOR_143"));
+    }
+
+    @Test(description = "Omit the servers when the port cannot be resolved for a service without a base path")
+    public void testListenerPortWithServerInfoOptionalForRootPath() {
+        OASResult result = generateWithOptionalServerInfo("listeners/listener_with_port_neg_9.bal");
+
+        OpenAPI openAPI = result.getOpenAPI().orElseThrow();
+        Assert.assertNull(openAPI.getServers());
+        Assert.assertTrue(openAPI.getPaths().containsKey("/hello"));
+    }
+
+    private OASResult generateWithOptionalServerInfo(String ballerinaFile) {
+        Path ballerinaFilePath = RES_DIR.resolve(ballerinaFile);
+        Project project = ProjectLoader.load(ballerinaFilePath).project();
+        Module module = project.currentPackage().getDefaultModule();
+        SemanticModel semanticModel = project.currentPackage().getCompilation().getSemanticModel(module.moduleId());
+        ModulePartNode modulePartNode = module.document(module.documentIds().iterator().next()).syntaxTree()
+                .rootNode();
+        ServiceDeclarationNode serviceNode = modulePartNode.members().stream()
+                .filter(ServiceDeclarationNode.class::isInstance)
+                .map(ServiceDeclarationNode.class::cast)
+                .findFirst()
+                .orElseThrow();
+        OASGenerationMetaInfo.OASGenerationMetaInfoBuilder builder =
+                new OASGenerationMetaInfo.OASGenerationMetaInfoBuilder();
+        builder.setServiceNode(new ServiceDeclaration(serviceNode, semanticModel))
+                .setSemanticModel(semanticModel)
+                .setOpenApiFileName("api_v1_openapi.yaml")
+                .setServerInfoOptional(true)
+                .setProject(project);
+        return ServiceToOpenAPIMapper.generateOAS(builder.build());
     }
 
     @Test

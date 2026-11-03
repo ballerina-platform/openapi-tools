@@ -103,6 +103,7 @@ public class ServersMapperImpl implements ServersMapper {
             openAPI.setServers(null);
             return;
         }
+        servers.removeIf(server -> Objects.isNull(server.getUrl()));
         if (servers.size() > 1) {
             Server mainServer = addEnumValues(servers);
             openAPI.setServers(Collections.singletonList(mainServer));

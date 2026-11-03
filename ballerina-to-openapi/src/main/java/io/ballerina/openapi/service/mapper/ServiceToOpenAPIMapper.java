@@ -60,6 +60,7 @@ import io.swagger.v3.oas.models.servers.Server;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -271,13 +272,26 @@ public final class ServiceToOpenAPIMapper {
                 ServersMapper serversMapperImpl = serviceMapperFactory.getServersMapper(serviceDefinition);
                 serversMapperImpl.setServers();
 
-                // Return if there are any errors while setting the servers
                 if (diagnostics.stream().anyMatch(diagnostic -> diagnostic.getDiagnosticSeverity()
                                 .equals(DiagnosticSeverity.ERROR))) {
-                    return new OASResult(openapi, diagnostics);
+                    if (!oasGenerationMetaInfo.isServerInfoOptional()) {
+                        return new OASResult(openapi, diagnostics);
+                    }
+                    if (Objects.isNull(openapi.getServers()) || openapi.getServers().isEmpty()) {
+                        // A relative server URL keeps the service base path, which the paths do not include
+                        String serviceBasePath = serviceDefinition.absoluteResourcePath();
+                        openapi.setServers(isRootPath(serviceBasePath) ?
+                                null : Collections.singletonList(new Server().url(serviceBasePath)));
+                    }
+                    // Only the server mapping has run at this point, so every diagnostic is a server diagnostic
+                    diagnostics.replaceAll(diagnostic -> new ExceptionDiagnostic(diagnostic,
+                            DiagnosticSeverity.WARNING));
                 }
 
                 if (oasAvailableViaServiceContract(serviceDefinition)) {
+                    if (oasGenerationMetaInfo.isServerInfoOptional()) {
+                        oasResult.getDiagnostics().addAll(diagnostics);
+                    }
                     return updateOasResultWithServiceContract((ServiceDeclaration) serviceDefinition, currentPackage,
                             oasResult, semanticModel, packageMemberVisitor);
                 }
@@ -316,6 +330,10 @@ public final class ServiceToOpenAPIMapper {
         }
     }
 
+    private static boolean isRootPath(String basePath) {
+        return Objects.isNull(basePath) || basePath.isEmpty() || basePath.equals("/");
+    }
+
     static boolean oasAvailableViaServiceContract(ServiceNode serviceNode) {
         return serviceNode.kind().equals(ServiceNode.Kind.SERVICE_DECLARATION) &&
                 ((ServiceDeclaration) serviceNode).implementsServiceContract();
@@ -345,9 +363,14 @@ public final class ServiceToOpenAPIMapper {
         // Copy servers
         String basePath = extractBasePath(openApiFromServiceContract);
         List<Server> existingServers = oasResult.getOpenAPI().get().getServers();
-        existingServers.forEach(
-                server -> server.setUrl(server.getUrl() + basePath)
-        );
+        if (existingServers != null) {
+            existingServers.forEach(
+                    server -> server.setUrl(server.getUrl() + basePath)
+            );
+        } else if (basePath != null && !basePath.isEmpty()) {
+            // The contract paths are relative to its base path, so keep it as a relative server URL
+            existingServers = Collections.singletonList(new Server().url(basePath));
+        }
         openApiFromServiceContract.setServers(existingServers);
         oasResult.setOpenAPI(openApiFromServiceContract);
         return oasResult;
