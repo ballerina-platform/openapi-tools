@@ -139,10 +139,11 @@ public class OASGenerationMetaInfo {
         }
 
         /**
-         * Generates the definition without the `servers` section when the listener details cannot be resolved,
-         * reporting those failures as warnings instead of errors.
+         * Keeps generating the definition when a listener port cannot be resolved, reporting the server failures
+         * as warnings instead of errors. The servers that resolve are kept. When none resolve, `servers` holds a
+         * single relative URL equal to the service base path, or is omitted for the root base path.
          *
-         * @param serverInfoOptional whether the `servers` section can be omitted
+         * @param serverInfoOptional whether a listener port that cannot be resolved is allowed
          * @return this builder
          */
         public OASGenerationMetaInfoBuilder setServerInfoOptional(boolean serverInfoOptional) {

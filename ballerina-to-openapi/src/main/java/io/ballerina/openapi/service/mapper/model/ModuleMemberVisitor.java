@@ -54,11 +54,7 @@ public class ModuleMemberVisitor extends NodeVisitor {
     Map<String, VariableDeclaredValue> variableDeclarations = new LinkedHashMap<>();
     SemanticModel semanticModel;
 
-    public record VariableDeclaredValue(ExpressionNode value, boolean isConfigurable, Node type) {
-
-        public VariableDeclaredValue(ExpressionNode value, boolean isConfigurable) {
-            this(value, isConfigurable, null);
-        }
+    public record VariableDeclaredValue(ExpressionNode value, boolean isConfigurable) {
     }
 
     public ModuleMemberVisitor(SemanticModel semanticModel) {
@@ -93,7 +89,9 @@ public class ModuleMemberVisitor extends NodeVisitor {
         TypedBindingPatternNode typedBindingPatternNode = moduleVariableDeclarationNode.typedBindingPattern();
         TypeDescriptorNode typeDescriptorNode = typedBindingPatternNode.typeDescriptor();
         BindingPatternNode bindingPatternNode = typedBindingPatternNode.bindingPattern();
-        if (!bindingPatternNode.kind().equals(SyntaxKind.CAPTURE_BINDING_PATTERN)) {
+        if (!bindingPatternNode.kind().equals(SyntaxKind.CAPTURE_BINDING_PATTERN) ||
+                !(typeDescriptorNode.kind().equals(SyntaxKind.INT_TYPE_DESC) ||
+                        typeDescriptorNode.kind().equals(SyntaxKind.VAR_TYPE_DESC))) {
             return;
         }
 
@@ -106,7 +104,7 @@ public class ModuleMemberVisitor extends NodeVisitor {
         boolean isConfigurable = moduleVariableDeclarationNode.qualifiers().stream()
                 .anyMatch(token -> token.kind().equals(SyntaxKind.CONFIGURABLE_KEYWORD));
         variableValue.ifPresent(expressionNode -> variableDeclarations.put(variableName,
-                new VariableDeclaredValue(expressionNode, isConfigurable, typeDescriptorNode)));
+                new VariableDeclaredValue(expressionNode, isConfigurable)));
     }
 
     @Override

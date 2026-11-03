@@ -277,16 +277,21 @@ public final class ServiceToOpenAPIMapper {
                     if (!oasGenerationMetaInfo.isServerInfoOptional()) {
                         return new OASResult(openapi, diagnostics);
                     }
-                    // A relative server URL keeps the service base path, which the paths do not include
-                    String serviceBasePath = serviceDefinition.absoluteResourcePath();
-                    openapi.setServers(Objects.isNull(serviceBasePath) || serviceBasePath.equals("/") ?
-                            null : Collections.singletonList(new Server().url(serviceBasePath)));
+                    if (Objects.isNull(openapi.getServers()) || openapi.getServers().isEmpty()) {
+                        // A relative server URL keeps the service base path, which the paths do not include
+                        String serviceBasePath = serviceDefinition.absoluteResourcePath();
+                        openapi.setServers(isRootPath(serviceBasePath) ?
+                                null : Collections.singletonList(new Server().url(serviceBasePath)));
+                    }
+                    // Only the server mapping has run at this point, so every diagnostic is a server diagnostic
                     diagnostics.replaceAll(diagnostic -> new ExceptionDiagnostic(diagnostic,
                             DiagnosticSeverity.WARNING));
                 }
 
                 if (oasAvailableViaServiceContract(serviceDefinition)) {
-                    oasResult.getDiagnostics().addAll(diagnostics);
+                    if (oasGenerationMetaInfo.isServerInfoOptional()) {
+                        oasResult.getDiagnostics().addAll(diagnostics);
+                    }
                     return updateOasResultWithServiceContract((ServiceDeclaration) serviceDefinition, currentPackage,
                             oasResult, semanticModel, packageMemberVisitor);
                 }
@@ -323,6 +328,10 @@ public final class ServiceToOpenAPIMapper {
         } else {
             return oasResult;
         }
+    }
+
+    private static boolean isRootPath(String basePath) {
+        return Objects.isNull(basePath) || basePath.isEmpty() || basePath.equals("/");
     }
 
     static boolean oasAvailableViaServiceContract(ServiceNode serviceNode) {

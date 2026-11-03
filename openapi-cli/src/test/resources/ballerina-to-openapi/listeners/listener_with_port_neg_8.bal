@@ -1,15 +1,11 @@
 import ballerina/http;
 
-type Config record {|
-    int port = 9711;
-|};
+int port = 8095 + 1;
 
-final Config base = {port: 9720};
-final Config cfg = {...base};
+listener http:Listener resolvedEp = new (9090);
+listener http:Listener unresolvedEp = new (port);
 
-listener http:Listener listenerEp = new (cfg.port);
-
-service /api/v1 on listenerEp {
+service /api on resolvedEp, unresolvedEp {
     resource function get hello() returns string {
         return "Hello from listener";
     }
