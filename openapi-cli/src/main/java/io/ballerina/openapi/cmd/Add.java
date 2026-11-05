@@ -57,9 +57,13 @@ import java.util.Locale;
 
 import static io.ballerina.cli.cmd.CommandUtil.exitError;
 import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_CLIENT_ID;
+import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_ADD_CMD;
+import static io.ballerina.openapi.cmd.CmdConstants.YAML_EXTENSION;
+import static io.ballerina.openapi.cmd.CmdConstants.YML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdUtils.searchEnum;
 import static io.ballerina.openapi.cmd.CmdUtils.getBallerinaTomlPath;
+import static io.ballerina.openapi.core.generators.common.ErrorMessages.invalidFileType;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createToken;
@@ -118,7 +122,9 @@ public class Add implements BLauncherCmd {
             }
             //check the given path is the Ballerina package
             Path ballerinaTomlPath = getBallerinaTomlPath(projectPath);
-            validateInputPath();
+            if (!isValidInputPath()) {
+                return;
+            }
             Path tomlPath = projectPath.resolve(ballerinaTomlPath);
             TextDocument configDocument = TextDocuments.from(Files.readString(tomlPath));
             SyntaxTree syntaxTree = SyntaxTree.from(configDocument);
@@ -199,11 +205,20 @@ public class Add implements BLauncherCmd {
         return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
-    private void validateInputPath() {
+    private boolean isValidInputPath() {
         if (baseCmd.inputPath == null || baseCmd.inputPath.isBlank()) {
             outStream.printf(ErrorMessages.INVALID_INPUT_PATH);
             exitError(this.exitWhenFinish);
+            return false;
         }
+        // The build tool only handles these contract file types, so do not write an entry it cannot build.
+        if (!(baseCmd.inputPath.endsWith(YAML_EXTENSION) || baseCmd.inputPath.endsWith(YML_EXTENSION) ||
+                baseCmd.inputPath.endsWith(JSON_EXTENSION))) {
+            outStream.println("ERROR: " + invalidFileType());
+            exitError(this.exitWhenFinish);
+            return false;
+        }
+        return true;
     }
 
     private CmdOptions collectCLIOptions() {
@@ -285,7 +300,7 @@ public class Add implements BLauncherCmd {
                     escapeTomlString(optionsBuilder.getClientMethod()), null));
         }
         if (optionsBuilder.getLicensePath() != null && !optionsBuilder.getLicensePath().isBlank()) {
-            moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.licensePath",
+            moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.license",
                     escapeTomlString(optionsBuilder.getLicensePath()), null));
         }
         if (optionsBuilder.getStatusCodeBinding()) {

@@ -161,6 +161,9 @@ public class UnresolvableReferenceTests {
                 {"#/components/schemas/Album/items", true},
                 {"#/components/schemas/Missing", true},
                 {"./external.yaml#/Album", true},
+                // Reference to another components section with the name of a component schema
+                {"#/components/responses/Album", true},
+                {"#/components/schemas/", true},
                 // Components section without schemas
                 {"#/components/schemas/Album", false}
         };

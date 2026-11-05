@@ -34,6 +34,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -919,7 +920,7 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                 "options.mode = \"client\"" + newLine +
                 "options.nullable = true" + newLine +
                 "options.clientMethods = \"resource\"" + newLine +
-                "options.licensePath = \"license.txt\"" + newLine +
+                "options.license = \"license.txt\"" + newLine +
                 "options.statusCodeBinding = true" + newLine +
                 "options.singleFile = true";
         Assert.assertTrue(tomlContent.contains(generatedTool));
@@ -949,10 +950,31 @@ public class OpenAPICmdTest extends OpenAPICommandTest {
                     isWindows ? "oas_client_petstore" : "oas_client_specs\\v1\\petstore");
             Assert.assertEquals(openApiTool.get("filePath"),
                     isWindows ? "specs/v1/petstore.yaml" : "specs\\v1\\petstore.yaml");
-            Assert.assertEquals(getOptions(openApiTool).get("licensePath"),
+            Assert.assertEquals(getOptions(openApiTool).get("license"),
                     isWindows ? "licenses/license.txt" : "licenses\\license.txt");
             Assert.assertEquals(getOptions(openApiTool).get("tags"), List.of("my\"tag", "pets"));
             Assert.assertEquals(getOptions(openApiTool).get("operations"), List.of("list\\pets"));
+        } finally {
+            FileUtils.deleteDirectory(packagePath.toFile());
+        }
+    }
+
+    @Test(description = "Test openapi add sub command rejects contracts which the build tool cannot handle")
+    public void testAddCmdWithUnsupportedContractFileType() throws IOException {
+        Path fixture = Paths.get(System.getProperty("user.dir"))
+                .resolve("build/resources/test/cmd/bal-task-client-windows-path");
+        Path packagePath = Files.createTempDirectory("openapi-add-cmd-");
+        try {
+            Files.copy(fixture.resolve("Ballerina.toml"), packagePath.resolve("Ballerina.toml"));
+            String originalToml = Files.readString(packagePath.resolve("Ballerina.toml"));
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            Add add = new Add(new PrintStream(output, true, StandardCharsets.UTF_8), false);
+            new CommandLine(add).parseArgs("--input", "specs/petstore", "-p", packagePath.toString());
+            add.execute();
+
+            Assert.assertTrue(output.toString(StandardCharsets.UTF_8)
+                    .contains("ERROR: Invalid file type. Provide either a .yaml or .json file."));
+            Assert.assertEquals(Files.readString(packagePath.resolve("Ballerina.toml")), originalToml);
         } finally {
             FileUtils.deleteDirectory(packagePath.toFile());
         }

@@ -61,7 +61,7 @@ public class TypeGeneratorUtils {
      * @throws OASTypeGenException if the reference does not resolve to a component schema
      */
     public static Schema<?> getReferencedComponentSchema(String reference) throws OASTypeGenException {
-        if (GeneratorUtils.isReferenceWithinComponentSchema(reference)) {
+        if (!GeneratorUtils.isComponentSchemaReference(reference)) {
             throw new OASTypeGenException(reference);
         }
         String schemaName;

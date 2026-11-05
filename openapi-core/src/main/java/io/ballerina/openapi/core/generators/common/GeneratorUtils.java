@@ -561,15 +561,17 @@ public class GeneratorUtils {
     }
 
     /**
-     * Checks whether the given reference points inside a schema under `#/components/schemas`, such as
-     * `#/components/schemas/AlbumArray/items`, instead of referring to the component schema itself.
+     * Checks whether the given reference refers to a schema under `#/components/schemas`, such as
+     * `#/components/schemas/Album`. References into a schema, such as `#/components/schemas/AlbumArray/items`, and
+     * references to other sections are not component schema references.
      *
      * @param reference reference value
-     * @return true if the reference points inside a component schema
+     * @return true if the reference refers to a component schema
      */
-    public static boolean isReferenceWithinComponentSchema(String reference) {
+    public static boolean isComponentSchemaReference(String reference) {
         return reference.startsWith(COMPONENT_SCHEMA_REFERENCE_PREFIX) &&
-                reference.indexOf('/', COMPONENT_SCHEMA_REFERENCE_PREFIX.length()) >= 0;
+                reference.length() > COMPONENT_SCHEMA_REFERENCE_PREFIX.length() &&
+                reference.indexOf('/', COMPONENT_SCHEMA_REFERENCE_PREFIX.length()) < 0;
     }
 
     /**

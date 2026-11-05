@@ -154,7 +154,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             }
             if (type != null) {
                 qualifiedNodes.put(type.toString(), type);
-                responseTypes.put(responseCode, type.toSourceCode().trim().replaceAll("\\s+", " "));
+                // Join a multi-line type into one doc line; literals cannot contain raw line breaks.
+                responseTypes.put(responseCode, type.toSourceCode().trim().replaceAll("\\s*\\R\\s*", " "));
             }
         }
         TypeDescriptorNode unionTypeDescriptorNode = GeneratorUtils.getUnionTypeDescriptorNodeFromTypeDescNodes(
