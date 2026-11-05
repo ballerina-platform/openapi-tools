@@ -1,0 +1,55 @@
+swagger: "2.0"
+info:
+  title: Swagger 2.0 consumes with media type parameters
+  version: 1.0.0
+host: api.example.com
+basePath: /v1
+schemes:
+  - https
+consumes:
+  - application/json; charset=utf-8
+produces:
+  - application/json; charset=utf-8
+paths:
+  /items:
+    post:
+      operationId: createItem
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Item'
+      responses:
+        "200":
+          description: Created item
+          schema:
+            $ref: '#/definitions/Item'
+  /items/{id}:
+    put:
+      operationId: replaceItem
+      consumes:
+        - application/xml; charset=utf-8
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Item'
+      responses:
+        "200":
+          description: Replaced item
+          schema:
+            $ref: '#/definitions/Item'
+definitions:
+  Item:
+    type: object
+    properties:
+      name:
+        type: string
+      quantity:
+        type: integer

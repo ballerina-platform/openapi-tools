@@ -545,6 +545,16 @@ public class GeneratorUtils {
     }
 
     /**
+     * Returns the media type without its parameters, e.g. `application/json` for `application/json; charset=utf-8`.
+     *
+     * @param mediaType media type which may contain parameters
+     * @return media type without parameters
+     */
+    public static String getMediaTypeWithoutParameters(String mediaType) {
+        return mediaType.split(";")[0].trim();
+    }
+
+    /**
      * Check whether the given media type is currently supported in the tool.
      *
      * @param mediaTypeEntry

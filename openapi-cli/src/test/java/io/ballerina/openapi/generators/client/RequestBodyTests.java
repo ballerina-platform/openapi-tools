@@ -20,6 +20,7 @@ package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
 import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
@@ -27,7 +28,9 @@ import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.testng.Assert;
 import org.testng.annotations.AfterTest;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -259,6 +262,31 @@ public class RequestBodyTests {
         compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
     }
 
+    @Test(description = "Test client generation for request body media types with parameters",
+            dataProvider = "mediaTypeWithParametersSpecs")
+    public void testRequestBodyMediaTypeWithParameters(String specFile, String expectedFile, boolean isResource)
+            throws IOException, BallerinaOpenApiException, ClientException {
+        Path expectedPath = RES_DIR.resolve("ballerina/" + expectedFile);
+        Path definitionPath = RES_DIR.resolve("swagger/" + specFile);
+        BallerinaClientGenerator ballerinaClientGenerator = getBallerinaClientGenerator(definitionPath, isResource);
+        syntaxTree = ballerinaClientGenerator.generateSyntaxTree();
+        compareGeneratedSyntaxTreeWithExpectedSyntaxTree(expectedPath, syntaxTree);
+        Assert.assertTrue(ballerinaClientGenerator.getDiagnostics().isEmpty(),
+                "Unexpected diagnostics: " + ballerinaClientGenerator.getDiagnostics().stream()
+                        .map(ClientDiagnostic::getMessage).toList());
+    }
+
+    @DataProvider(name = "mediaTypeWithParametersSpecs")
+    public Object[][] mediaTypeWithParametersSpecs() {
+        return new Object[][]{
+                {"request_body_media_type_with_parameters.yaml", "request_body_media_type_with_parameters.bal",
+                        false},
+                {"request_body_media_type_with_parameters.yaml",
+                        "request_body_media_type_with_parameters_resource.bal", true},
+                {"request_body_consumes_with_parameters.yaml", "request_body_consumes_with_parameters.bal", false}
+        };
+    }
+
     @AfterTest
     private void deleteGeneratedFiles() {
         try {
@@ -270,13 +298,18 @@ public class RequestBodyTests {
 
     private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath) throws IOException,
             BallerinaOpenApiException {
+        return getBallerinaClientGenerator(definitionPath, false);
+    }
+
+    private BallerinaClientGenerator getBallerinaClientGenerator(Path definitionPath, boolean isResource)
+            throws IOException, BallerinaOpenApiException {
         OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(definitionPath, true, false);
         TypeHandler.createInstance(openAPI, true);
         OASClientConfig.Builder clientMetaDataBuilder = new OASClientConfig.Builder();
         OASClientConfig oasClientConfig = clientMetaDataBuilder
                 .withFilters(filter)
                 .withOpenAPI(openAPI)
-                .withResourceMode(false).build();
+                .withResourceMode(isResource).build();
         BallerinaClientGenerator ballerinaClientGenerator = new BallerinaClientGenerator(oasClientConfig);
         return ballerinaClientGenerator;
     }

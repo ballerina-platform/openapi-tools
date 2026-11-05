@@ -1,0 +1,154 @@
+openapi: 3.0.2
+info:
+  title: Request body media types with parameters
+  version: 1.0.0
+servers:
+  - url: https://api.example.com/v1
+paths:
+  /items:
+    post:
+      operationId: createItem
+      requestBody:
+        required: true
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        "200":
+          description: Created item
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Item'
+  /items/{id}:
+    put:
+      operationId: replaceItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/xml; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        "200":
+          description: Replaced item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+    patch:
+      operationId: updateItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+  /items/{id}/notes:
+    post:
+      operationId: addNote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          text/plain; charset=utf-8:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: Note added
+  /items/{id}/attachments:
+    post:
+      operationId: uploadAttachment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/octet-stream; qs=0.9:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Attachment uploaded
+  /items/{id}/images:
+    post:
+      operationId: uploadImage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data; boundary=item-boundary:
+            schema:
+              type: object
+              properties:
+                caption:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Image uploaded
+  /items/{id}/metadata:
+    post:
+      operationId: setMetadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json;charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        "200":
+          description: Metadata set
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        name:
+          type: string
+        quantity:
+          type: integer
