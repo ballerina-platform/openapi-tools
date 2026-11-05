@@ -81,6 +81,8 @@ public class CmdUtils {
         String openAPIFileContent = Files.readString(definitionPath);
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
+        // Since swagger-parser 2.1.23, referenced responses are resolved only when this is enabled.
+        parseOptions.setResolveResponses(true);
         parseOptions.setFlatten(true);
         SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
         if (!parseResult.getMessages().isEmpty()) {
