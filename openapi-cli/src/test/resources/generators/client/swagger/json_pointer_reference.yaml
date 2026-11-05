@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  title: Albums API
+  version: 1.0.0
+  description: A simple API to get a list of albums
+servers:
+  - url: https://api.example.com
+paths:
+  /albums:
+    get:
+      operationId: getAlbums
+      responses:
+        "200":
+          description: A list of albums
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlbumArray"
+  /albums/{id}:
+    get:
+      operationId: getAlbum
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: An album
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlbumArray/items"
+  /albums/{id}/summary:
+    get:
+      operationId: getAlbumSummary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: An album summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlbumSummary"
+components:
+  schemas:
+    AlbumArray:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+          title:
+            type: string
+    AlbumSummary:
+      type: object
+      properties:
+        album:
+          $ref: "#/components/schemas/AlbumArray/items"
+        trackCount:
+          type: integer

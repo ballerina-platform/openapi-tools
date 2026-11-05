@@ -81,6 +81,9 @@ public class ReferencedTypeGenerator extends TypeGenerator {
         Schema<?> refSchema = GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(typeName);
         refSchema = refSchema == null ?
                 GeneratorMetaData.getInstance().getOpenAPI().getComponents().getSchemas().get(extractName) : refSchema;
+        if (refSchema == null) {
+            throw new OASTypeGenException(schema.get$ref());
+        }
         SimpleNameReferenceNode nameReferenceNode = createSimpleNameReferenceNode(createIdentifierToken(typeName));
         TypeGenerator reffredTypeGenerator = TypeGeneratorUtils.getTypeGenerator(refSchema, extractName,
                 null,  ignoreNullableFlag, subTypesMap, pregeneratedTypeMap);
