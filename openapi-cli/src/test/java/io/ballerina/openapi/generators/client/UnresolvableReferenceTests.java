@@ -27,8 +27,13 @@ import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiExc
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
+import io.ballerina.openapi.core.generators.type.TypeGeneratorUtils;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
+import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -96,6 +101,69 @@ public class UnresolvableReferenceTests {
         Assert.assertTrue(service.contains("resourcefunctiongetalbums/[intid]()returnsjson"), service);
         Assert.assertTrue(service.contains("resourcefunctiongetalbums/[intid]/summary()returnsjson"), service);
         assertInvalidReferenceDiagnostics(TypeHandler.getInstance().getDiagnostics());
+    }
+
+    @Test(description = "A JSON pointer reference is reported even when its last segment names another schema")
+    public void testJsonPointerReferenceWithMatchingComponentName() throws IOException, BallerinaOpenApiException,
+            ClientException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(
+                RES_DIR.resolve("swagger/json_pointer_reference_collision.yaml"), true, false);
+        TypeHandler.createInstance(openAPI, false);
+        OASClientConfig oasClientConfig = new OASClientConfig.Builder()
+                .withFilters(new Filter(new ArrayList<>(), new ArrayList<>()))
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+
+        String client = withoutWhitespace(new BallerinaClientGenerator(oasClientConfig).generateSyntaxTree()
+                .toSourceCode());
+
+        // The reference must not resolve to the unrelated `items` schema, including inside `allOf`.
+        Assert.assertTrue(client.contains("getAlbum(intid,map<string|string[]>headers={})returnsjson|error"), client);
+        Assert.assertTrue(client.contains("getAlbumDetails(intid,map<string|string[]>headers={})returnsjson|error"),
+                client);
+        assertInvalidReferenceDiagnostics(TypeHandler.getInstance().getDiagnostics());
+    }
+
+    @Test(description = "Referenced component schemas are resolved", dataProvider = "componentSchemaReferences")
+    public void testGetReferencedComponentSchema(String reference, String expectedSchema) throws OASTypeGenException {
+        OpenAPI openAPI = new OpenAPI().components(new Components()
+                .addSchemas("Album", new ObjectSchema().description("Album"))
+                .addSchemas("items", new ObjectSchema().description("items")));
+        GeneratorMetaData.createInstance(openAPI, false);
+        Assert.assertEquals(TypeGeneratorUtils.getReferencedComponentSchema(reference).getDescription(),
+                expectedSchema);
+    }
+
+    @DataProvider(name = "componentSchemaReferences")
+    public Object[][] componentSchemaReferences() {
+        return new Object[][]{
+                {"#/components/schemas/Album", "Album"},
+                {"#/components/schemas/items", "items"}
+        };
+    }
+
+    @Test(description = "References which do not resolve to a component schema are rejected",
+            dataProvider = "unresolvableSchemaReferences", expectedExceptions = OASTypeGenException.class)
+    public void testGetReferencedComponentSchemaFailure(String reference, boolean hasSchemas)
+            throws OASTypeGenException {
+        Components components = new Components();
+        if (hasSchemas) {
+            components.addSchemas("Album", new ObjectSchema()).addSchemas("items", new ObjectSchema());
+        }
+        GeneratorMetaData.createInstance(new OpenAPI().components(components), false);
+        TypeGeneratorUtils.getReferencedComponentSchema(reference);
+    }
+
+    @DataProvider(name = "unresolvableSchemaReferences")
+    public Object[][] unresolvableSchemaReferences() {
+        return new Object[][]{
+                // JSON pointer into a schema whose last segment matches another component schema
+                {"#/components/schemas/Album/items", true},
+                {"#/components/schemas/Missing", true},
+                {"./external.yaml#/Album", true},
+                // Components section without schemas
+                {"#/components/schemas/Album", false}
+        };
     }
 
     private static void assertInvalidReferenceDiagnostics(List<Diagnostic> diagnostics) {

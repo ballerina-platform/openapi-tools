@@ -189,6 +189,7 @@ public class GeneratorUtils {
 
     public static final MinutiaeList SINGLE_WS_MINUTIAE = getSingleWSMinutiae();
     public static final List<String> BAL_KEYWORDS = SyntaxInfo.keywords();
+    private static final String COMPONENT_SCHEMA_REFERENCE_PREFIX = "#/components/schemas/";
     public static final MinutiaeList SINGLE_END_OF_LINE_MINUTIAE = getEndOfLineMinutiae();
     private static final PrintStream OUT_STREAM = System.err;
     public static final String NAME = "name";
@@ -523,12 +524,8 @@ public class GeneratorUtils {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
         }
         String openAPIFileContent = Files.readString(definitionPath);
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        // Since swagger-parser 2.1.23, referenced responses are resolved only when this is enabled.
-        parseOptions.setResolveResponses(true);
-        parseOptions.setFlatten(true);
-        SwaggerParseResult parseResult = new OpenAPIParser().readContents(openAPIFileContent, null, parseOptions);
+        SwaggerParseResult parseResult = new OpenAPIParser().readContents(openAPIFileContent, null,
+                getResolvingParseOptions());
         if (!parseResult.getMessages().isEmpty()) {
             if (parseResult.getMessages().contains(UNSUPPORTED_OPENAPI_VERSION_PARSER_MESSAGE)) {
                 throw new BallerinaOpenApiException(ErrorMessages.unsupportedOpenAPIVersion());
@@ -545,13 +542,45 @@ public class GeneratorUtils {
     }
 
     /**
+     * Returns the parser options used to read an OpenAPI definition for code generation, with references resolved
+     * and inline schemas flattened.
+     *
+     * @return parser options
+     */
+    public static ParseOptions getResolvingParseOptions() {
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setFlatten(true);
+        try {
+            // Since swagger-parser 2.1.23, referenced responses are resolved only when this is enabled.
+            parseOptions.setResolveResponses(true);
+        } catch (NoSuchMethodError e) {
+            // Older swagger-parser versions resolve referenced responses by default and do not have this option.
+        }
+        return parseOptions;
+    }
+
+    /**
+     * Checks whether the given reference points inside a schema under `#/components/schemas`, such as
+     * `#/components/schemas/AlbumArray/items`, instead of referring to the component schema itself.
+     *
+     * @param reference reference value
+     * @return true if the reference points inside a component schema
+     */
+    public static boolean isReferenceWithinComponentSchema(String reference) {
+        return reference.startsWith(COMPONENT_SCHEMA_REFERENCE_PREFIX) &&
+                reference.indexOf('/', COMPONENT_SCHEMA_REFERENCE_PREFIX.length()) >= 0;
+    }
+
+    /**
      * Returns the media type without its parameters, e.g. `application/json` for `application/json; charset=utf-8`.
      *
      * @param mediaType media type which may contain parameters
      * @return media type without parameters
      */
     public static String getMediaTypeWithoutParameters(String mediaType) {
-        return mediaType.split(";")[0].trim();
+        int parameterStart = mediaType.indexOf(';');
+        return (parameterStart < 0 ? mediaType : mediaType.substring(0, parameterStart)).trim();
     }
 
     /**
@@ -561,11 +590,7 @@ public class GeneratorUtils {
      * @return
      */
     public static boolean isSupportedMediaType(Map.Entry<String, MediaType> mediaTypeEntry) {
-        String mediaType = mediaTypeEntry.getKey();
-        String[] contentTypes = mediaType.split(";");
-        if (mediaType.length() > 1) {
-            mediaType = contentTypes[0];
-        }
+        String mediaType = getMediaTypeWithoutParameters(mediaTypeEntry.getKey());
         String defaultBallerinaType = getBallerinaMediaType(mediaType, true);
         Schema<?> schema = mediaTypeEntry.getValue().getSchema();
 
@@ -587,10 +612,7 @@ public class GeneratorUtils {
      * Generate BallerinaMediaType for all the return mediaTypes.
      */
     public static String getBallerinaMediaType(String mediaType, boolean isRequest) {
-        String[] contentTypes = mediaType.split(";");
-        if (mediaType.length() > 1) {
-            mediaType = contentTypes[0];
-        }
+        mediaType = getMediaTypeWithoutParameters(mediaType);
         if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
             return SyntaxKind.JSON_KEYWORD.stringValue();
         } else if (mediaType.matches(".*/xml") || mediaType.matches("application/.*\\+xml")) {
@@ -1039,10 +1061,7 @@ public class GeneratorUtils {
     }
 
     public static String selectMediaType(String mediaTypeContent) {
-        String[] contentTypes = mediaTypeContent.split(";");
-        if (mediaTypeContent.length() > 1) {
-            mediaTypeContent = contentTypes[0];
-        }
+        mediaTypeContent = getMediaTypeWithoutParameters(mediaTypeContent);
         if (mediaTypeContent.matches("application/.*\\+json") || mediaTypeContent.matches(".*/json")) {
             mediaTypeContent = GeneratorConstants.APPLICATION_JSON;
         } else if (mediaTypeContent.matches("application/.*\\+xml") || mediaTypeContent.matches(".*/xml")) {

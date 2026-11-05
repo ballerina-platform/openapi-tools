@@ -6,21 +6,21 @@ import ballerina/http;
 listener http:Listener ep0 = new (9090, config = {host: "localhost"});
 
 service /api on ep0 {
-    # + return - returns can be any of following types
-    # http:Ok (Ok)
-    # http:DefaultStatusCodeResponse (NotFound)
+    # + return - returns can be any of following types 
+    # Album[] (Ok)
+    # ErrorMessageDefault (NotFound)
     resource function get albums(string genre) returns Album[]|ErrorMessageDefault {
     }
 
-    # + return - returns can be any of following types
-    # http:Ok (Ok)
-    # http:DefaultStatusCodeResponse (Default Error)
+    # + return - returns can be any of following types 
+    # Album (Ok)
+    # ErrorMessageDefault (Default Error)
     resource function get albums/[string id]() returns Album|ErrorMessageDefault {
     }
 
-    # + return - returns can be any of following types
-    # http:Created (Created)
-    # http:DefaultStatusCodeResponse (Conflict)
+    # + return - returns can be any of following types 
+    # Album (Created)
+    # ErrorMessageDefault (Conflict)
     resource function post albums(@http:Payload Album payload) returns Album|ErrorMessageDefault {
     }
 }

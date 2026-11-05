@@ -45,6 +45,23 @@ paths:
                 $ref: "#/components/schemas/Person"
         "404":
           $ref: "#/components/responses/NotFound"
+  /report:
+    get:
+      description: Download the report
+      responses:
+        "200":
+          description: The report document
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   responses:
     NotFound:

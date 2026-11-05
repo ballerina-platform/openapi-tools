@@ -19,11 +19,14 @@
 package io.ballerina.openapi.generators.client;
 
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
+import io.ballerina.compiler.syntax.tree.StatementNode;
 import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp;
+import io.ballerina.openapi.core.generators.client.BallerinaClientGenerator;
 import io.ballerina.openapi.core.generators.client.BallerinaUtilGenerator;
 import io.ballerina.openapi.core.generators.client.FunctionBodyGeneratorImp;
 import io.ballerina.openapi.core.generators.client.MimeFactory;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.exception.ClientException;
 import io.ballerina.openapi.core.generators.client.mime.CustomType;
 import io.ballerina.openapi.core.generators.client.mime.JsonType;
 import io.ballerina.openapi.core.generators.client.mime.MimeType;
@@ -31,9 +34,11 @@ import io.ballerina.openapi.core.generators.client.mime.MultipartFormData;
 import io.ballerina.openapi.core.generators.client.mime.OctetStreamType;
 import io.ballerina.openapi.core.generators.client.mime.UrlEncodedType;
 import io.ballerina.openapi.core.generators.client.mime.XmlType;
+import io.ballerina.openapi.core.generators.client.model.OASClientConfig;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -48,6 +53,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +81,71 @@ public class MediaTypeParameterTests {
                 {"application/json;charset=utf-8", "application/json"},
                 {"application/json ; charset=utf-8", "application/json"},
                 {"multipart/form-data; boundary=item-boundary", "multipart/form-data"},
-                {"text/plain; charset=utf-8; format=flowed", "text/plain"}
+                {"text/plain; charset=utf-8; format=flowed", "text/plain"},
+                {"application/json ;", "application/json"},
+                {";", ""}
+        };
+    }
+
+    @Test(description = "Response media types with parameters are mapped to the media type without parameters",
+            dataProvider = "responseMediaTypes")
+    public void testSelectMediaTypeWithParameters(String mediaType, String expected) {
+        Assert.assertEquals(GeneratorUtils.selectMediaType(mediaType), expected);
+    }
+
+    @DataProvider(name = "responseMediaTypes")
+    public Object[][] responseMediaTypes() {
+        return new Object[][]{
+                {"application/json; charset=utf-8", "application/json"},
+                {"application/json ; charset=utf-8", "application/json"},
+                {"application/vnd.api+json;charset=utf-8", "application/json"},
+                {"application/xml ; charset=utf-8", "application/xml"}
+        };
+    }
+
+    @Test(description = "The media type is escaped when it is written as a string literal in the generated client")
+    public void testPayloadMediaTypeIsEscaped() {
+        List<StatementNode> statements = new ArrayList<>();
+        new JsonType(new ArrayList<>()).setPayload(statements,
+                Map.entry("application/json; profile=\"urn:example:item\"", new MediaType()));
+        Assert.assertEquals(statements.get(statements.size() - 1).toSourceCode().trim(),
+                "request.setPayload(jsonBody, \"application/json; profile=\\\"urn:example:item\\\"\");");
+    }
+
+    @Test(description = "Client is generated for media types with quoted parameters and spaces before parameters")
+    public void testClientGenerationWithQuotedMediaTypeParameter() throws IOException, BallerinaOpenApiException,
+            ClientException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(Path.of("src/test/resources/generators/client/swagger/" +
+                "request_body_media_type_with_quoted_parameter.yaml").toAbsolutePath(), true, false);
+        TypeHandler.createInstance(openAPI, false);
+        OASClientConfig oasClientConfig = new OASClientConfig.Builder()
+                .withFilters(new Filter(new ArrayList<>(), new ArrayList<>()))
+                .withOpenAPI(openAPI)
+                .withResourceMode(false).build();
+        String client = new BallerinaClientGenerator(oasClientConfig).generateSyntaxTree().toSourceCode()
+                .replaceAll("\\s+", "");
+        Assert.assertTrue(client.contains("createItem(Itempayload,map<string|string[]>headers={})returnsItem|error"),
+                client);
+        Assert.assertTrue(client.contains(
+                "request.setPayload(jsonBody,\"application/json;profile=\\\"urn:example:item\\\"\");"), client);
+    }
+
+    @Test(description = "Media types with parameters are recognized as supported request media types",
+            dataProvider = "supportedMediaTypesWithParameters")
+    public void testSupportedMediaTypeWithParameters(String mediaType, String ballerinaType) {
+        Assert.assertTrue(GeneratorUtils.isSupportedMediaType(
+                Map.entry(mediaType, new MediaType().schema(new ObjectSchema()))));
+        Assert.assertEquals(GeneratorUtils.getBallerinaMediaType(mediaType, true), ballerinaType);
+    }
+
+    @DataProvider(name = "supportedMediaTypesWithParameters")
+    public Object[][] supportedMediaTypesWithParameters() {
+        return new Object[][]{
+                {"application/json; charset=utf-8", "json"},
+                {"application/json ; charset=utf-8", "json"},
+                {"application/xml ; charset=utf-8", "xml"},
+                {"text/plain; charset=utf-8", "string"},
+                {"application/octet-stream; qs=0.9", "byte[]"}
         };
     }
 

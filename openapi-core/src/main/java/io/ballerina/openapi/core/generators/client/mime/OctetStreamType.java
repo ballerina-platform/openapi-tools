@@ -48,6 +48,6 @@ public class OctetStreamType extends MimeType {
                     payloadName, "payload.toBase64()");
             statementsList.add(encodedVariable);
         }
-        setPayload(statementsList, payloadName, javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM);
+        setPayload(statementsList, payloadName, mediaTypeEntry.getKey());
     }
 }

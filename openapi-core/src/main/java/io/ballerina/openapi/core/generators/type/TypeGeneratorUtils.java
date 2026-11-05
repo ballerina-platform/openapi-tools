@@ -22,6 +22,8 @@ import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.ballerina.openapi.core.generators.type.generators.AllOfRecordTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.AnyDataTypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.ArrayTypeGenerator;
@@ -31,12 +33,14 @@ import io.ballerina.openapi.core.generators.type.generators.ReferencedTypeGenera
 import io.ballerina.openapi.core.generators.type.generators.TypeGenerator;
 import io.ballerina.openapi.core.generators.type.generators.UnionTypeGenerator;
 import io.ballerina.openapi.core.generators.type.model.GeneratorMetaData;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.NodeFactory.createOptionalTypeDescriptorNode;
@@ -48,6 +52,35 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.QUESTION_MARK_TOKEN;
  * @since 1.3.0
  */
 public class TypeGeneratorUtils {
+
+    /**
+     * Returns the schema under `#/components/schemas` that the given reference points to.
+     *
+     * @param reference reference value
+     * @return referenced component schema
+     * @throws OASTypeGenException if the reference does not resolve to a component schema
+     */
+    public static Schema<?> getReferencedComponentSchema(String reference) throws OASTypeGenException {
+        if (GeneratorUtils.isReferenceWithinComponentSchema(reference)) {
+            throw new OASTypeGenException(reference);
+        }
+        String schemaName;
+        try {
+            schemaName = GeneratorUtils.extractReferenceType(reference);
+        } catch (BallerinaOpenApiException e) {
+            throw new OASTypeGenException(reference);
+        }
+        Components components = GeneratorMetaData.getInstance().getOpenAPI().getComponents();
+        Map<String, Schema> schemas = components == null ? null : components.getSchemas();
+        Schema<?> schema = schemas == null ? null : schemas.get(schemaName);
+        if (schema == null && schemas != null) {
+            schema = schemas.get(GeneratorUtils.escapeIdentifier(schemaName));
+        }
+        if (schema == null) {
+            throw new OASTypeGenException(reference);
+        }
+        return schema;
+    }
     public static final List<String> PRIMITIVE_TYPE_LIST =
             Collections.unmodifiableList(Arrays.asList(
                     GeneratorConstants.INTEGER, GeneratorConstants.NUMBER,

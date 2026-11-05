@@ -116,8 +116,7 @@ public class ServiceDeclarationGenerator extends ServiceGenerator {
         syntaxTree = syntaxTree.modifyWith(modulePartNode);
         // Add comments
         ServiceDocCommentGenerator serviceDocCommentGenerator = new ServiceDocCommentGenerator(syntaxTree,
-                oasServiceMetadata.getOpenAPI(), oasServiceMetadata.generateWithoutDataBinding(),
-                oasServiceMetadata.getResponseTypes());
+                oasServiceMetadata.getOpenAPI(), oasServiceMetadata.getResponseTypes());
         return serviceDocCommentGenerator.updateSyntaxTreeWithDocComments();
     }
 

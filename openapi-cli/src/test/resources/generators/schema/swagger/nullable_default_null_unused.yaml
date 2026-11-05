@@ -1,0 +1,29 @@
+openapi: 3.0.2
+info:
+  title: Unused nullable schema with a null default value
+  version: 1.0.0
+paths:
+  /holders:
+    get:
+      operationId: getHolder
+      responses:
+        "200":
+          description: Holder
+          content:
+            application/json:
+              schema:
+                type: string
+components:
+  schemas:
+    UnusedTags:
+      type: array
+      nullable: true
+      default: null
+      items:
+        type: string
+    UnusedLabels:
+      type: object
+      nullable: true
+      default: null
+      additionalProperties:
+        type: string

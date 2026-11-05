@@ -60,7 +60,7 @@ public isolated client class Client {
     resource isolated function post items/[string id]/attachments(byte[] payload, map<string|string[]> headers = {}) returns error? {
         string resourcePath = string `/items/${getEncodedUri(id)}/attachments`;
         http:Request request = new;
-        request.setPayload(payload, "application/octet-stream");
+        request.setPayload(payload, "application/octet-stream; qs=0.9");
         return self.clientEp->post(resourcePath, request, headers);
     }
 

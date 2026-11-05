@@ -85,6 +85,14 @@ public class SwaggerParserTests {
         };
     }
 
+    @Test(description = "Nullable schemas with a null default value which are not used by any operation are valid")
+    public void testUnusedNullableSchemaWithNullDefault() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(
+                RES_DIR.resolve("swagger/nullable_default_null_unused.yaml"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("UnusedTags"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("UnusedLabels"));
+    }
+
     @Test(description = "Types are generated for nullable schemas with a null default value")
     public void testTypeGenerationForNullableSchemaWithNullDefault() throws IOException,
             BallerinaOpenApiException, FormatterException {

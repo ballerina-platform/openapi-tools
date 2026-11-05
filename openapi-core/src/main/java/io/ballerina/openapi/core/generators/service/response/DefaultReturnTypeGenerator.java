@@ -112,6 +112,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     private TypeDescriptorNode handleMultipleResponse(Operation operation, ApiResponses responses,
                                                       String httpMethod) {
         HashMap<String, TypeDescriptorNode> qualifiedNodes = new LinkedHashMap<>();
+        Map<String, String> responseTypes = new LinkedHashMap<>();
         for (Map.Entry<String, ApiResponse> response : responses.entrySet()) {
             String responseCode = response.getKey().trim();
             String code = GeneratorConstants.HTTP_CODES_DES.get(responseCode);
@@ -153,13 +154,18 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             }
             if (type != null) {
                 qualifiedNodes.put(type.toString(), type);
-                oasServiceMetadata.addResponseType(operation, responseCode, type.toSourceCode().trim());
+                responseTypes.put(responseCode, type.toSourceCode().trim().replaceAll("\\s+", " "));
             }
         }
         TypeDescriptorNode unionTypeDescriptorNode = GeneratorUtils.getUnionTypeDescriptorNodeFromTypeDescNodes(
                 qualifiedNodes);
         if (unionTypeDescriptorNode.toSourceCode().contains(GeneratorConstants.ANYDATA)) {
             return NodeParser.parseTypeDescriptor(GeneratorConstants.ANYDATA);
+        }
+        // Document the response types only when the return type is the union of all of them.
+        if (responseTypes.size() == responses.size()) {
+            responseTypes.forEach((responseCode, type) ->
+                    oasServiceMetadata.addResponseType(operation, responseCode, type));
         }
         return unionTypeDescriptorNode;
     }

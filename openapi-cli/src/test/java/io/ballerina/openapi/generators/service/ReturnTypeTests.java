@@ -535,10 +535,18 @@ public class ReturnTypeTests {
             BallerinaOpenApiException {
         String source = withoutWhitespace(generateServiceSource(
                 "swagger/response/multiple_responses_return_docs.yaml"));
-        Assert.assertFalse(source.contains("#http:NonAuthoritativeInformation"), source);
-        Assert.assertFalse(source.contains("#http:Accepted"), source);
-        Assert.assertFalse(source.contains("#http:Ok"), source);
-        Assert.assertFalse(source.contains("#http:NotFound"), source);
+        Assert.assertFalse(source.contains("#http:NonAuthoritativeInformation(Ok)"), source);
+        Assert.assertFalse(source.contains("#http:Accepted(Accepted)"), source);
+        Assert.assertFalse(source.contains("#http:Ok(Thegreeting)"), source);
+        Assert.assertFalse(source.contains("#http:NotFound(Greetingnotfound)"), source);
+    }
+
+    @Test(description = "Return documentation falls back to status codes when the return type is anydata")
+    public void testReturnDocumentationWhenReturnTypeIsAnydata() throws IOException, BallerinaOpenApiException {
+        String source = withoutWhitespace(generateServiceSource(
+                "swagger/response/multiple_responses_return_docs.yaml"));
+        Assert.assertTrue(source.contains("#http:Ok(Thereportdocument)#http:NotFound(Reportnotfound)" +
+                "resourcefunctiongetreport()returnsanydata"), source);
     }
 
     @Test(description = "A single referenced response is generated as the return type")

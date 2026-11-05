@@ -108,15 +108,11 @@ public class BallerinaTypesGenerator {
         }
 
         if (schema.get$ref() != null) {
+            Schema<?> referencedSchema = TypeGeneratorUtils.getReferencedComponentSchema(schema.get$ref());
             String schemaName = GeneratorUtils.extractReferenceType(schema.get$ref());
             String typeName = GeneratorUtils.escapeIdentifier(schemaName);
             if (!pregeneratedTypeMap.containsKey(typeName)) {
-                String reference = schema.get$ref();
-                schema = GeneratorMetaData.getInstance()
-                        .getOpenAPI().getComponents().getSchemas().get(schemaName);
-                if (schema == null) {
-                    throw new OASTypeGenException(reference);
-                }
+                schema = referencedSchema;
                 TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema,
                         GeneratorUtils.escapeIdentifier(typeName.trim()), null, ignoreNullableFlag,
                         subTypesMap, pregeneratedTypeMap);

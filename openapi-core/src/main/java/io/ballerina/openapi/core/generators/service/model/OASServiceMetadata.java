@@ -108,10 +108,22 @@ public class OASServiceMetadata {
         return serviceObjectTypeName;
     }
 
+    /**
+     * Records the return type generated for a response of an operation.
+     *
+     * @param operation  OpenAPI operation
+     * @param statusCode response status code
+     * @param type       generated Ballerina type
+     */
     public void addResponseType(Operation operation, String statusCode, String type) {
         responseTypes.computeIfAbsent(operation, key -> new LinkedHashMap<>()).put(statusCode, type);
     }
 
+    /**
+     * Returns the generated return types of the responses, keyed by the operation instance.
+     *
+     * @return generated return type for each response status code of each operation
+     */
     public Map<Operation, Map<String, String>> getResponseTypes() {
         return Collections.unmodifiableMap(responseTypes);
     }

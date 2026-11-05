@@ -50,7 +50,8 @@ public abstract class MimeType {
      */
     public void setPayload(List<StatementNode> statementsList, String payloadName, String mediaType) {
         ExpressionStatementNode setPayloadExpression = GeneratorUtils.getSimpleExpressionStatementNode(
-                String.format("request.setPayload(%s, \"%s\")", payloadName, mediaType));
+                String.format("request.setPayload(%s, \"%s\")", payloadName,
+                        mediaType.replace("\\", "\\\\").replace("\"", "\\\"")));
         statementsList.add(setPayloadExpression);
     }
 }

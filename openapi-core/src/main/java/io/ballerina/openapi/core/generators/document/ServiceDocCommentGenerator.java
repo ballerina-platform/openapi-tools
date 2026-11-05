@@ -83,10 +83,17 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
     private final Map<Operation, Map<String, String>> responseTypes;
 
     public ServiceDocCommentGenerator(SyntaxTree syntaxTree, OpenAPI openAPI, boolean isProxyService) {
-        this(syntaxTree, openAPI, isProxyService, Map.of());
+        this(syntaxTree, openAPI, Map.of());
     }
 
-    public ServiceDocCommentGenerator(SyntaxTree syntaxTree, OpenAPI openAPI, boolean isProxyService,
+    /**
+     * Creates a doc comment generator which documents the given return type of each response.
+     *
+     * @param syntaxTree    service syntax tree
+     * @param openAPI       OpenAPI definition of the service
+     * @param responseTypes generated return type for each response status code, keyed by the operation
+     */
+    public ServiceDocCommentGenerator(SyntaxTree syntaxTree, OpenAPI openAPI,
                                       Map<Operation, Map<String, String>> responseTypes) {
         this.openAPI = openAPI;
         this.syntaxTree = syntaxTree;

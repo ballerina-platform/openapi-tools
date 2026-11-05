@@ -63,6 +63,13 @@ shadowJar {
         include(dependency('io.swagger:swagger-core'))
         include(dependency('io.swagger:swagger-models'))
         include(dependency('io.swagger:swagger-annotations'))
+        // swagger-core and swagger-parser are built against these versions, which are newer than the distribution's.
+        include(dependency('com.fasterxml.jackson.core:jackson-core'))
+        include(dependency('com.fasterxml.jackson.core:jackson-databind'))
+        include(dependency('com.fasterxml.jackson.core:jackson-annotations'))
+        include(dependency('com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'))
+        include(dependency('com.fasterxml.jackson.datatype:jackson-datatype-jsr310'))
+        include(dependency('org.yaml:snakeyaml'))
         exclude('META-INF/*.SF')
         exclude('META-INF/*.DSA')
         exclude('META-INF/*.RSA')
