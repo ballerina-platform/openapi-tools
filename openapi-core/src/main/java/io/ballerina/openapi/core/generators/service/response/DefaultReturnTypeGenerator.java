@@ -77,7 +77,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             ApiResponses responses = operation.getValue().getResponses();
             if (responses.size() > 1) {
                 //handle multiple response scenarios ex: status code 200, 400, 500
-                TypeDescriptorNode type = handleMultipleResponse(responses, httpMethod);
+                TypeDescriptorNode type = handleMultipleResponse(operation.getValue(), responses, httpMethod);
                 returnNode = createReturnTypeDescriptorNode(createToken(RETURNS_KEYWORD), createEmptyNodeList(), type);
             } else if (responses.size() == 1) {
                 //handle single response
@@ -109,7 +109,8 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
     /**
      * Generate union type node when operation has multiple responses.
      */
-    private TypeDescriptorNode handleMultipleResponse(ApiResponses responses, String httpMethod) {
+    private TypeDescriptorNode handleMultipleResponse(Operation operation, ApiResponses responses,
+                                                      String httpMethod) {
         HashMap<String, TypeDescriptorNode> qualifiedNodes = new LinkedHashMap<>();
         for (Map.Entry<String, ApiResponse> response : responses.entrySet()) {
             String responseCode = response.getKey().trim();
@@ -152,6 +153,7 @@ public class DefaultReturnTypeGenerator extends ReturnTypeGenerator {
             }
             if (type != null) {
                 qualifiedNodes.put(type.toString(), type);
+                oasServiceMetadata.addResponseType(operation, responseCode, type.toSourceCode().trim());
             }
         }
         TypeDescriptorNode unionTypeDescriptorNode = GeneratorUtils.getUnionTypeDescriptorNodeFromTypeDescNodes(

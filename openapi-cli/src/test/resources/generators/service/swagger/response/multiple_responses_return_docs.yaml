@@ -1,0 +1,66 @@
+openapi: 3.0.1
+info:
+  title: Return documentation for multiple responses
+  version: 1.0.0
+paths:
+  /greeting:
+    put:
+      description: A resource for generating greetings
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: the input string name
+          schema:
+            type: string
+      requestBody:
+        description: parameter description
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Person"
+      responses:
+        "203":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Person"
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Person"
+        "400":
+          description: Bad request without a body
+    get:
+      description: Get the greeting
+      responses:
+        "200":
+          description: The greeting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Person"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  responses:
+    NotFound:
+      description: Greeting not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Person:
+      type: object
+      properties:
+        name:
+          type: string
+    Error:
+      type: object
+      properties:
+        message:
+          type: string

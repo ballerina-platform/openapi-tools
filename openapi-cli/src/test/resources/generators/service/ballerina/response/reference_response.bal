@@ -12,9 +12,9 @@ service / on ep0 {
     #
     # + id - parameter description
     # + return - returns can be any of following types
-    # http:Ok (OK)
-    # http:Unauthorized (Unauthorized)
-    # http:NotFound (The specified resource was not found)
+    # User (OK)
+    # ErrorUnauthorized (Unauthorized)
+    # ErrorNotFound (The specified resource was not found)
     resource function get users/[int id]() returns User|ErrorUnauthorized|ErrorNotFound {
     }
 }

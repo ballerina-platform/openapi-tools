@@ -22,6 +22,12 @@ import io.ballerina.openapi.core.generators.common.GeneratorConstants;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * This class stores metadata that related to service code generations.
@@ -41,6 +47,8 @@ public class OASServiceMetadata {
     private final String srcFile;
     private final boolean isUsingSanitizedOas;
     private final String serviceObjectTypeName;
+    // Generated return type per response status code, keyed by operation instance, used for the return docs.
+    private final Map<Operation, Map<String, String>> responseTypes = new IdentityHashMap<>();
 
     private OASServiceMetadata(Builder serviceMetadataBuilder) {
         this.openAPI = serviceMetadataBuilder.openAPI;
@@ -98,6 +106,14 @@ public class OASServiceMetadata {
 
     public String getServiceObjectTypeName() {
         return serviceObjectTypeName;
+    }
+
+    public void addResponseType(Operation operation, String statusCode, String type) {
+        responseTypes.computeIfAbsent(operation, key -> new LinkedHashMap<>()).put(statusCode, type);
+    }
+
+    public Map<Operation, Map<String, String>> getResponseTypes() {
+        return Collections.unmodifiableMap(responseTypes);
     }
     /**
      * Service generation meta data builder class.
