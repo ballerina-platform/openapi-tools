@@ -268,8 +268,6 @@ public class MapperCommonUtils {
         Path contractPath = Paths.get(definitionURI);
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
-        // Since swagger-parser 2.1.23, referenced responses are resolved only when this is enabled.
-        parseOptions.setResolveResponses(true);
         parseOptions.setResolveFully(true);
 
         if (!Files.exists(contractPath)) {
