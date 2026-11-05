@@ -152,8 +152,8 @@ public class Add implements BLauncherCmd {
 
     private void createDefaultClientID() {
         if (id == null || id.isBlank()) {
-            String file = baseCmd.inputPath.substring(baseCmd.inputPath.lastIndexOf('/') + 1,
-                    baseCmd.inputPath.lastIndexOf('.'));
+            String inputPath = toPortablePath(baseCmd.inputPath);
+            String file = inputPath.substring(inputPath.lastIndexOf('/') + 1, inputPath.lastIndexOf('.'));
             if (baseCmd.mode != null) {
                 mode = searchEnum(CmdConstants.Mode.class, baseCmd.mode);
                 if (mode == null) {
@@ -167,6 +167,11 @@ public class Add implements BLauncherCmd {
         }
     }
 
+    // Backslashes are escape characters in TOML basic strings, so Windows paths must use forward slashes.
+    static String toPortablePath(String path) {
+        return path.replace('\\', '/');
+    }
+
     private void validateInputPath() {
         if (baseCmd.inputPath == null || baseCmd.inputPath.isBlank()) {
             outStream.printf(ErrorMessages.INVALID_INPUT_PATH);
@@ -176,7 +181,7 @@ public class Add implements BLauncherCmd {
 
     private CmdOptions collectCLIOptions() {
         return new CmdOptions.CmdOptionsBuilder()
-                .withInput(baseCmd.inputPath)
+                .withInput(toPortablePath(baseCmd.inputPath))
                 .withId(id)
                 .withOutputModule(outputModule)
                 .withPackagePath(packagePath)
@@ -185,7 +190,7 @@ public class Add implements BLauncherCmd {
                 .withNullable(baseCmd.nullable)
                 .withOperations(getOperations())
                 .withTags(getTags())
-                .withLicensePath(baseCmd.licenseFilePath)
+                .withLicensePath(baseCmd.licenseFilePath == null ? null : toPortablePath(baseCmd.licenseFilePath))
                 .withStatusCodeBinding(baseCmd.statusCodeBinding)
                 .withMock(baseCmd.mock)
                 .withSingleFile(baseCmd.singleFile)
