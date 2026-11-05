@@ -69,7 +69,7 @@ public class EnumTypeTests {
         skipOnWindows();
         Path ballerinaFilePath = RES_DIR.resolve("data_type/enum_query.bal");
         //Compare generated yaml file with expected yaml content
-        TestUtils.compareWithGeneratedFile(ballerinaFilePath, "data_type/enum_query.yaml");
+        TestUtils.compareYamlWithGeneratedFile(ballerinaFilePath, "data_type/enum_query.yaml");
     }
 
     @Test(description = "Test for having union type query parameter")

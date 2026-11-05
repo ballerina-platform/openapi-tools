@@ -99,7 +99,7 @@ public class RequestBodyGenerator implements ParameterGenerator {
             String paramType;
             //Take payload type
             if (schema != null && GeneratorUtils.isSupportedMediaType(mediaTypeEntry)) {
-                String mediaTypeEntryKey = mediaTypeEntry.getKey();
+                String mediaTypeEntryKey = GeneratorUtils.getMediaTypeWithoutParameters(mediaTypeEntry.getKey());
                 if (mediaTypeEntryKey.equals(APPLICATION_OCTET_STREAM) ||
                         mediaTypeEntryKey.matches("application/.*\\+octet-stream")) {
                     paramType = getBallerinaMediaType(mediaTypeEntryKey, true);

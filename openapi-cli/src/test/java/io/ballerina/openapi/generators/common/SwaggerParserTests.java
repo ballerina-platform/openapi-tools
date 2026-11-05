@@ -20,10 +20,15 @@ package io.ballerina.openapi.generators.common;
 
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
+import io.ballerina.openapi.core.generators.common.TypeHandler;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
+import io.ballerina.openapi.core.generators.service.ServiceGenerationHandler;
+import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.ballerina.openapi.core.generators.type.exception.OASTypeGenException;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.ballerinalang.formatter.core.FormatterException;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -32,6 +37,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.ballerina.openapi.TestUtils.FILTER;
 
 /**
  * Tests for BallerinaSchemaGenerators.
@@ -59,6 +66,57 @@ public class SwaggerParserTests {
         OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(definitionPath);
 //        BallerinaTypesGenerator ballerinaSchemaGenerator = new BallerinaTypesGenerator(openAPI);
 //        syntaxTree = ballerinaSchemaGenerator.generateTypeSyntaxTree();
+    }
+
+    @Test(description = "Nullable array and object schemas with a null default value are valid OpenAPI 3.0 schemas",
+            dataProvider = "nullableDefaultNullSpecs")
+    public void testNullableSchemaWithNullDefault(String specFile) throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve(specFile));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Tags"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Labels"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("Holder"));
+    }
+
+    @DataProvider(name = "nullableDefaultNullSpecs")
+    public Object[][] nullableDefaultNullSpecs() {
+        return new Object[][]{
+                {"swagger/nullable_default_null.yaml"},
+                {"swagger/nullable_default_null_v3_0_3.yaml"}
+        };
+    }
+
+    @Test(description = "Nullable schemas with a null default value which are not used by any operation are valid")
+    public void testUnusedNullableSchemaWithNullDefault() throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(
+                RES_DIR.resolve("swagger/nullable_default_null_unused.yaml"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("UnusedTags"));
+        Assert.assertNotNull(openAPI.getComponents().getSchemas().get("UnusedLabels"));
+    }
+
+    @Test(description = "Types are generated for nullable schemas with a null default value")
+    public void testTypeGenerationForNullableSchemaWithNullDefault() throws IOException,
+            BallerinaOpenApiException, FormatterException {
+        OpenAPI openAPI = GeneratorUtils.normalizeOpenAPI(RES_DIR.resolve("swagger/nullable_default_null.yaml"),
+                true, false);
+        TypeHandler.createInstance(openAPI, false);
+        ServiceGenerationHandler serviceGenerationHandler = new ServiceGenerationHandler();
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withNullable(false)
+                .withFilters(FILTER)
+                .build();
+        serviceGenerationHandler.generateServiceFiles(oasServiceMetadata);
+        syntaxTree = TypeHandler.getInstance().generateTypeSyntaxTree();
+        GeneratorTestUtils.assertGeneratedSyntaxTreeContainsExpectedSyntaxTree(
+                "schema/ballerina/nullable_default_null.bal", syntaxTree);
+    }
+
+    @Test(description = "A null default value is still rejected when the schema is not nullable",
+            expectedExceptions = BallerinaOpenApiException.class,
+            expectedExceptionsMessageRegExp = "(?s)OpenAPI definition has errors: .*" +
+                    "attribute components.schemas.Tags.default is not of type `non-null array`.*")
+    public void testNonNullableSchemaWithNullDefault() throws IOException, BallerinaOpenApiException {
+        GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve("swagger/non_nullable_default_null.yaml"));
     }
 
     //Get string as a content of ballerina file

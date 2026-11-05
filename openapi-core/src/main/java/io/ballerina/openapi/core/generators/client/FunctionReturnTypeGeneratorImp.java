@@ -193,11 +193,7 @@ public class FunctionReturnTypeGeneratorImp implements FunctionReturnTypeGenerat
      */
     private Optional<TypeDescriptorNode> getDataType(Map.Entry<String, MediaType> media, Schema<?> schema) {
         //add regex to check all JSON types
-        String mediaType = media.getKey().trim();
-        String[] contentTypes = mediaType.split(";");
-        if (mediaType.length() > 1) {
-            mediaType = contentTypes[0];
-        }
+        String mediaType = GeneratorUtils.getMediaTypeWithoutParameters(media.getKey());
         if ((mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) &&
                 schema != null) {
             return TypeHandler.getInstance().getTypeNodeFromOASSchema(schema);

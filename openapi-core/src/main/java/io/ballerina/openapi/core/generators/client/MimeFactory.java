@@ -67,7 +67,7 @@ public class MimeFactory {
         if (requestBodySchema != null && (requestBodySchema.get$ref() != null ||
                 GeneratorUtils.getOpenAPIType(requestBodySchema) != null
                 || requestBodySchema.getProperties() != null)) {
-            String mediaType = mediaTypeEntry.getKey();
+            String mediaType = GeneratorUtils.getMediaTypeWithoutParameters(mediaTypeEntry.getKey());
             if (mediaType.matches(".*/json") || mediaType.matches("application/.*\\+json")) {
                 return new JsonType(imports);
             } else if (mediaType.startsWith(TEXT_PREFIX) || mediaType.contains(PDF) || mediaType.startsWith(IMAGE)) {
@@ -84,7 +84,7 @@ public class MimeFactory {
             } else if (mediaType.contains(VENDOR_SPECIFIC_TYPE)) {
                 return new CustomType();
             } else {
-                throw new BallerinaOpenApiException(String.format(UNSUPPORTED_MEDIA_ERROR, mediaType));
+                throw new BallerinaOpenApiException(String.format(UNSUPPORTED_MEDIA_ERROR, mediaTypeEntry.getKey()));
             }
         } else {
             return new CustomType();

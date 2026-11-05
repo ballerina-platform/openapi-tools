@@ -7,23 +7,23 @@ listener http:Listener ep0 = new (9090, config = {host: "localhost"});
 
 service /api on ep0 {
     # + return - returns can be any of following types 
-    # http:Ok (Ok)
-    # http:NotFound (NotFound)
-    # http:BadRequest (BadRequest)
+    # Album[] (Ok)
+    # ErrorMessageNotFound (NotFound)
+    # ErrorPayloadBadRequest (BadRequest)
     resource function get albums(string genre) returns Album[]|ErrorMessageNotFound|ErrorPayloadBadRequest {
     }
 
-    # + return - returns can be any of following types
-    # http:Ok (Ok)
-    # http:NotFound (NotFound)
-    # http:BadRequest (BadRequest)
+    # + return - returns can be any of following types 
+    # Album (Ok)
+    # ErrorMessageNotFound (NotFound)
+    # ErrorPayloadBadRequest (BadRequest)
     resource function get albums/[string id]() returns Album|ErrorMessageNotFound|ErrorPayloadBadRequest {
     }
 
-    # + return - returns can be any of following types
-    # http:Created (Created)
-    # http:Conflict (Conflict)
-    # http:BadRequest (BadRequest)
+    # + return - returns can be any of following types 
+    # Album (Created)
+    # ErrorMessageConflict (Conflict)
+    # ErrorPayloadBadRequest (BadRequest)
     resource function post albums(@http:Payload Album payload) returns Album|ErrorMessageConflict|ErrorPayloadBadRequest {
     }
 }

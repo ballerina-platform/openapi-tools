@@ -23,6 +23,7 @@ import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectEnvironmentBuilder;
+import io.swagger.v3.core.util.Yaml;
 import org.testng.Assert;
 
 import java.io.File;
@@ -116,6 +117,31 @@ public class TestUtils {
             deleteDirectory(tempDir);
             System.gc();
         }
+    }
+
+    /**
+     * Compares the generated OpenAPI definition with the expected one as YAML documents, so that the order of the
+     * keys within an object does not matter.
+     */
+    public static void compareYamlWithGeneratedFile(Path ballerinaFilePath, String yamlFile) throws IOException {
+        OASContractGenerator openApiConverter = new OASContractGenerator();
+        openApiConverter.setEnvironmentBuilder(SHARED_ENV_BUILDER);
+        Path tempDir = Files.createTempDirectory("bal-to-openapi-test-out-" + System.nanoTime());
+        try {
+            String expectedYamlContent = getStringFromGivenBalFile(RES_DIR.resolve("expected_gen"), yamlFile);
+            openApiConverter.generateOAS3DefinitionsAllService(ballerinaFilePath, tempDir, null, false);
+            if (!Files.exists(tempDir.resolve("payloadV_openapi.yaml"))) {
+                Assert.fail("Yaml was not generated");
+            }
+            assertYamlEquals(getStringFromGivenBalFile(tempDir, "payloadV_openapi.yaml"), expectedYamlContent);
+        } finally {
+            deleteGeneratedFiles("payloadV_openapi.yaml", tempDir);
+            deleteDirectory(tempDir);
+        }
+    }
+
+    public static void assertYamlEquals(String actualYaml, String expectedYaml) throws IOException {
+        Assert.assertEquals(Yaml.mapper().readTree(actualYaml), Yaml.mapper().readTree(expectedYaml));
     }
 
     public static DiagnosticResult getCompilation(Project project) {

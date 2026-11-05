@@ -1,0 +1,30 @@
+openapi: 3.0.2
+info:
+  title: Request body media type with a quoted parameter
+  version: 1.0.0
+servers:
+  - url: https://api.example.com/v1
+paths:
+  /items:
+    post:
+      operationId: createItem
+      requestBody:
+        required: true
+        content:
+          application/json; profile="urn:example:item":
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        "200":
+          description: Created item
+          content:
+            application/json ; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/Item'
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        name:
+          type: string

@@ -1,0 +1,23 @@
+openapi: 3.0.2
+info:
+  title: Non nullable schema with a null default value
+  version: 1.0.0
+paths:
+  /tags:
+    get:
+      operationId: getTags
+      responses:
+        "200":
+          description: Tags
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tags'
+components:
+  schemas:
+    Tags:
+      type: array
+      nullable: false
+      default: null
+      items:
+        type: string

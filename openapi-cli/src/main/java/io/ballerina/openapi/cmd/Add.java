@@ -42,6 +42,7 @@ import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import picocli.CommandLine;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -56,9 +57,13 @@ import java.util.Locale;
 
 import static io.ballerina.cli.cmd.CommandUtil.exitError;
 import static io.ballerina.openapi.cmd.CmdConstants.DEFAULT_CLIENT_ID;
+import static io.ballerina.openapi.cmd.CmdConstants.JSON_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdConstants.OPENAPI_ADD_CMD;
+import static io.ballerina.openapi.cmd.CmdConstants.YAML_EXTENSION;
+import static io.ballerina.openapi.cmd.CmdConstants.YML_EXTENSION;
 import static io.ballerina.openapi.cmd.CmdUtils.searchEnum;
 import static io.ballerina.openapi.cmd.CmdUtils.getBallerinaTomlPath;
+import static io.ballerina.openapi.core.generators.common.ErrorMessages.invalidFileType;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createSeparatedNodeList;
 import static io.ballerina.toml.syntax.tree.AbstractNodeFactory.createToken;
@@ -117,7 +122,9 @@ public class Add implements BLauncherCmd {
             }
             //check the given path is the Ballerina package
             Path ballerinaTomlPath = getBallerinaTomlPath(projectPath);
-            validateInputPath();
+            if (!isValidInputPath()) {
+                return;
+            }
             Path tomlPath = projectPath.resolve(ballerinaTomlPath);
             TextDocument configDocument = TextDocuments.from(Files.readString(tomlPath));
             SyntaxTree syntaxTree = SyntaxTree.from(configDocument);
@@ -152,8 +159,7 @@ public class Add implements BLauncherCmd {
 
     private void createDefaultClientID() {
         if (id == null || id.isBlank()) {
-            String file = baseCmd.inputPath.substring(baseCmd.inputPath.lastIndexOf('/') + 1,
-                    baseCmd.inputPath.lastIndexOf('.'));
+            String file = getFileNameWithoutExtension(toPortablePath(baseCmd.inputPath));
             if (baseCmd.mode != null) {
                 mode = searchEnum(CmdConstants.Mode.class, baseCmd.mode);
                 if (mode == null) {
@@ -167,16 +173,57 @@ public class Add implements BLauncherCmd {
         }
     }
 
-    private void validateInputPath() {
+    static String getFileNameWithoutExtension(String path) {
+        String fileName = path.substring(path.lastIndexOf('/') + 1);
+        int extensionStart = fileName.lastIndexOf('.');
+        return extensionStart > 0 ? fileName.substring(0, extensionStart) : fileName;
+    }
+
+    static String toPortablePath(String path) {
+        return toPortablePath(path, File.separatorChar);
+    }
+
+    /**
+     * Converts Windows path separators to `/` so the path in Ballerina.toml works on every platform. On other
+     * platforms, a backslash is a valid file name character and is kept as it is.
+     *
+     * @param path      path given by the user
+     * @param separator file separator of the platform
+     * @return path to be written to Ballerina.toml
+     */
+    static String toPortablePath(String path, char separator) {
+        return separator == '\\' ? path.replace('\\', '/') : path;
+    }
+
+    /**
+     * Escapes the characters which have a special meaning inside a TOML basic string.
+     *
+     * @param value string value
+     * @return escaped value
+     */
+    static String escapeTomlString(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private boolean isValidInputPath() {
         if (baseCmd.inputPath == null || baseCmd.inputPath.isBlank()) {
             outStream.printf(ErrorMessages.INVALID_INPUT_PATH);
             exitError(this.exitWhenFinish);
+            return false;
         }
+        // The build tool only handles these contract file types, so do not write an entry it cannot build.
+        if (!(baseCmd.inputPath.endsWith(YAML_EXTENSION) || baseCmd.inputPath.endsWith(YML_EXTENSION) ||
+                baseCmd.inputPath.endsWith(JSON_EXTENSION))) {
+            outStream.println("ERROR: " + invalidFileType());
+            exitError(this.exitWhenFinish);
+            return false;
+        }
+        return true;
     }
 
     private CmdOptions collectCLIOptions() {
         return new CmdOptions.CmdOptionsBuilder()
-                .withInput(baseCmd.inputPath)
+                .withInput(toPortablePath(baseCmd.inputPath))
                 .withId(id)
                 .withOutputModule(outputModule)
                 .withPackagePath(packagePath)
@@ -185,7 +232,7 @@ public class Add implements BLauncherCmd {
                 .withNullable(baseCmd.nullable)
                 .withOperations(getOperations())
                 .withTags(getTags())
-                .withLicensePath(baseCmd.licenseFilePath)
+                .withLicensePath(baseCmd.licenseFilePath == null ? null : toPortablePath(baseCmd.licenseFilePath))
                 .withStatusCodeBinding(baseCmd.statusCodeBinding)
                 .withMock(baseCmd.mock)
                 .withSingleFile(baseCmd.singleFile)
@@ -211,12 +258,12 @@ public class Add implements BLauncherCmd {
         TableNode openapiToolConfig = SampleNodeGenerator.createTable("[tool.openapi]", null);
         moduleMembers = moduleMembers.add(openapiToolConfig);
         moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("id",
-                optionsBuilder.getId(), null));
+                escapeTomlString(optionsBuilder.getId()), null));
         moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("filePath",
-                optionsBuilder.getInput(), null));
+                escapeTomlString(optionsBuilder.getInput()), null));
         if (optionsBuilder.getOutputModule() != null) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("targetModule",
-                    optionsBuilder.getOutputModule(), null));
+                    escapeTomlString(optionsBuilder.getOutputModule()), null));
         }
         if (optionsBuilder.getMode() != null) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.mode",
@@ -250,11 +297,11 @@ public class Add implements BLauncherCmd {
         }
         if (optionsBuilder.getClientMethod() != null) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.clientMethods",
-                    optionsBuilder.getClientMethod(), null));
+                    escapeTomlString(optionsBuilder.getClientMethod()), null));
         }
         if (optionsBuilder.getLicensePath() != null && !optionsBuilder.getLicensePath().isBlank()) {
-            moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.licensePath",
-                    optionsBuilder.getLicensePath(), null));
+            moduleMembers = moduleMembers.add(SampleNodeGenerator.createStringKV("options.license",
+                    escapeTomlString(optionsBuilder.getLicensePath()), null));
         }
         if (optionsBuilder.getStatusCodeBinding()) {
             moduleMembers = moduleMembers.add(SampleNodeGenerator.createBooleanKV("options.statusCodeBinding",
@@ -276,7 +323,8 @@ public class Add implements BLauncherCmd {
         List<Node> itemList = new ArrayList<>();
         IdentifierToken doubleQuotes = createIdentifierToken("\"");
         for (String item : items) {
-            itemList.add(NodeFactory.createStringLiteralNode(doubleQuotes, createIdentifierToken(item), doubleQuotes));
+            itemList.add(NodeFactory.createStringLiteralNode(doubleQuotes,
+                    createIdentifierToken(escapeTomlString(item)), doubleQuotes));
             itemList.add(createToken(SyntaxKind.COMMA_TOKEN));
         }
         // Remove the trailing comma if present

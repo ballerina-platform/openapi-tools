@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Albums API
+  version: 1.0.0
+servers:
+  - url: https://api.example.com
+paths:
+  /albums/{id}:
+    get:
+      operationId: getAlbum
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: An album
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlbumArray/items"
+  /albums/{id}/details:
+    get:
+      operationId: getAlbumDetails
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Album details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlbumDetails"
+components:
+  schemas:
+    AlbumArray:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+          title:
+            type: string
+    items:
+      type: object
+      properties:
+        unrelated:
+          type: string
+    AlbumDetails:
+      allOf:
+        - $ref: "#/components/schemas/AlbumArray/items"
+        - type: object
+          properties:
+            rating:
+              type: integer

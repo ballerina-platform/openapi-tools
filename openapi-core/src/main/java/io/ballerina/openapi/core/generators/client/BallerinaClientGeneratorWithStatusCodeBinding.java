@@ -177,14 +177,18 @@ public class BallerinaClientGeneratorWithStatusCodeBinding extends BallerinaClie
                                        List<FunctionDefinitionNode> clientFunctionNodes, boolean hasDefaultResponse,
                                        List<String> nonDefaultStatusCodes) {
         FunctionDefinitionNode clientExternFunction = clientFunctionNodes.get(clientFunctionNodes.size() - 1);
+        int diagnosticCount = diagnostics.size();
         Optional<FunctionDefinitionNode> implFunction = createImplFunction(path, operationEntry, openAPI,
                 authConfigGeneratorImp, ballerinaUtilGenerator, clientExternFunction, hasDefaultResponse,
                 nonDefaultStatusCodes);
         if (implFunction.isPresent()) {
             clientFunctionNodes.add(implFunction.get());
         } else {
-            diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_112,
-                    operationEntry.getValue().getOperationId()));
+            // Report the generic failure only when the cause has not already been reported.
+            if (diagnostics.size() == diagnosticCount) {
+                diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_112,
+                        operationEntry.getValue().getOperationId()));
+            }
             clientFunctionNodes.remove(clientFunctionNodes.size() - 1);
         }
     }

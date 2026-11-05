@@ -108,17 +108,11 @@ public class BallerinaTypesGenerator {
         }
 
         if (schema.get$ref() != null) {
+            Schema<?> referencedSchema = TypeGeneratorUtils.getReferencedComponentSchema(schema.get$ref());
             String schemaName = GeneratorUtils.extractReferenceType(schema.get$ref());
             String typeName = GeneratorUtils.escapeIdentifier(schemaName);
             if (!pregeneratedTypeMap.containsKey(typeName)) {
-                schema = GeneratorMetaData.getInstance()
-                        .getOpenAPI().getComponents().getSchemas().get(schemaName);
-                if (schema == null) {
-                    //this check for safe method because swagger parser has a issue with representing
-                    // the wrong name for reference
-                    schema = GeneratorMetaData.getInstance()
-                            .getOpenAPI().getComponents().getSchemas().get(schemaName);
-                }
+                schema = referencedSchema;
                 TypeGenerator typeGenerator = TypeGeneratorUtils.getTypeGenerator(schema,
                         GeneratorUtils.escapeIdentifier(typeName.trim()), null, ignoreNullableFlag,
                         subTypesMap, pregeneratedTypeMap);

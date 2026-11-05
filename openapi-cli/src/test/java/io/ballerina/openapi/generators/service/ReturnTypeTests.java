@@ -26,6 +26,8 @@ import io.ballerina.openapi.core.generators.common.model.Filter;
 import io.ballerina.openapi.core.generators.service.ServiceDeclarationGenerator;
 import io.ballerina.openapi.core.generators.service.model.OASServiceMetadata;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -502,5 +504,69 @@ public class ReturnTypeTests {
         syntaxTree = ballerinaServiceGenerator.generateSyntaxTree();
         CommonTestFunctions.compareGeneratedSyntaxTreewithExpectedSyntaxTree(
                 "response/multiline_return_description.bal", syntaxTree);
+    }
+
+    @Test(description = "Return documentation lists the generated return type of each response",
+            dataProvider = "returnDocLines")
+    public void testReturnDocumentationForMultipleResponses(String expectedDocLine) throws IOException,
+            BallerinaOpenApiException {
+        String source = generateServiceSource("swagger/response/multiple_responses_return_docs.yaml");
+        Assert.assertTrue(withoutWhitespace(source).contains(withoutWhitespace(expectedDocLine)),
+                "Missing `" + expectedDocLine + "` in:\n" + source);
+    }
+
+    @DataProvider(name = "returnDocLines")
+    public Object[][] returnDocLines() {
+        return new Object[][]{
+                // Status code response record
+                {"# PersonNonAuthoritativeInformation (Ok)"},
+                {"# PersonAccepted (Accepted)"},
+                // Response without a body
+                {"# http:BadRequest (Bad request without a body)"},
+                // Default status code of the method returns the payload type directly
+                {"# Person (The greeting)"},
+                // Referenced response
+                {"# ErrorNotFound (Greeting not found)"}
+        };
+    }
+
+    @Test(description = "Return documentation does not use the status code name for responses with a body")
+    public void testReturnDocumentationDoesNotUseStatusCodeForResponsesWithBody() throws IOException,
+            BallerinaOpenApiException {
+        String source = withoutWhitespace(generateServiceSource(
+                "swagger/response/multiple_responses_return_docs.yaml"));
+        Assert.assertFalse(source.contains("#http:NonAuthoritativeInformation(Ok)"), source);
+        Assert.assertFalse(source.contains("#http:Accepted(Accepted)"), source);
+        Assert.assertFalse(source.contains("#http:Ok(Thegreeting)"), source);
+        Assert.assertFalse(source.contains("#http:NotFound(Greetingnotfound)"), source);
+    }
+
+    @Test(description = "Return documentation falls back to status codes when the return type is anydata")
+    public void testReturnDocumentationWhenReturnTypeIsAnydata() throws IOException, BallerinaOpenApiException {
+        String source = withoutWhitespace(generateServiceSource(
+                "swagger/response/multiple_responses_return_docs.yaml"));
+        Assert.assertTrue(source.contains("#http:Ok(Thereportdocument)#http:NotFound(Reportnotfound)" +
+                "resourcefunctiongetreport()returnsanydata"), source);
+    }
+
+    @Test(description = "A single referenced response is generated as the return type")
+    public void testSingleReferencedResponseReturnType() throws IOException, BallerinaOpenApiException {
+        String source = withoutWhitespace(generateServiceSource("swagger/response/reference_response.yaml"));
+        Assert.assertTrue(source.contains("resourcefunctiongetusers()returnsErrorUnauthorized"), source);
+    }
+
+    private static String withoutWhitespace(String value) {
+        return value.replaceAll("\\s+", "");
+    }
+
+    private String generateServiceSource(String specPath) throws IOException, BallerinaOpenApiException {
+        OpenAPI openAPI = GeneratorUtils.getOpenAPIFromOpenAPIV3Parser(RES_DIR.resolve(specPath));
+        OASServiceMetadata oasServiceMetadata = new OASServiceMetadata.Builder()
+                .withOpenAPI(openAPI)
+                .withFilters(filter)
+                .build();
+        TypeHandler.createInstance(openAPI, false);
+        ServiceDeclarationGenerator serviceGenerator = new ServiceDeclarationGenerator(oasServiceMetadata);
+        return serviceGenerator.generateSyntaxTree().toSourceCode();
     }
 }

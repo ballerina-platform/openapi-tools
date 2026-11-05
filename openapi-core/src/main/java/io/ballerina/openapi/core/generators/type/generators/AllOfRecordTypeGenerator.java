@@ -165,6 +165,7 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
 
         for (Schema allOfSchema : allOfSchemas) {
             if (allOfSchema.get$ref() != null) {
+                Schema refSchema = TypeGeneratorUtils.getReferencedComponentSchema(allOfSchema.get$ref());
                 String extractedSchemaName;
                 try {
                     extractedSchemaName = GeneratorUtils.extractReferenceType(allOfSchema.get$ref());
@@ -176,8 +177,6 @@ public class AllOfRecordTypeGenerator extends RecordTypeGenerator {
                 TypeReferenceNode recordField = NodeFactory.createTypeReferenceNode(createToken(ASTERISK_TOKEN),
                         typeRef, createToken(SEMICOLON_TOKEN));
                 // check whether given reference schema has additional fields.
-                OpenAPI openAPI = GeneratorMetaData.getInstance().getOpenAPI();
-                Schema refSchema = openAPI.getComponents().getSchemas().get(extractedSchemaName);
                 addAdditionalSchemas(refSchema);
 
                 if (!pregeneratedTypeMap.containsKey(modifiedSchemaName)) {

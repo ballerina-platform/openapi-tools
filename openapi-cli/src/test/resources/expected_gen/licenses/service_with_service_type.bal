@@ -10,23 +10,23 @@ service OASServiceType /v1 on ep0 {
     #
     # + 'limit - How many items to return at one time (max 100)
     # + return - returns can be any of following types
-    # http:Ok (An paged array of pets)
-    # http:DefaultStatusCodeResponse (unexpected error)
+    # Pets (An paged array of pets)
+    # ErrorDefault (unexpected error)
     resource function get pets(int? 'limit) returns Pets|ErrorDefault {
     }
     # Info for a specific pet
     #
     # + petId - The id of the pet to retrieve
     # + return - returns can be any of following types
-    # http:Ok (Expected response to a valid request)
-    # http:DefaultStatusCodeResponse (unexpected error)
+    # Dog (Expected response to a valid request)
+    # ErrorDefault (unexpected error)
     resource function get pets/[string petId]() returns Dog|ErrorDefault {
     }
     # Create a pet
     #
     # + return - returns can be any of following types
     # http:Created (Null response)
-    # http:DefaultStatusCodeResponse (unexpected error)
+    # ErrorDefault (unexpected error)
     resource function post pets() returns http:Created|ErrorDefault {
     }
 }

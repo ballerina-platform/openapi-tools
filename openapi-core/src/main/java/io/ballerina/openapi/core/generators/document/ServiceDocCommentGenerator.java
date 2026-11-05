@@ -80,10 +80,24 @@ import static io.ballerina.openapi.core.generators.document.DocCommentsGenerator
 public class ServiceDocCommentGenerator implements DocCommentsGenerator {
     OpenAPI openAPI;
     SyntaxTree syntaxTree;
+    private final Map<Operation, Map<String, String>> responseTypes;
 
     public ServiceDocCommentGenerator(SyntaxTree syntaxTree, OpenAPI openAPI, boolean isProxyService) {
+        this(syntaxTree, openAPI, Map.of());
+    }
+
+    /**
+     * Creates a doc comment generator which documents the given return type of each response.
+     *
+     * @param syntaxTree    service syntax tree
+     * @param openAPI       OpenAPI definition of the service
+     * @param responseTypes generated return type for each response status code, keyed by the operation
+     */
+    public ServiceDocCommentGenerator(SyntaxTree syntaxTree, OpenAPI openAPI,
+                                      Map<Operation, Map<String, String>> responseTypes) {
         this.openAPI = openAPI;
         this.syntaxTree = syntaxTree;
+        this.responseTypes = responseTypes;
     }
     @Override
     public SyntaxTree updateSyntaxTreeWithDocComments() {
@@ -221,6 +235,7 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                     MarkdownParameterDocumentationLineNode returnDoc = createAPIParamDoc("return",
                             "returns can be any of following types");
                     docs.add(returnDoc);
+                    Map<String, String> generatedTypes = responseTypes.getOrDefault(operation, Map.of());
                     for (Map.Entry<String, ApiResponse> response : entrySet) {
                         String code = GeneratorConstants.HTTP_CODES_DES.get(response.getKey().trim());
                         Optional<String> responseDescription = getResponseDescription(response.getValue(),
@@ -229,9 +244,10 @@ public class ServiceDocCommentGenerator implements DocCommentsGenerator {
                             if (code == null) {
                                 code = "Response";
                             }
+                            String type = generatedTypes.getOrDefault(response.getKey().trim(), "http:" + code);
                             MarkdownCodeLineNode returnDocLine = createMarkdownCodeLineNode(
                                     createToken(SyntaxKind.HASH_TOKEN), createIdentifierToken(String
-                                            .format("http:%s (%s)", code, responseDescription.get()
+                                            .format("%s (%s)", type, responseDescription.get()
                                                     .replaceAll("\n", "\n# "))));
                             docs.add(returnDocLine);
                         }

@@ -41,6 +41,8 @@ import io.ballerina.compiler.syntax.tree.TypedBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.VariableDeclarationNode;
 import io.ballerina.openapi.core.generators.client.AuthConfigGeneratorImp.ApiKeyNamePair;
 import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnostic;
+import io.ballerina.openapi.core.generators.client.diagnostic.ClientDiagnosticImp;
+import io.ballerina.openapi.core.generators.client.diagnostic.DiagnosticMessages;
 import io.ballerina.openapi.core.generators.client.mime.MimeType;
 import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
@@ -141,6 +143,7 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
     private final boolean hasHeaders;
     private final boolean hasQueries;
     private boolean hasDefaultHeaders;
+    private final List<ClientDiagnostic> diagnostics = new ArrayList<>();
 
     public List<ImportDeclarationNode> getImports() {
         return imports;
@@ -197,7 +200,9 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
                     statements,
                     createToken(CLOSE_BRACE_TOKEN), null));
         } catch (BallerinaOpenApiException e) {
-            //todo diagnostic message
+            String reason = e.getDiagnostic() != null ? e.getDiagnostic().message() : e.getMessage();
+            diagnostics.add(new ClientDiagnosticImp(DiagnosticMessages.OAS_CLIENT_118, path,
+                    operation.getKey().name().toLowerCase(Locale.ENGLISH), reason));
             return Optional.empty();
         }
     }
@@ -729,6 +734,6 @@ public class FunctionBodyGeneratorImp implements FunctionBodyGenerator {
 
     @Override
     public List<ClientDiagnostic> getDiagnostics() {
-        return new ArrayList<>();
+        return diagnostics;
     }
 }

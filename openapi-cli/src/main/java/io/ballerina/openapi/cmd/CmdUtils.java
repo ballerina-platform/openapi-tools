@@ -18,6 +18,7 @@
 package io.ballerina.openapi.cmd;
 
 import io.ballerina.openapi.core.generators.common.ErrorMessages;
+import io.ballerina.openapi.core.generators.common.GeneratorUtils;
 import io.ballerina.openapi.core.generators.common.exception.BallerinaOpenApiException;
 import io.ballerina.openapi.core.generators.common.model.GenSrcFile;
 import io.ballerina.openapi.service.mapper.utils.MapperCommonUtils;
@@ -31,7 +32,6 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.diagnostics.Location;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 import java.io.File;
@@ -79,10 +79,8 @@ public class CmdUtils {
             throw new BallerinaOpenApiException(ErrorMessages.invalidFileType());
         }
         String openAPIFileContent = Files.readString(definitionPath);
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolve(true);
-        parseOptions.setFlatten(true);
-        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null, parseOptions);
+        SwaggerParseResult parseResult = new OpenAPIV3Parser().readContents(openAPIFileContent, null,
+                GeneratorUtils.getResolvingParseOptions());
         if (!parseResult.getMessages().isEmpty()) {
             StringBuilder errorMessage = new StringBuilder("OpenAPI definition has errors: \n");
             for (String message : parseResult.getMessages()) {
