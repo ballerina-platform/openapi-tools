@@ -11,11 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 21
+      - name: Resolve Java version
+        id: resolve-java
+        uses: ballerina-platform/ballerina-library/.github/actions/resolve-java-version@main
+      - name: Set up JDK ${{ steps.resolve-java.outputs.java-version }}
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
-          java-version: 21.0.3
+          java-version: ${{ steps.resolve-java.outputs.java-version }}
       - name: Set version env variable
         run: echo "VERSION=$((grep -w "ballerinaToOpenAPIVersion" | cut -d= -f2) < gradle.properties | rev | cut --complement -d- -f1 | rev)" >> $GITHUB_ENV
       - name: Pre release dependency version update

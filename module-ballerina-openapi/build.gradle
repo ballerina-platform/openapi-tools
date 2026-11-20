@@ -53,7 +53,7 @@ jar {
 
 def packageName = "openapi"
 def packageOrg = "ballerina"
-def platform = "java21"
+def platform = "java25"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaConfigFilePlaceHolder = new File("${project.rootDir}/config/resources/Ballerina.toml")
 def ballerinaCompileConfigFilePlaceHolder = new File("${project.rootDir}/config/resources/CompilerPlugin.toml")
